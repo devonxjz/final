@@ -1,7 +1,7 @@
 package com.example.dao;
 
-import com.example.model.NhaCungCap;
-import com.example.util.DatabaseConnection;
+import com.example.entity.NhaCungCap;
+import com.example.config.DatabaseConnection;
 
 import java.sql.*;
 import java.util.*;

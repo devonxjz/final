@@ -1,7 +1,7 @@
 package com.example.dao;
 
-import com.example.model.SanPham;
-import com.example.util.DatabaseConnection;
+import com.example.entity.SanPham;
+import com.example.config.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;

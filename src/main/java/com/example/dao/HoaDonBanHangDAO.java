@@ -1,11 +1,11 @@
 package com.example.dao;
 
-import com.example.model.HoaDonBanHang;
-import com.example.model.ChiTietHDBH;
-import com.example.model.ThanhToan;
-import com.example.model.KhachHang;
-import com.example.model.SanPham;
-import com.example.util.DatabaseConnection;
+import com.example.entity.HoaDonBanHang;
+import com.example.entity.ChiTietHDBH;
+import com.example.entity.ThanhToan;
+import com.example.entity.KhachHang;
+import com.example.entity.SanPham;
+import com.example.config.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;

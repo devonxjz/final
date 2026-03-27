@@ -1,4 +1,4 @@
-package com.exaple.dto.request;
+package com.example.dto.request;
 
 public class CustomerRequest {
 }

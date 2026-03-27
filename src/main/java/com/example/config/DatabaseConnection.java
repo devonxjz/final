@@ -1,4 +1,4 @@
-package com.example.util; // Bạn có thể đổi tên package cho phù hợp với dự án
+package com.example.config; // Bạn có thể đổi tên package cho phù hợp với dự án
 
 import java.sql.Connection;
 import java.sql.DriverManager;

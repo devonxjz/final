@@ -1,4 +1,4 @@
-package com.exaple.controller;
+package com.example.controller;
 
 public class OrderController {
 }

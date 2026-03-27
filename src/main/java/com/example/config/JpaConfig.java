@@ -1,4 +1,4 @@
-package com.exaple.config;
+package com.example.config;
 
 public class JpaConfig {
 }

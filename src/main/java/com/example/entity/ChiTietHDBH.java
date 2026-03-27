@@ -1,44 +1,27 @@
-package com.example.model;
+package com.example.entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+
+@Entity
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = false)
 
 public class ChiTietHDBH {
-    private int maHDBH;
-    private int maSP;
-    private int soLuong;
-    private double tongTien;
+    @NonFinal
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    int maHDBH;
+    int maSP;
+    int soLuong;
+    double tongTien;
 
-    // Getter và Setter cho MaHDBH
-    public int getMaHDBH() {
-        return maHDBH;
-    }
-
-    public void setMaHDBH(int maHDBH) {
-        this.maHDBH = maHDBH;
-    }
-
-    // Getter và Setter cho MaSP
-    public int getMaSP() {
-        return maSP;
-    }
-
-    public void setMaSP(int maSP) {
-        this.maSP = maSP;
-    }
-
-    // Getter và Setter cho SoLuong
-    public int getSoLuong() {
-        return soLuong;
-    }
-
-    public void setSoLuong(int soLuong) {
-        this.soLuong = soLuong;
-    }
-
-    // Getter và Setter cho TongTien
-    public double getTongTien() {
-        return tongTien;
-    }
-
-    public void setTongTien(double tongTien) {
-        this.tongTien = tongTien;
-    }
 }

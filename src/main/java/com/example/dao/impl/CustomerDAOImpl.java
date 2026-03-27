@@ -1,4 +1,4 @@
-package com.exaple.dao.impl;
+package com.example.dao.impl;
 
 public class CustomerDAOImpl {
 }

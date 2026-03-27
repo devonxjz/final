@@ -1,4 +1,4 @@
-package com.exaple.services.impl;
+package com.example.services.impl;
 
 public class CustomerServiceImpl {
 }

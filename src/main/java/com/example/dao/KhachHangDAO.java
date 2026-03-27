@@ -1,7 +1,7 @@
 package com.example.dao;
 
-import com.example.model.KhachHang;
-import com.example.util.DatabaseConnection;
+import com.example.entity.KhachHang;
+import com.example.config.DatabaseConnection;
 
 import javax.swing.*;
 import java.sql.*;

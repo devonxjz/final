@@ -1,48 +1,27 @@
-package com.example.model;
+package com.example.entity;
 
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
+@Entity
+@Data
+@RequiredArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = false)
 public class NhaCungCap {
-    private int maNCC;
-    private String tenNCC;
-    private String diaChi;
-    private String sdt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    int maNCC;
+    String tenNCC;
+    String diaChi;
+    String sdt;
 
-    // Getter cho MaNCC
-    public int getMaNCC() {
-        return maNCC;
-    }
-
-    // Setter cho MaNCC
-    public void setMaNCC(int maNCC) {
-        this.maNCC = maNCC;
-    }
-
-    // Getter cho TenNCC
-    public String getTenNCC() {
-        return tenNCC;
-    }
-
-    // Setter cho TenNCC
-    public void setTenNCC(String tenNCC) {
-        this.tenNCC = tenNCC;
-    }
-
-    // Getter cho DiaChi
-    public String getDiaChi() {
-        return diaChi;
-    }
-
-    // Setter cho DiaChi
-    public void setDiaChi(String diaChi) {
-        this.diaChi = diaChi;
-    }
-
-    // Getter cho Sdt
-    public String getSdt() {
-        return sdt;
-    }
-
-    // Setter cho Sdt
-    public void setSdt(String sdt) {
-        this.sdt = sdt;
-    }
 }
