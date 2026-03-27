@@ -328,7 +328,7 @@ public class HoaDonBanHangDAO {
                 sp.setGiaBan(rs.getDouble("GiaBan"));
                 list.add(sp);
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) { e.printStackTrace(); }git
         return list;
     }
 
