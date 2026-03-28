@@ -1,8 +1,11 @@
-package com.example.dao;
+package com.example.services;
 
 import java.util.Map;
 
-public interface ThongKeDAO {
+/**
+ * Interface Service cho Thống Kê
+ */
+public interface IThongKeService {
     double getTongDoanhThu(String tuNgay, String denNgay);
     int getTongDonHang(String tuNgay, String denNgay);
     double getLoiNhuan(String tuNgay, String denNgay);

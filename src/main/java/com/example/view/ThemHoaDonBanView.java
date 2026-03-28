@@ -1,11 +1,11 @@
 package com.example.view;
 
+import com.example.config.UITheme;
 import com.toedter.calendar.JDateChooser;
 import javax.swing.*;
 import java.awt.*;
 
 public class ThemHoaDonBanView extends JFrame {
-    // Khai báo các thành phần giao diện
     public JTextField txtTimKiem, txtSDT, txtTenKH, txtDiaChi, txtMaSP, txtTenSP, txtSoLuong, txtLaiSuat;
     public JComboBox<String> cbGioiTinh, cbLoaiHD, cbHinhThucTT;
     public JDateChooser dateChooser;
@@ -13,163 +13,112 @@ public class ThemHoaDonBanView extends JFrame {
     public JButton btnHuyChon, btnThem, btnXuatHoaDon;
 
     public ThemHoaDonBanView() {
-        setTitle("Form_ThemHoaDonBanHang");
+        setTitle("Thêm hoá đơn bán hàng");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(1000, 600);
+        setSize(1050, 650);
         setLocationRelativeTo(null);
-        setLayout(null);
+        getContentPane().setBackground(UITheme.BG_DARK);
+        setLayout(new BorderLayout(8, 8));
 
-        // Ô tìm kiếm
-        JLabel lblTimKiem = new JLabel("Tìm kiếm");
-        lblTimKiem.setBounds(10, 10, 80, 25);
-        add(lblTimKiem);
+        // === HEADER ===
+        JPanel pnlHeader = new JPanel(new BorderLayout(10, 0));
+        pnlHeader.setBackground(UITheme.BG_DARK);
+        pnlHeader.setBorder(BorderFactory.createEmptyBorder(10, 15, 5, 15));
+        JLabel lblSearch = UITheme.createLabel("Tìm kiếm SP:");
+        lblSearch.setFont(UITheme.FONT_SUBTITLE);
+        txtTimKiem = UITheme.createTextField();
+        btnXuatHoaDon = UITheme.createSuccessButton("Xuất hóa đơn");
+        pnlHeader.add(lblSearch, BorderLayout.WEST);
+        pnlHeader.add(txtTimKiem, BorderLayout.CENTER);
+        pnlHeader.add(btnXuatHoaDon, BorderLayout.EAST);
+        add(pnlHeader, BorderLayout.NORTH);
 
-        txtTimKiem = new JTextField();
-        txtTimKiem.setBounds(90, 10, 300, 25);
-        add(txtTimKiem);
+        // === LEFT: Tables ===
+        JPanel pnlLeft = new JPanel(new BorderLayout(5, 5));
+        pnlLeft.setBackground(UITheme.BG_DARK);
+        pnlLeft.setPreferredSize(new Dimension(520, 0));
+        pnlLeft.setBorder(BorderFactory.createEmptyBorder(0, 15, 10, 5));
 
-        // Nút xuất hóa đơn
-        btnXuatHoaDon = new JButton("Xuất hóa đơn");
-        btnXuatHoaDon.setBounds(860, 10, 120, 25);
-        add(btnXuatHoaDon);
+        tableSanPham = new JTable(); UITheme.styleTable(tableSanPham);
+        JScrollPane spSP = UITheme.createScrollPane(tableSanPham);
+        pnlLeft.add(spSP, BorderLayout.CENTER);
 
-        // Danh sách sản phẩm
-        tableSanPham = new JTable();
-        JScrollPane scrollSanPham = new JScrollPane(tableSanPham);
-        scrollSanPham.setBounds(10, 40, 500, 250);
-        add(scrollSanPham);
+        JPanel pnlChon = new JPanel(new BorderLayout(5, 2));
+        pnlChon.setBackground(UITheme.BG_DARK);
+        pnlChon.setPreferredSize(new Dimension(0, 180));
+        JPanel pnlChonHeader = new JPanel(new BorderLayout());
+        pnlChonHeader.setBackground(UITheme.BG_DARK);
+        JLabel lblChon = UITheme.createLabel("Sản phẩm đã chọn");
+        lblChon.setFont(UITheme.FONT_SUBTITLE); lblChon.setForeground(UITheme.ACCENT);
+        btnHuyChon = UITheme.createDangerButton("Hủy chọn");
+        pnlChonHeader.add(lblChon, BorderLayout.WEST);
+        pnlChonHeader.add(btnHuyChon, BorderLayout.EAST);
+        pnlChon.add(pnlChonHeader, BorderLayout.NORTH);
+        tableSanPhamChon = new JTable(); UITheme.styleTable(tableSanPhamChon);
+        pnlChon.add(UITheme.createScrollPane(tableSanPhamChon), BorderLayout.CENTER);
+        pnlLeft.add(pnlChon, BorderLayout.SOUTH);
+        add(pnlLeft, BorderLayout.WEST);
 
-        // Sản phẩm đã chọn
-        JLabel lblSanPhamDaChon = new JLabel("Sản phẩm đã chọn");
-        lblSanPhamDaChon.setBounds(10, 300, 150, 25);
-        add(lblSanPhamDaChon);
+        // === RIGHT: Info form ===
+        JPanel pnlRight = new JPanel(new BorderLayout(5, 8));
+        pnlRight.setBackground(UITheme.BG_DARK);
+        pnlRight.setBorder(BorderFactory.createEmptyBorder(0, 5, 10, 15));
 
-        tableSanPhamChon = new JTable();
-        JScrollPane scrollSanPhamChon = new JScrollPane(tableSanPhamChon);
-        scrollSanPhamChon.setBounds(10, 330, 500, 150);
-        add(scrollSanPhamChon);
+        JPanel pnlKH = UITheme.createCard();
+        pnlKH.setLayout(new GridLayout(7, 2, 8, 6));
+        pnlKH.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(UITheme.BORDER),
+            BorderFactory.createEmptyBorder(10, 12, 10, 12)));
 
-        btnHuyChon = new JButton("Hủy chọn");
-        btnHuyChon.setBounds(420, 295, 90, 25);
-        add(btnHuyChon);
-
-        // Thông tin khách hàng bên phải
-        JPanel panelThongTin = new JPanel();
-        panelThongTin.setLayout(null);
-        panelThongTin.setBounds(520, 40, 450, 300);
-        add(panelThongTin);
-
-        // SDT
-        JLabel lblSDT = new JLabel("SDT:");
-        lblSDT.setBounds(10, 10, 100, 25);
-        panelThongTin.add(lblSDT);
-
-        txtSDT = new JTextField();
-        txtSDT.setBounds(120, 10, 300, 25);
-        panelThongTin.add(txtSDT);
-
-        // Tên KH
-        JLabel lblTenKH = new JLabel("Tên KH:");
-        lblTenKH.setBounds(10, 45, 100, 25);
-        panelThongTin.add(lblTenKH);
-
-        txtTenKH = new JTextField();
-        txtTenKH.setBounds(120, 45, 300, 25);
-        panelThongTin.add(txtTenKH);
-
-        // Giới tính
-        JLabel lblGioiTinh = new JLabel("Giới tính:");
-        lblGioiTinh.setBounds(10, 80, 100, 25);
-        panelThongTin.add(lblGioiTinh);
-
+        txtSDT = UITheme.createTextField(); txtTenKH = UITheme.createTextField();
+        txtDiaChi = UITheme.createTextField(); txtLaiSuat = UITheme.createTextField();
         cbGioiTinh = new JComboBox<>(new String[]{"Nam", "Nữ", "Khác"});
-        cbGioiTinh.setBounds(120, 80, 300, 25);
-        panelThongTin.add(cbGioiTinh);
-
-        // Địa chỉ
-        JLabel lblDiaChi = new JLabel("Địa chỉ:");
-        lblDiaChi.setBounds(10, 115, 100, 25);
-        panelThongTin.add(lblDiaChi);
-
-        txtDiaChi = new JTextField();
-        txtDiaChi.setBounds(120, 115, 300, 25);
-        panelThongTin.add(txtDiaChi);
-
-        // Ngày tạo
-        JLabel lblNgayTao = new JLabel("Ngày tạo:");
-        lblNgayTao.setBounds(10, 150, 100, 25);
-        panelThongTin.add(lblNgayTao);
-
-        dateChooser = new JDateChooser();
-        dateChooser.setDateFormatString("dd/MM/yyyy");
-        dateChooser.setBounds(120, 150, 300, 25);
-        panelThongTin.add(dateChooser);
-
-        // Loại hóa đơn
-        JLabel lblLoaiHD = new JLabel("Loại hóa đơn:");
-        lblLoaiHD.setBounds(10, 185, 100, 25);
-        panelThongTin.add(lblLoaiHD);
-
+        cbGioiTinh.setBackground(UITheme.BG_INPUT); cbGioiTinh.setForeground(UITheme.TEXT_PRIMARY);
+        dateChooser = new JDateChooser(); dateChooser.setDateFormatString("dd/MM/yyyy");
         cbLoaiHD = new JComboBox<>(new String[]{"Trả thẳng", "Trả góp"});
-        cbLoaiHD.setBounds(120, 185, 300, 25);
-        panelThongTin.add(cbLoaiHD);
-
-        // Lãi suất
-        JLabel lblLaiSuat = new JLabel("Lãi suất:");
-        lblLaiSuat.setBounds(10, 220, 100, 25);
-        panelThongTin.add(lblLaiSuat);
-
-        txtLaiSuat = new JTextField();
-        txtLaiSuat.setBounds(120, 220, 300, 25);
-        panelThongTin.add(txtLaiSuat);
-
-        // Hình thức thanh toán
-        JLabel lblHinhThuc = new JLabel("Hình thức TT:");
-        lblHinhThuc.setBounds(10, 255, 100, 25);
-        panelThongTin.add(lblHinhThuc);
-
+        cbLoaiHD.setBackground(UITheme.BG_INPUT); cbLoaiHD.setForeground(UITheme.TEXT_PRIMARY);
         cbHinhThucTT = new JComboBox<>(new String[]{"Tiền mặt", "Chuyển khoản", "Thẻ tín dụng"});
-        cbHinhThucTT.setBounds(120, 255, 300, 25);
-        panelThongTin.add(cbHinhThucTT);
+        cbHinhThucTT.setBackground(UITheme.BG_INPUT); cbHinhThucTT.setForeground(UITheme.TEXT_PRIMARY);
 
-        // Panel sản phẩm (Chi tiết nhập)
-        JPanel panelSanPham = new JPanel();
-        panelSanPham.setLayout(null);
-        panelSanPham.setBounds(520, 350, 450, 130);
-        add(panelSanPham);
+        pnlKH.add(UITheme.createLabel("SĐT:")); pnlKH.add(txtSDT);
+        pnlKH.add(UITheme.createLabel("Tên KH:")); pnlKH.add(txtTenKH);
+        pnlKH.add(UITheme.createLabel("Giới tính:")); pnlKH.add(cbGioiTinh);
+        pnlKH.add(UITheme.createLabel("Địa chỉ:")); pnlKH.add(txtDiaChi);
+        pnlKH.add(UITheme.createLabel("Ngày tạo:")); pnlKH.add(dateChooser);
+        pnlKH.add(UITheme.createLabel("Loại HĐ:")); pnlKH.add(cbLoaiHD);
+        pnlKH.add(UITheme.createLabel("Lãi suất:")); pnlKH.add(txtLaiSuat);
+        pnlRight.add(pnlKH, BorderLayout.CENTER);
 
-        JLabel lblMaSP = new JLabel("Mã sản phẩm:");
-        lblMaSP.setBounds(10, 10, 100, 25);
-        panelSanPham.add(lblMaSP);
+        JPanel pnlSP = UITheme.createCard();
+        pnlSP.setLayout(new GridLayout(3, 2, 8, 6));
+        pnlSP.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(UITheme.BORDER),
+            BorderFactory.createEmptyBorder(10, 12, 10, 12)));
+        pnlSP.setPreferredSize(new Dimension(0, 140));
+        txtMaSP = UITheme.createTextField(); txtTenSP = UITheme.createTextField();
+        txtSoLuong = UITheme.createTextField();
+        pnlSP.add(UITheme.createLabel("Mã SP:")); pnlSP.add(txtMaSP);
+        pnlSP.add(UITheme.createLabel("Tên SP:")); pnlSP.add(txtTenSP);
+        pnlSP.add(UITheme.createLabel("Số lượng:")); pnlSP.add(txtSoLuong);
 
-        txtMaSP = new JTextField();
-        txtMaSP.setBounds(120, 10, 300, 25);
-        panelSanPham.add(txtMaSP);
+        JPanel pnlBottom = new JPanel(new BorderLayout(0, 5));
+        pnlBottom.setBackground(UITheme.BG_DARK);
+        pnlBottom.add(pnlSP, BorderLayout.CENTER);
+        btnThem = UITheme.createPrimaryButton("Thêm vào đơn");
+        JPanel pnlBtnAdd = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        pnlBtnAdd.setBackground(UITheme.BG_DARK);
+        pnlBtnAdd.add(btnThem);
+        pnlBottom.add(pnlBtnAdd, BorderLayout.SOUTH);
+        pnlRight.add(pnlBottom, BorderLayout.SOUTH);
 
-        JLabel lblTenSP = new JLabel("Tên sản phẩm:");
-        lblTenSP.setBounds(10, 45, 100, 25);
-        panelSanPham.add(lblTenSP);
+        JPanel pnlHTTT = new JPanel(new GridLayout(1, 2, 8, 0));
+        pnlHTTT.setBackground(UITheme.BG_CARD);
+        pnlHTTT.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
+        pnlHTTT.setPreferredSize(new Dimension(0, 35));
+        pnlHTTT.add(UITheme.createLabel("Hình thức TT:")); pnlHTTT.add(cbHinhThucTT);
+        pnlRight.add(pnlHTTT, BorderLayout.NORTH);
 
-        txtTenSP = new JTextField();
-        txtTenSP.setBounds(120, 45, 300, 25);
-        panelSanPham.add(txtTenSP);
-
-        JLabel lblSoLuong = new JLabel("Số lượng:");
-        lblSoLuong.setBounds(10, 80, 100, 25);
-        panelSanPham.add(lblSoLuong);
-
-        txtSoLuong = new JTextField();
-        txtSoLuong.setBounds(120, 80, 300, 25);
-        panelSanPham.add(txtSoLuong);
-
-        btnThem = new JButton("Thêm");
-        btnThem.setBounds(350, 110, 80, 25);
-        panelSanPham.add(btnThem);
-
+        add(pnlRight, BorderLayout.CENTER);
         setVisible(true);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(ThemHoaDonBanView::new);
     }
 }

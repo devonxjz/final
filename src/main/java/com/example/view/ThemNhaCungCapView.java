@@ -1,7 +1,9 @@
 package com.example.view;
 
+import com.example.config.UITheme;
 import com.example.controller.ThemNhaCungCapController;
 import com.example.dao.NhaCungCapDAO;
+import com.example.dao.impl.NhaCungCapDAOImpl;
 import javax.swing.*;
 import java.awt.*;
 
@@ -11,60 +13,37 @@ public class ThemNhaCungCapView extends JFrame {
     private ThemNhaCungCapController controller;
 
     public ThemNhaCungCapView() {
-        setTitle("Form_themNCC");
-        setSize(700, 300);
+        setTitle("ThÃªm nhÃ  cung cáº¥p");
+        setSize(600, 280);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        getContentPane().setBackground(UITheme.BG_DARK);
+        setLayout(new BorderLayout(10, 10));
 
-        JPanel panel = new JPanel();
-        panel.setBackground(Color.CYAN);
-        panel.setLayout(null);
+        JLabel lblTitle = UITheme.createTitleLabel("THÃŠM NHÃ€ CUNG Cáº¤P");
+        lblTitle.setForeground(UITheme.ACCENT);
+        lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
+        lblTitle.setBorder(BorderFactory.createEmptyBorder(15, 0, 5, 0));
+        add(lblTitle, BorderLayout.NORTH);
 
-        JLabel lblTitle = new JLabel("THÊM NHÀ CUNG CẤP");
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 24));
-        lblTitle.setBounds(200, 10, 300, 40);
-        panel.add(lblTitle);
+        JPanel pnlForm = UITheme.createCard();
+        pnlForm.setLayout(new GridLayout(3, 2, 15, 10));
+        pnlForm.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
+        txtTenNCC = UITheme.createTextField();
+        txtSDT = UITheme.createTextField();
+        txtDiaChi = UITheme.createTextField();
+        pnlForm.add(UITheme.createLabel("TÃªn NCC:")); pnlForm.add(txtTenNCC);
+        pnlForm.add(UITheme.createLabel("SÄT:")); pnlForm.add(txtSDT);
+        pnlForm.add(UITheme.createLabel("Äá»‹a chá»‰:")); pnlForm.add(txtDiaChi);
+        add(pnlForm, BorderLayout.CENTER);
 
-        // Tên nhà cung cấp
-        JLabel lblTen = new JLabel("Tên nhà cung cấp:");
-        lblTen.setBounds(50, 80, 150, 25);
-        panel.add(lblTen);
+        JPanel pnlBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        pnlBtns.setBackground(UITheme.BG_DARK);
+        btnThem = UITheme.createSuccessButton("ThÃªm");
+        btnClear = UITheme.createDangerButton("Clear");
+        pnlBtns.add(btnThem); pnlBtns.add(btnClear);
+        add(pnlBtns, BorderLayout.SOUTH);
 
-        txtTenNCC = new JTextField();
-        txtTenNCC.setBounds(200, 80, 150, 25);
-        panel.add(txtTenNCC);
-
-        // Số điện thoại
-        JLabel lblSDT = new JLabel("Số điện thoại:");
-        lblSDT.setBounds(380, 80, 100, 25);
-        panel.add(lblSDT);
-
-        txtSDT = new JTextField();
-        txtSDT.setBounds(480, 80, 150, 25);
-        panel.add(txtSDT);
-
-        // Địa chỉ
-        JLabel lblDiaChi = new JLabel("Địa chỉ:");
-        lblDiaChi.setBounds(50, 130, 150, 25);
-        panel.add(lblDiaChi);
-
-        txtDiaChi = new JTextField();
-        txtDiaChi.setBounds(200, 130, 430, 25);
-        panel.add(txtDiaChi);
-
-        // Nút chức năng
-        btnThem = new JButton("Thêm");
-        btnThem.setBounds(580, 30, 80, 30);
-        btnThem.setForeground(Color.BLUE);
-        panel.add(btnThem);
-
-        btnClear = new JButton("Clear");
-        btnClear.setBounds(580, 200, 80, 30);
-        btnClear.setForeground(Color.RED);
-        panel.add(btnClear);
-
-        add(panel);
-
-        controller = new ThemNhaCungCapController(new NhaCungCapDAO(), this);
+        controller = new ThemNhaCungCapController(new NhaCungCapDAOImpl(), this);
     }
 }

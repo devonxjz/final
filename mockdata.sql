@@ -1,14 +1,5 @@
 USE QLNVBCHLapTop;
 
--- Xóa dữ liệu cũ
-SET FOREIGN_KEY_CHECKS = 0;
-TRUNCATE TABLE ThanhToan;
-TRUNCATE TABLE ChiTietHDBH;
-TRUNCATE TABLE HoaDonBanHang;
-TRUNCATE TABLE SanPham;
-TRUNCATE TABLE KhachHang;
-TRUNCATE TABLE NhaCungCap;
-SET FOREIGN_KEY_CHECKS = 1;
 
 -- =============================================
 -- 1. NHÀ CUNG CẤP (20 records)

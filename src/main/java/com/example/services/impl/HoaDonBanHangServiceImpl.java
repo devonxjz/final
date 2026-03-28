@@ -1,4 +1,4 @@
-package com.example.services;
+package com.example.services.impl;
 
 import com.example.dao.HoaDonBanHangDAO;
 import com.example.dao.impl.HoaDonBanHangDAOImpl;
@@ -8,23 +8,34 @@ import com.example.dao.KhachHangDAO;
 import com.example.dao.SanPhamDAO;
 import com.example.dto.ChiTietHDBHDTO;
 import com.example.entity.*;
+import com.example.services.IHoaDonBanHangService;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class HoaDonBanHangService {
-    private final HoaDonBanHangDAO hoadoDao;
+/**
+ * Triển khai IHoaDonBanHangService — Xử lý nghiệp vụ Hóa Đơn Bán Hàng
+ */
+public class HoaDonBanHangServiceImpl implements IHoaDonBanHangService {
+    private final HoaDonBanHangDAO hoadonDAO;
     private final KhachHangDAO khachHangDAO;
     private final SanPhamDAO sanPhamDAO;
 
-    public HoaDonBanHangService() {
-        this.hoadoDao = new HoaDonBanHangDAOImpl();
+    public HoaDonBanHangServiceImpl() {
+        this.hoadonDAO = new HoaDonBanHangDAOImpl();
         this.khachHangDAO = new KhachHangDAOImpl();
         this.sanPhamDAO = new SanPhamDAOImpl();
     }
 
-    public boolean thanhToanHoaDon(int maKH, String loaiHD, double tongTien, double laiSuat, int thoiHan, List<ChiTietHDBHDTO> gioHang) {
+    @Override
+    public List<HoaDonBanHang> getAllHoaDon() {
+        return hoadonDAO.getAllHDBH();
+    }
+
+    @Override
+    public boolean thanhToanHoaDon(int maKH, String loaiHD, double tongTien,
+                                    double laiSuat, int thoiHan, List<ChiTietHDBHDTO> gioHang) {
         KhachHang kh = khachHangDAO.getById(maKH);
         if (kh == null) return false;
 
@@ -51,7 +62,7 @@ public class HoaDonBanHangService {
         for (ChiTietHDBHDTO ctDTO : gioHang) {
             SanPham sp = sanPhamDAO.getById(ctDTO.maSP());
             if (sp == null || sp.getSoLuongTrongKho() < ctDTO.soLuong()) {
-                throw new IllegalArgumentException("Sản phẩm không đủ tồn kho: " + ctDTO.tenSP());
+                throw new IllegalArgumentException("SP không đủ tồn kho: " + ctDTO.tenSP());
             }
             ChiTietHDBH ct = new ChiTietHDBH();
             ct.setHoaDonBanHang(hd); ct.setSanPham(sp);
@@ -68,6 +79,11 @@ public class HoaDonBanHangService {
         dsTT.add(tt);
         hd.setDanhSachThanhToan(dsTT);
 
-        return hoadoDao.saveHoaDonFull(hd);
+        return hoadonDAO.saveHoaDonFull(hd);
+    }
+
+    @Override
+    public List<HoaDonBanHang> searchByDate(Date date) {
+        return hoadonDAO.timKiem(date);
     }
 }

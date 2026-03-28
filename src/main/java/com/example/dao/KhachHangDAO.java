@@ -1,133 +1,15 @@
 package com.example.dao;
 
-import com.example.config.HibernateUtil;
 import com.example.entity.KhachHang;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.TypedQuery;
 import java.util.List;
 
-/**
- * Data Access Object cho Khách Hàng sử dụng JPA/Hibernate
- */
-public class KhachHangDAO {
-
-    /**
-     * Lấy tất cả khách hàng
-     */
-    public List<KhachHang> getAllKhachHang() {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
-            return em.createQuery("SELECT k FROM KhachHang k", KhachHang.class).getResultList();
-        }
-    }
-
-    /**
-     * Tìm khách hàng theo ID
-     */
-    public KhachHang getById(int maKH) {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
-            return em.find(KhachHang.class, maKH);
-        }
-    }
-
-    /**
-     * Thêm mới khách hàng
-     */
-    public boolean insert(KhachHang kh) {
-        EntityManager em = HibernateUtil.getEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            em.persist(kh);
-            tx.commit();
-            return true;
-        } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
-            e.printStackTrace();
-            return false;
-        } finally {
-            em.close();
-        }
-    }
-
-    /**
-     * Cập nhật khách hàng
-     */
-    public boolean update(KhachHang kh) {
-        EntityManager em = HibernateUtil.getEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            em.merge(kh);
-            tx.commit();
-            return true;
-        } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
-            e.printStackTrace();
-            return false;
-        } finally {
-            em.close();
-        }
-    }
-
-    /**
-     * Xóa khách hàng
-     */
-    public boolean delete(int maKH) {
-        EntityManager em = HibernateUtil.getEntityManager();
-        EntityTransaction tx = em.getTransaction();
-        try {
-            tx.begin();
-            KhachHang kh = em.find(KhachHang.class, maKH);
-            if (kh != null) {
-                em.remove(kh);
-            }
-            tx.commit();
-            return true;
-        } catch (Exception e) {
-            if (tx.isActive()) tx.rollback();
-            e.printStackTrace();
-            return false;
-        } finally {
-            em.close();
-        }
-    }
-
-    /**
-     * Lấy khách hàng có liên quan hóa đơn (tránh xóa)
-     */
-    public boolean hasInvoices(int maKH) {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
-            String jpql = "SELECT COUNT(t) FROM ThanhToan t WHERE t.khachHang.maKH = :maKH";
-            Long count = em.createQuery(jpql, Long.class)
-                    .setParameter("maKH", maKH)
-                    .getSingleResult();
-            return count > 0;
-        }
-    }
-
-    /**
-     * Tìm kiếm theo tên sử dụng JPQL
-     */
-    public List<KhachHang> timKiem(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return getAllKhachHang();
-        }
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
-            String jpql = "SELECT k FROM KhachHang k WHERE k.tenKH LIKE :keyword OR k.sdt LIKE :keyword";
-            TypedQuery<KhachHang> query = em.createQuery(jpql, KhachHang.class);
-            query.setParameter("keyword", "%" + keyword + "%");
-            return query.getResultList();
-        }
-    }
-
-    public List<KhachHang> timKiemSDT(String sdt) {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
-            String jpql = "SELECT k FROM KhachHang k WHERE k.sdt = :sdt";
-            TypedQuery<KhachHang> query = em.createQuery(jpql, KhachHang.class);
-            query.setParameter("sdt", sdt);
-            return query.getResultList();
-        }
-    }
+public interface KhachHangDAO {
+    List<KhachHang> getAllKhachHang();
+    KhachHang getById(int maKH);
+    boolean insert(KhachHang kh);
+    boolean update(KhachHang kh);
+    boolean delete(int maKH);
+    boolean hasInvoices(int maKH);
+    List<KhachHang> timKiem(String keyword);
+    List<KhachHang> timKiemSDT(String sdt);
 }

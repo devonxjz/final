@@ -37,13 +37,13 @@ public class UITheme {
     public static final Color BORDER        = new Color(51, 65, 85);       // #334155
 
     // ========== FONT ==========
-    public static final Font FONT_TITLE     = new Font("Segoe UI", Font.BOLD, 22);
-    public static final Font FONT_SUBTITLE  = new Font("Segoe UI", Font.BOLD, 16);
-    public static final Font FONT_BODY      = new Font("Segoe UI", Font.PLAIN, 13);
-    public static final Font FONT_SMALL     = new Font("Segoe UI", Font.PLAIN, 11);
-    public static final Font FONT_MENU      = new Font("Segoe UI", Font.PLAIN, 14);
-    public static final Font FONT_TABLE     = new Font("Segoe UI", Font.PLAIN, 12);
-    public static final Font FONT_HEADER    = new Font("Segoe UI", Font.BOLD, 12);
+    public static final Font FONT_TITLE     = new Font("Segoe UI Emoji", Font.BOLD, 22);
+    public static final Font FONT_SUBTITLE  = new Font("Segoe UI Emoji", Font.BOLD, 16);
+    public static final Font FONT_BODY      = new Font("Segoe UI Emoji", Font.PLAIN, 13);
+    public static final Font FONT_SMALL     = new Font("Segoe UI Emoji", Font.PLAIN, 11);
+    public static final Font FONT_MENU      = new Font("Segoe UI Emoji", Font.PLAIN, 14);
+    public static final Font FONT_TABLE     = new Font("Segoe UI Emoji", Font.PLAIN, 12);
+    public static final Font FONT_HEADER    = new Font("Segoe UI Emoji", Font.BOLD, 12);
 
     // ========== FACTORY METHODS ==========
 
@@ -63,6 +63,10 @@ public class UITheme {
         UIManager.put("TitledBorder.titleColor", new ColorUIResource(ACCENT));
         UIManager.put("ScrollPane.background", new ColorUIResource(BG_DARK));
         UIManager.put("Viewport.background", new ColorUIResource(BG_DARK));
+        
+        // Custom ScrollBar
+        UIManager.put("ScrollBarUI", DarkScrollBarUI.class.getName());
+        UIManager.put("ScrollBar.width", 12);
     }
 
     /** Tạo nút bấm với style accent */
@@ -197,6 +201,7 @@ public class UITheme {
         public void paint(Graphics g, JComponent c) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
             AbstractButton btn = (AbstractButton) c;
             ButtonModel model = btn.getModel();
@@ -208,18 +213,68 @@ public class UITheme {
                 bg = bgColor.brighter();
             }
 
+            // Paint rounded background
             g2.setColor(bg);
             g2.fillRoundRect(0, 0, c.getWidth(), c.getHeight(), 10, 10);
+            g2.dispose();
 
-            // Paint text
-            FontMetrics fm = g2.getFontMetrics(c.getFont());
-            g2.setFont(c.getFont());
-            g2.setColor(c.getForeground());
-            String text = btn.getText();
-            int x = (c.getWidth() - fm.stringWidth(text)) / 2;
-            int y = (c.getHeight() + fm.getAscent() - fm.getDescent()) / 2;
-            g2.drawString(text, x, y);
+            // Delegate text painting to super — handles emoji/surrogate pairs correctly
+            super.paint(g, c);
+        }
+    }
 
+    // ========== INNER CLASS: Dark ScrollBar UI ==========
+    public static class DarkScrollBarUI extends javax.swing.plaf.basic.BasicScrollBarUI {
+        
+        public static javax.swing.plaf.ComponentUI createUI(JComponent c) {
+            return new DarkScrollBarUI();
+        }
+
+        @Override
+        protected void configureScrollBarColors() {
+            this.thumbColor = TEXT_MUTED; // Màu xám nhạt
+            this.thumbHighlightColor = TEXT_SECONDARY;
+            this.trackColor = BG_DARK;
+        }
+
+        @Override
+        protected JButton createDecreaseButton(int orientation) {
+            return createZeroButton();
+        }
+
+        @Override
+        protected JButton createIncreaseButton(int orientation) {
+            return createZeroButton();
+        }
+
+        private JButton createZeroButton() {
+            JButton button = new JButton();
+            Dimension zeroDim = new Dimension(0, 0);
+            button.setPreferredSize(zeroDim);
+            button.setMinimumSize(zeroDim);
+            button.setMaximumSize(zeroDim);
+            return button;
+        }
+
+        @Override
+        protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
+            if (thumbBounds.isEmpty() || !scrollbar.isEnabled()) return;
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            Color color = isThumbRollover() ? thumbHighlightColor : thumbColor;
+            g2.setColor(color);
+            int arc = 8;
+            g2.fillRoundRect(thumbBounds.x + 2, thumbBounds.y + 2, 
+                             thumbBounds.width - 4, thumbBounds.height - 4, arc, arc);
+            g2.dispose();
+        }
+
+        @Override
+        protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setColor(trackColor);
+            g2.fillRect(trackBounds.x, trackBounds.y, trackBounds.width, trackBounds.height);
             g2.dispose();
         }
     }

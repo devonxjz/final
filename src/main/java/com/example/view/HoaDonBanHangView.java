@@ -1,5 +1,6 @@
 package com.example.view;
 
+import com.example.config.UITheme;
 import com.toedter.calendar.JDateChooser;
 import javax.swing.*;
 import java.awt.*;
@@ -13,78 +14,80 @@ public class HoaDonBanHangView extends JFrame {
         setTitle("Quản lý hoá đơn bán hàng");
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(null);
+        setLocationRelativeTo(null);
+        getContentPane().setBackground(UITheme.BG_DARK);
+        setLayout(new BorderLayout(8, 8));
 
-        JPanel panelMain = new JPanel();
-        panelMain.setLayout(null);
-        panelMain.setBackground(new Color(0, 204, 204));
-        panelMain.setBounds(0, 0, 1000, 700);
-        add(panelMain);
+        // === HEADER ===
+        JPanel pnlHeader = new JPanel(new BorderLayout(10, 0));
+        pnlHeader.setBackground(UITheme.BG_DARK);
+        pnlHeader.setBorder(BorderFactory.createEmptyBorder(12, 20, 5, 20));
 
-        // Tiêu đề chính
-        JLabel lblTitle = new JLabel("QUẢN LÝ HOÁ ĐƠN BÁN HÀNG", SwingConstants.CENTER);
-        lblTitle.setFont(new Font("Arial", Font.BOLD, 24));
-        lblTitle.setOpaque(true);
-        lblTitle.setBackground(new Color(173, 240, 255));
-        lblTitle.setBounds(250, 10, 500, 40);
-        panelMain.add(lblTitle);
+        JLabel lblTitle = UITheme.createTitleLabel("QUẢN LÝ HOÁ ĐƠN BÁN HÀNG");
+        lblTitle.setForeground(UITheme.ACCENT);
+        lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
+        pnlHeader.add(lblTitle, BorderLayout.CENTER);
 
-        // Phần chọn ngày và tìm kiếm
-        JLabel lblNgay = new JLabel("Chọn ngày:");
-        lblNgay.setBounds(30, 60, 100, 25);
-        panelMain.add(lblNgay);
-
+        JPanel pnlTop = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        pnlTop.setBackground(UITheme.BG_DARK);
+        pnlTop.add(UITheme.createLabel("Chọn ngày:"));
         dateChooser = new JDateChooser();
         dateChooser.setDateFormatString("dd/MM/yyyy");
-        dateChooser.setBounds(110, 60, 120, 25);
-        panelMain.add(dateChooser);
+        dateChooser.setPreferredSize(new Dimension(130, 30));
+        pnlTop.add(dateChooser);
+        btnTimKiem = UITheme.createPrimaryButton("Tìm kiếm");
+        pnlTop.add(btnTimKiem);
+        btnThem = UITheme.createSuccessButton("＋ Thêm HĐ");
+        pnlTop.add(btnThem);
 
-        btnTimKiem = new JButton("Tìm kiếm");
-        btnTimKiem.setBounds(240, 60, 100, 25);
-        btnTimKiem.setBackground(Color.WHITE);
-        btnTimKiem.setForeground(Color.RED);
-        panelMain.add(btnTimKiem);
+        JPanel pnlNorth = new JPanel(new BorderLayout());
+        pnlNorth.setBackground(UITheme.BG_DARK);
+        pnlNorth.add(pnlHeader, BorderLayout.NORTH);
+        pnlNorth.add(pnlTop, BorderLayout.SOUTH);
+        add(pnlNorth, BorderLayout.NORTH);
 
-        btnThem = new JButton("Thêm hóa đơn");
-        btnThem.setBounds(850, 60, 120, 25);
-        btnThem.setForeground(Color.BLUE);
-        panelMain.add(btnThem);
-
-        // Bảng danh sách hóa đơn bán hàng
+        // === TABLE DS HOÁ ĐƠN (Center) ===
         tableDsHDBH = new JTable();
-        JScrollPane scrollPaneDsHDBH = new JScrollPane(tableDsHDBH);
-        scrollPaneDsHDBH.setBounds(30, 100, 940, 300);
-        panelMain.add(scrollPaneDsHDBH);
+        UITheme.styleTable(tableDsHDBH);
+        JScrollPane spHD = UITheme.createScrollPane(tableDsHDBH);
+        add(spHD, BorderLayout.CENTER);
 
-        // Nút Reload
-        btnReload = new JButton("Reload");
-        btnReload.setBounds(890, 420, 80, 30);
-        btnReload.setBackground(new Color(255, 255, 204));
-        btnReload.setForeground(Color.RED);
-        panelMain.add(btnReload);
+        // === BOTTOM: Chi tiết + Thanh toán ===
+        JPanel pnlBottom = new JPanel(new GridLayout(1, 2, 10, 0));
+        pnlBottom.setBackground(UITheme.BG_DARK);
+        pnlBottom.setBorder(BorderFactory.createEmptyBorder(5, 15, 10, 15));
+        pnlBottom.setPreferredSize(new Dimension(0, 200));
 
-        // Bảng chi tiết hóa đơn
-        JLabel lblChiTiet = new JLabel("Chi tiết hóa đơn");
-        lblChiTiet.setFont(new Font("Arial", Font.BOLD, 16));
-        lblChiTiet.setBounds(30, 460, 150, 25);
-        panelMain.add(lblChiTiet);
+        // Chi tiết
+        JPanel pnlChiTiet = new JPanel(new BorderLayout());
+        pnlChiTiet.setBackground(UITheme.BG_CARD);
+        JLabel lblCT = UITheme.createLabel("Chi tiết hóa đơn");
+        lblCT.setFont(UITheme.FONT_SUBTITLE); lblCT.setForeground(UITheme.ACCENT);
+        lblCT.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 0));
+        pnlChiTiet.add(lblCT, BorderLayout.NORTH);
+        tableChiTietHD = new JTable(); UITheme.styleTable(tableChiTietHD);
+        pnlChiTiet.add(UITheme.createScrollPane(tableChiTietHD), BorderLayout.CENTER);
+        pnlBottom.add(pnlChiTiet);
 
-        tableChiTietHD = new JTable();
-        JScrollPane scrollPaneChiTietHD = new JScrollPane(tableChiTietHD);
-        scrollPaneChiTietHD.setBounds(30, 490, 450, 150);
-        panelMain.add(scrollPaneChiTietHD);
+        // Thanh toán
+        JPanel pnlTT = new JPanel(new BorderLayout());
+        pnlTT.setBackground(UITheme.BG_CARD);
+        JLabel lblTT = UITheme.createLabel("Thanh toán");
+        lblTT.setFont(UITheme.FONT_SUBTITLE); lblTT.setForeground(UITheme.ACCENT);
+        lblTT.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 0));
+        pnlTT.add(lblTT, BorderLayout.NORTH);
+        tableThanhToan = new JTable(); UITheme.styleTable(tableThanhToan);
+        pnlTT.add(UITheme.createScrollPane(tableThanhToan), BorderLayout.CENTER);
+        pnlBottom.add(pnlTT);
+        add(pnlBottom, BorderLayout.SOUTH);
 
-        // Bảng thanh toán
-        JLabel lblThanhToan = new JLabel("Thanh toán");
-        lblThanhToan.setFont(new Font("Arial", Font.BOLD, 16));
-        lblThanhToan.setBounds(520, 460, 150, 25);
-        panelMain.add(lblThanhToan);
+        // Reload
+        btnReload = UITheme.createButton("Reload", UITheme.ACCENT_YELLOW);
+        JPanel pnlReload = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        pnlReload.setBackground(UITheme.BG_DARK);
+        pnlReload.add(btnReload);
+        pnlNorth.add(pnlReload, BorderLayout.CENTER);
 
-        tableThanhToan = new JTable();
-        JScrollPane scrollPaneThanhToan = new JScrollPane(tableThanhToan);
-        scrollPaneThanhToan.setBounds(520, 490, 450, 150);
-        panelMain.add(scrollPaneThanhToan);
-
-        setVisible(true); // Hiển thị form
+        setVisible(true);
     }
 }
