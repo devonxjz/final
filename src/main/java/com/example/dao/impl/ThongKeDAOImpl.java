@@ -105,13 +105,13 @@ public class ThongKeDAOImpl implements ThongKeDAO {
     public Map<String, Double> getRevenueByDay(String tuNgay, String denNgay) {
         Map<String, Double> map = new LinkedHashMap<>();
         try (EntityManager em = HibernateUtil.getEntityManager()) {
-            String jpql = "SELECT FUNC('DATE_FORMAT', h.ngayTao, '%Y-%m-%d'), SUM(h.tongTien) FROM HoaDonBanHang h WHERE h.trangThai != 'Đã hủy' ";
+            StringBuilder sql = new StringBuilder("SELECT DATE_FORMAT(NgayTao, '%Y-%m-%d'), SUM(TongTien) FROM HoaDonBanHang WHERE TrangThai != 'Đã hủy' ");
             if (tuNgay != null && denNgay != null && !tuNgay.isEmpty() && !denNgay.isEmpty()) {
-                jpql += " AND h.ngayTao BETWEEN :tuNgay AND :denNgay ";
+                sql.append(" AND NgayTao BETWEEN :tuNgay AND :denNgay ");
             }
-            jpql += " GROUP BY FUNC('DATE_FORMAT', h.ngayTao, '%Y-%m-%d') ORDER BY FUNC('DATE_FORMAT', h.ngayTao, '%Y-%m-%d') ASC";
+            sql.append(" GROUP BY DATE_FORMAT(NgayTao, '%Y-%m-%d') ORDER BY DATE_FORMAT(NgayTao, '%Y-%m-%d') ASC");
             
-            Query query = em.createQuery(jpql);
+            Query query = em.createNativeQuery(sql.toString());
             if (tuNgay != null && denNgay != null && !tuNgay.isEmpty() && !denNgay.isEmpty()) {
                 query.setParameter("tuNgay", java.sql.Date.valueOf(tuNgay));
                 query.setParameter("denNgay", java.sql.Date.valueOf(denNgay));
@@ -119,7 +119,7 @@ public class ThongKeDAOImpl implements ThongKeDAO {
             
             List<Object[]> results = query.getResultList();
             for (Object[] r : results) {
-                map.put(r[0].toString(), (Double) r[1]);
+                map.put(r[0].toString(), ((Number) r[1]).doubleValue());
             }
         } catch (Exception e) {
             e.printStackTrace();
