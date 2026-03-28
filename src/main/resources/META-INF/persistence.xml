@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_1.xsd"
+             version="3.1">
+
+    <persistence-unit name="LaptopPU" transaction-type="RESOURCE_LOCAL">
+        <!-- Configure the Hibernate Provider -->
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        
+        <!-- List out all the Entities -->
+        <class>com.example.entity.ChiTietHDBH</class>
+        <class>com.example.entity.HoaDonBanHang</class>
+        <class>com.example.entity.KhachHang</class>
+        <class>com.example.entity.NhaCungCap</class>
+        <class>com.example.entity.SanPham</class>
+        <class>com.example.entity.ThanhToan</class>
+        <class>com.example.entity.ChiTietHDBHId</class>
+
+        <properties>
+            <!-- Database Connection Properties -->
+            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/QLNVBCHLapTop"/>
+            <property name="jakarta.persistence.jdbc.user" value="root"/>
+            <property name="jakarta.persistence.jdbc.password" value="12345"/>
+
+            <!-- Hibernate Properties -->
+            <!-- Use update to automatically create or update the schema -->
+            <property name="hibernate.hbm2ddl.auto" value="update"/>
+            <!-- Show SQL in console for debugging -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
+        </properties>
+    </persistence-unit>
+</persistence>

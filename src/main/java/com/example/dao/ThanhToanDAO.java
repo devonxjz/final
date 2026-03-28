@@ -1,119 +1,110 @@
 package com.example.dao;
 
+import com.example.config.HibernateUtil;
+import com.example.entity.HoaDonBanHang;
+import com.example.entity.KhachHang;
 import com.example.entity.ThanhToan;
-import com.example.config.DatabaseConnection;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
 
-import java.sql.*;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ThanhToanDAO {
-    private Connection conn;
 
-    public ThanhToanDAO() {
-        try {
-            conn = DatabaseConnection.getConnection();
+    public List<Map<String, Object>> getAllThanhToanAsMap() {
+        List<Map<String, Object>> list = new ArrayList<>();
+        try (EntityManager em = HibernateUtil.getEntityManager()) {
+            String jpql = "SELECT t.maTT, h.maHDBH, k.maKH, t.ngayTT, t.tienThanhToan, t.hinhThucTT, k.tenKH " +
+                          "FROM ThanhToan t JOIN t.khachHang k JOIN t.hoaDonBanHang h";
+            List<Object[]> results = em.createQuery(jpql, Object[].class).getResultList();
+            for (Object[] r : results) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("maTT", r[0]);
+                row.put("maHDBH", r[1]);
+                row.put("maKH", r[2]);
+                row.put("ngayTT", r[3]);
+                row.put("tienThanhToan", r[4]);
+                row.put("hinhThucTT", r[5]);
+                row.put("tenKH", r[6]);
+                list.add(row);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    // Lấy tất cả thanh toán kèm tên khách hàng
-    public List<Map<String, Object>> getAllThanhToanAsMap() {
-        List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT tt.*, kh.tenKH FROM ThanhToan tt " +
-                "JOIN KhachHang kh ON tt.maKH = kh.maKH";
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                Map<String, Object> row = new HashMap<>();
-                row.put("maTT", rs.getInt("maTT"));
-                row.put("maHDBH", rs.getInt("maHDBH"));
-                row.put("maKH", rs.getInt("maKH"));
-                row.put("ngayTT", rs.getDate("ngayTT"));
-                row.put("tienThanhToan", rs.getDouble("tienThanhToan"));
-                row.put("hinhThucTT", rs.getString("hinhThucTT"));
-                row.put("tenKH", rs.getString("tenKH"));
-                list.add(row);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
         return list;
     }
 
-    // Thêm thanh toán mới
-    public boolean themThanhToan(int maHDBH, int maKH, Date ngayTT, double tienThanhToan, String hinhThucThanhToan) {
-        String sql = "INSERT INTO ThanhToan (maHDBH, maKH, ngayTT, tienThanhToan, hinhThucTT) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, maHDBH);
-            stmt.setInt(2, maKH);
-            stmt.setDate(3, new java.sql.Date(ngayTT.getTime()));
-            stmt.setDouble(4, tienThanhToan);
-            stmt.setString(5, hinhThucThanhToan);
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
+    public boolean themThanhToan(int maHDBH, int maKH, java.util.Date ngayTT, double tienThanhToan, String hinhThucTT) {
+        EntityManager em = HibernateUtil.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            HoaDonBanHang hd = em.find(HoaDonBanHang.class, maHDBH);
+            KhachHang kh = em.find(KhachHang.class, maKH);
+            if (hd == null || kh == null) {
+                return false;
+            }
+            ThanhToan tt = new ThanhToan();
+            tt.setHoaDonBanHang(hd);
+            tt.setKhachHang(kh);
+            tt.setNgayTT(ngayTT);
+            tt.setTienThanhToan(tienThanhToan);
+            tt.setHinhThucTT(hinhThucTT);
+            em.persist(tt);
+            
+            // Cập nhật lại số tiền nợ
+            double nợCòn = hd.getSoTienConLai() - tienThanhToan;
+            if (nợCòn <= 0) {
+                hd.setSoTienConLai(0.0);
+                hd.setTrangThai("Đã thanh toán");
+            } else {
+                hd.setSoTienConLai(nợCòn);
+            }
+            em.merge(hd);
+            
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
             e.printStackTrace();
             return false;
+        } finally {
+            em.close();
         }
     }
 
-    // Lấy danh sách hóa đơn đang trả góp
     public List<Map<String, Object>> getAllHoaDonDangGopAsMap() {
         List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT hd.MaHDBH, MIN(tt.MaKH) AS MaKH, MIN(kh.TenKH) AS TenKH, " +
-                "hd.TongTien, hd.TienCoc, (hd.TongTien - hd.TienCoc) / 6 AS TienGopThang, hd.NgayTao " +
-                "FROM HoaDonBanHang hd " +
-                "JOIN ThanhToan tt ON hd.MaHDBH = tt.MaHDBH " +
-                "JOIN KhachHang kh ON tt.MaKH = kh.MaKH " +
-                "WHERE hd.TrangThai = N'Đang trả góp' " +
-                "GROUP BY hd.MaHDBH, hd.TongTien, hd.TienCoc, hd.NgayTao";
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
+        try (EntityManager em = HibernateUtil.getEntityManager()) {
+            String jpql = "SELECT h.maHDBH, MIN(k.maKH), MIN(k.tenKH), h.tongTien, h.tienCoc, h.tienGopHangThang, h.ngayTao " +
+                          "FROM ThanhToan t JOIN t.hoaDonBanHang h JOIN t.khachHang k " +
+                          "WHERE h.trangThai = 'Đang trả góp' " +
+                          "GROUP BY h.maHDBH, h.tongTien, h.tienCoc, h.tienGopHangThang, h.ngayTao";
+            List<Object[]> results = em.createQuery(jpql, Object[].class).getResultList();
+            for (Object[] r : results) {
                 Map<String, Object> row = new HashMap<>();
-                row.put("maHDBH", rs.getInt("MaHDBH"));
-                row.put("maKH", rs.getInt("MaKH"));
-                row.put("tenKH", rs.getString("TenKH"));
-                row.put("tongTien", rs.getDouble("TongTien"));
-                row.put("tienCoc", rs.getDouble("TienCoc"));
-                row.put("tienGopThang", rs.getDouble("TienGopThang"));
-                row.put("ngayTao", rs.getDate("NgayTao"));
+                row.put("maHDBH", r[0]);
+                row.put("maKH", r[1]);
+                row.put("tenKH", r[2]);
+                row.put("tongTien", r[3]);
+                row.put("tienCoc", r[4]);
+                row.put("tienGopThang", r[5]);
+                row.put("ngayTao", r[6]);
                 list.add(row);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return list;
     }
 
-    // Lấy danh sách tất cả đối tượng ThanhToan
     public List<ThanhToan> layTatCaThanhToan() {
-        List<ThanhToan> danhSach = new ArrayList<>();
-        String sql = "SELECT * FROM ThanhToan";
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                ThanhToan tt = new ThanhToan();
-                tt.setMaTT(rs.getInt("maTT"));
-                tt.setMaHDBH(rs.getInt("maHDBH"));
-                tt.setMaKH(rs.getInt("maKH"));
-                tt.setNgayTT(rs.getDate("ngayTT"));
-                tt.setTienThanhToan(rs.getDouble("tienThanhToan"));
-                tt.setHinhThucTT(rs.getString("hinhThucTT"));
-                danhSach.add(tt);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        try (EntityManager em = HibernateUtil.getEntityManager()) {
+            return em.createQuery("SELECT t FROM ThanhToan t JOIN FETCH t.hoaDonBanHang h JOIN FETCH t.khachHang k", ThanhToan.class).getResultList();
         }
-        return danhSach;
     }
 }

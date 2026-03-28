@@ -1,179 +1,133 @@
 package com.example.dao;
 
+import com.example.config.HibernateUtil;
 import com.example.entity.KhachHang;
-import com.example.config.DatabaseConnection;
 
-import javax.swing.*;
-import java.sql.*;
-import java.util.ArrayList;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.TypedQuery;
 import java.util.List;
 
+/**
+ * Data Access Object cho Khách Hàng sử dụng JPA/Hibernate
+ */
 public class KhachHangDAO {
-    private Connection conn;
 
-    public KhachHangDAO() {
-        try {
-            conn = DatabaseConnection.getConnection();
-            if (conn == null) {
-                throw new SQLException("Không thể kết nối đến cơ sở dữ liệu!");
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Lỗi kết nối cơ sở dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
-    }
-
-    // Lấy tất cả khách hàng
+    /**
+     * Lấy tất cả khách hàng
+     */
     public List<KhachHang> getAllKhachHang() {
-        List<KhachHang> ds = new ArrayList<>();
-        String sql = "SELECT * FROM KhachHang";
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                KhachHang kh = new KhachHang();
-                kh.setMaKH(rs.getInt("MaKH"));
-                kh.setTenKH(rs.getString("TenKH"));
-                kh.setGioiTinh(rs.getString("GioiTinh"));
-                kh.setDiaChi(rs.getString("DiaChi"));
-                kh.setSdt(rs.getString("SDT"));
-                ds.add(kh);
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi SQL trong getAllKhachHang: " + e.getMessage());
-            JOptionPane.showMessageDialog(null, "Lỗi truy vấn cơ sở dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+        try (EntityManager em = HibernateUtil.getEntityManager()) {
+            return em.createQuery("SELECT k FROM KhachHang k", KhachHang.class).getResultList();
         }
-        return ds;
     }
 
-    // Thêm mới khách hàng
+    /**
+     * Tìm khách hàng theo ID
+     */
+    public KhachHang getById(int maKH) {
+        try (EntityManager em = HibernateUtil.getEntityManager()) {
+            return em.find(KhachHang.class, maKH);
+        }
+    }
+
+    /**
+     * Thêm mới khách hàng
+     */
     public boolean insert(KhachHang kh) {
-        if (kh.getTenKH() == null || kh.getTenKH().trim().isEmpty()) {
-            throw new IllegalArgumentException("Tên khách hàng không được để trống");
-        }
-        if (kh.getGioiTinh() == null || kh.getGioiTinh().trim().isEmpty()) {
-            throw new IllegalArgumentException("Giới tính không được để trống");
-        }
-        if (kh.getDiaChi() == null || kh.getDiaChi().trim().isEmpty()) {
-            throw new IllegalArgumentException("Địa chỉ không được để trống");
-        }
-        if (kh.getSdt() == null || kh.getSdt().trim().isEmpty()) {
-            throw new IllegalArgumentException("Số điện thoại không được để trống");
-        }
-
-        String sql = "INSERT INTO KhachHang (TenKH, GioiTinh, DiaChi, SDT) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, kh.getTenKH());
-            stmt.setString(2, kh.getGioiTinh());
-            stmt.setString(3, kh.getDiaChi());
-            stmt.setString(4, kh.getSdt());
-
-            int rowsAffected = stmt.executeUpdate();
-            if (rowsAffected > 0) {
-                ResultSet generatedKeys = stmt.getGeneratedKeys();
-                if (generatedKeys.next()) {
-                    kh.setMaKH(generatedKeys.getInt(1)); // Cập nhật MaKH tự sinh
-                }
-                return true;
-            }
-            return false;
-        } catch (SQLException e) {
-            System.err.println("Lỗi SQL trong insert: " + e.getMessage());
-            JOptionPane.showMessageDialog(null, "Lỗi thêm mới cơ sở dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-    }
-
-    // Cập nhật khách hàng
-    public boolean update(KhachHang kh) {
-        if (kh.getTenKH() == null || kh.getTenKH().trim().isEmpty()) {
-            throw new IllegalArgumentException("Tên khách hàng không được để trống");
-        }
-        if (kh.getGioiTinh() == null || kh.getGioiTinh().trim().isEmpty()) {
-            throw new IllegalArgumentException("Giới tính không được để trống");
-        }
-        if (kh.getDiaChi() == null || kh.getDiaChi().trim().isEmpty()) {
-            throw new IllegalArgumentException("Địa chỉ không được để trống");
-        }
-        if (kh.getSdt() == null || kh.getSdt().trim().isEmpty()) {
-            throw new IllegalArgumentException("Số điện thoại không được để trống");
-        }
-
-        String sql = "UPDATE KhachHang SET TenKH = ?, GioiTinh = ?, DiaChi = ?, SDT = ? WHERE MaKH = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, kh.getTenKH());
-            stmt.setString(2, kh.getGioiTinh());
-            stmt.setString(3, kh.getDiaChi());
-            stmt.setString(4, kh.getSdt());
-            stmt.setInt(5, kh.getMaKH());
-
-            int rowsAffected = stmt.executeUpdate();
-            if (rowsAffected == 0) {
-                JOptionPane.showMessageDialog(null, "Không tìm thấy khách hàng với MaKH: " + kh.getMaKH(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-                return false;
-            }
+        EntityManager em = HibernateUtil.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.persist(kh);
+            tx.commit();
             return true;
-        } catch (SQLException e) {
-            System.err.println("Lỗi SQL trong update: " + e.getMessage());
-            JOptionPane.showMessageDialog(null, "Lỗi cập nhật cơ sở dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            e.printStackTrace();
             return false;
+        } finally {
+            em.close();
         }
     }
 
-    // Tìm kiếm theo tên (bắt đầu bằng keyword)
+    /**
+     * Cập nhật khách hàng
+     */
+    public boolean update(KhachHang kh) {
+        EntityManager em = HibernateUtil.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            em.merge(kh);
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Xóa khách hàng
+     */
+    public boolean delete(int maKH) {
+        EntityManager em = HibernateUtil.getEntityManager();
+        EntityTransaction tx = em.getTransaction();
+        try {
+            tx.begin();
+            KhachHang kh = em.find(KhachHang.class, maKH);
+            if (kh != null) {
+                em.remove(kh);
+            }
+            tx.commit();
+            return true;
+        } catch (Exception e) {
+            if (tx.isActive()) tx.rollback();
+            e.printStackTrace();
+            return false;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Lấy khách hàng có liên quan hóa đơn (tránh xóa)
+     */
+    public boolean hasInvoices(int maKH) {
+        try (EntityManager em = HibernateUtil.getEntityManager()) {
+            String jpql = "SELECT COUNT(t) FROM ThanhToan t WHERE t.khachHang.maKH = :maKH";
+            Long count = em.createQuery(jpql, Long.class)
+                    .setParameter("maKH", maKH)
+                    .getSingleResult();
+            return count > 0;
+        }
+    }
+
+    /**
+     * Tìm kiếm theo tên sử dụng JPQL
+     */
     public List<KhachHang> timKiem(String keyword) {
-        List<KhachHang> list = new ArrayList<>();
         if (keyword == null || keyword.trim().isEmpty()) {
             return getAllKhachHang();
         }
-
-        String sql = "SELECT * FROM KhachHang WHERE TenKH LIKE ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, keyword + "%");
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                KhachHang kh = new KhachHang();
-                kh.setMaKH(rs.getInt("MaKH"));
-                kh.setTenKH(rs.getString("TenKH"));
-                kh.setGioiTinh(rs.getString("GioiTinh"));
-                kh.setDiaChi(rs.getString("DiaChi"));
-                kh.setSdt(rs.getString("SDT"));
-                list.add(kh);
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi SQL trong timKiem: " + e.getMessage());
-            JOptionPane.showMessageDialog(null, "Lỗi truy vấn cơ sở dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+        try (EntityManager em = HibernateUtil.getEntityManager()) {
+            String jpql = "SELECT k FROM KhachHang k WHERE k.tenKH LIKE :keyword OR k.sdt LIKE :keyword";
+            TypedQuery<KhachHang> query = em.createQuery(jpql, KhachHang.class);
+            query.setParameter("keyword", "%" + keyword + "%");
+            return query.getResultList();
         }
-        return list;
     }
 
-    // Tìm kiếm theo số điện thoại
     public List<KhachHang> timKiemSDT(String sdt) {
-        List<KhachHang> list = new ArrayList<>();
-        if (sdt == null || sdt.trim().isEmpty()) {
-            return getAllKhachHang();
+        try (EntityManager em = HibernateUtil.getEntityManager()) {
+            String jpql = "SELECT k FROM KhachHang k WHERE k.sdt = :sdt";
+            TypedQuery<KhachHang> query = em.createQuery(jpql, KhachHang.class);
+            query.setParameter("sdt", sdt);
+            return query.getResultList();
         }
-
-        String sql = "SELECT * FROM KhachHang WHERE SDT = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, sdt);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                KhachHang kh = new KhachHang();
-                kh.setMaKH(rs.getInt("MaKH"));
-                kh.setTenKH(rs.getString("TenKH"));
-                kh.setGioiTinh(rs.getString("GioiTinh"));
-                kh.setDiaChi(rs.getString("DiaChi"));
-                kh.setSdt(rs.getString("SDT"));
-                list.add(kh);
-            }
-        } catch (SQLException e) {
-            System.err.println("Lỗi SQL trong timKiemSDT: " + e.getMessage());
-            JOptionPane.showMessageDialog(null, "Lỗi truy vấn cơ sở dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
-        return list;
     }
 }
