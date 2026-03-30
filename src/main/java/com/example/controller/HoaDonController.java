@@ -2,9 +2,13 @@ package com.example.controller;
 
 import com.example.dto.ChiTietHDBHDTO;
 import com.example.dto.SanPhamDTO;
+import com.example.dto.ChiTietHDBHDTO;
+import com.example.dto.SanPhamDTO;
 import com.example.services.HoaDonBanHangService;
 import com.example.services.SanPhamService;
 import com.example.view.HoaDonView;
+import com.example.util.InputValidator;
+import com.example.util.ValidationResult;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -87,35 +91,40 @@ public class HoaDonController {
 
         String inputSL = JOptionPane.showInputDialog(view, "Nhập số lượng cho " + tenSP + ":", "1");
         if (inputSL != null && !inputSL.isEmpty()) {
-            try {
-                int sl = Integer.parseInt(inputSL);
-                if (sl > tonKho) {
-                    JOptionPane.showMessageDialog(view, "Số lượng tồn kho không đủ!");
-                    return;
-                }
-                
-                // Kiểm tra xem giỏ hàng đã có sp này chưa, nếu có thì cộng dồn!
-                boolean found = false;
-                for (int i = 0; i < gioHang.size(); i++) {
-                    if (gioHang.get(i).maSP() == maSP) {
-                        ChiTietHDBHDTO current = gioHang.get(i);
-                        int newSl = current.soLuong() + sl;
-                        if(newSl > tonKho) {
-                            JOptionPane.showMessageDialog(view, "Số lượng mua vượt tồn kho!");
-                            return;
-                        }
-                        gioHang.set(i, new ChiTietHDBHDTO(0, maSP, tenSP, newSl, giaBan, newSl * giaBan));
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    gioHang.add(new ChiTietHDBHDTO(0, maSP, tenSP, sl, giaBan, sl * giaBan));
-                }
-                updateTableGioHang();
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(view, "Số lượng phải là số nguyên!");
+            ValidationResult<Integer> rSL = InputValidator.parseIntSafe(inputSL, "Số lượng");
+            if (!rSL.isValid()) {
+                JOptionPane.showMessageDialog(view, rSL.getErrorMessage());
+                return;
             }
+            int sl = rSL.getValue();
+            if (sl <= 0) {
+                JOptionPane.showMessageDialog(view, "Số lượng phải > 0!");
+                return;
+            }
+            if (sl > tonKho) {
+                JOptionPane.showMessageDialog(view, "Số lượng tồn kho không đủ!");
+                return;
+            }
+            
+            // Kiểm tra xem giỏ hàng đã có sp này chưa, nếu có thì cộng dồn!
+            boolean found = false;
+            for (int i = 0; i < gioHang.size(); i++) {
+                if (gioHang.get(i).maSP() == maSP) {
+                    ChiTietHDBHDTO current = gioHang.get(i);
+                    int newSl = current.soLuong() + sl;
+                    if(newSl > tonKho) {
+                        JOptionPane.showMessageDialog(view, "Số lượng mua vượt tồn kho!");
+                        return;
+                    }
+                    gioHang.set(i, new ChiTietHDBHDTO(0, maSP, tenSP, newSl, giaBan, newSl * giaBan));
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                gioHang.add(new ChiTietHDBHDTO(0, maSP, tenSP, sl, giaBan, sl * giaBan));
+            }
+            updateTableGioHang();
         }
     }
 
@@ -136,30 +145,38 @@ public class HoaDonController {
             JOptionPane.showMessageDialog(view, "Giỏ hàng đang trống!");
             return;
         }
-        try {
-            int maKH = Integer.parseInt(view.txtMaKH.getText());
-            double tongTien = Double.parseDouble(view.txtTongTien.getText().replace(",", ""));
-            String loaiHD = view.cbLoaiHD.getSelectedItem().toString();
-            
-            double laiSuat = 0;
-            int thoiHan = 0;
-            if (loaiHD.equals("Trả góp")) {
-                laiSuat = Double.parseDouble(view.txtLaiSuat.getText());
-                thoiHan = Integer.parseInt(view.txtThoiHan.getText());
-            }
 
-            // Giao cho Service xử lý toàn bộ transaction xuống DAO
-            boolean isSuccess = hoaDonService.thanhToanHoaDon(maKH, loaiHD, tongTien, laiSuat, thoiHan, gioHang);
+        ValidationResult<Integer> rMaKH = InputValidator.parseIntSafe(view.txtMaKH.getText(), "Mã khách hàng");
+        if (!rMaKH.isValid()) { JOptionPane.showMessageDialog(view, rMaKH.getErrorMessage()); return; }
 
-            if (isSuccess) {
-                JOptionPane.showMessageDialog(view, "Thanh toán thành công! Đã tự động trừ chi tiết và kho hàng.");
-                resetForm();
-                loadInitialData(); // Reload kho hàng
-            } else {
-                JOptionPane.showMessageDialog(view, "Lỗi khi lưu hóa đơn! (Khách Hàng không tồn tại?)");
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(view, "Vui lòng kiểm tra Mã Khách Hàng và thông tin trả góp hợp lệ!\nChi tiết: " + e.getMessage());
+        ValidationResult<Double> rTongTien = InputValidator.parseCurrency(view.txtTongTien.getText(), "Tổng tiền");
+        if (!rTongTien.isValid()) { JOptionPane.showMessageDialog(view, rTongTien.getErrorMessage()); return; }
+
+        int maKH = rMaKH.getValue();
+        double tongTien = rTongTien.getValue();
+        String loaiHD = view.cbLoaiHD.getSelectedItem().toString();
+        
+        double laiSuat = 0;
+        int thoiHan = 0;
+        if (loaiHD.equals("Trả góp")) {
+            ValidationResult<Float> rLaiSuat = InputValidator.parseFloatSafe(view.txtLaiSuat.getText(), "Lãi suất");
+            if (!rLaiSuat.isValid()) { JOptionPane.showMessageDialog(view, rLaiSuat.getErrorMessage()); return; }
+            laiSuat = rLaiSuat.getValue();
+
+            ValidationResult<Integer> rThoiHan = InputValidator.parseIntSafe(view.txtThoiHan.getText(), "Thời hạn");
+            if (!rThoiHan.isValid()) { JOptionPane.showMessageDialog(view, rThoiHan.getErrorMessage()); return; }
+            thoiHan = rThoiHan.getValue();
+        }
+
+        // Giao cho Service xử lý toàn bộ transaction xuống DAO
+        boolean isSuccess = hoaDonService.thanhToanHoaDon(maKH, loaiHD, tongTien, laiSuat, thoiHan, gioHang);
+
+        if (isSuccess) {
+            JOptionPane.showMessageDialog(view, "Thanh toán thành công! Đã tự động trừ chi tiết và kho hàng.");
+            resetForm();
+            loadInitialData(); // Reload kho hàng
+        } else {
+            JOptionPane.showMessageDialog(view, "Lỗi khi lưu hóa đơn! (Khách Hàng không tồn tại?)");
         }
     }
 

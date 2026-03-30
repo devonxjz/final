@@ -79,10 +79,7 @@ public class KhachHangView extends JPanel {
         txtSDT    = UITheme.createTextField();
         txtDiaChi = UITheme.createTextField();
         txtEmail  = UITheme.createTextField();
-        cbGioiTinh = new JComboBox<>(new String[]{"Male", "Female", "Other"});
-        cbGioiTinh.setFont(UITheme.FONT_BODY);
-        cbGioiTinh.setBackground(UITheme.BG_INPUT);
-        cbGioiTinh.setForeground(UITheme.TEXT_PRIMARY);
+        cbGioiTinh = UITheme.createComboBox(new String[]{"Male", "Female", "Other"});
 
         addFormField(pnlInfo, "Customer ID:", txtMaKH,    gbc, 1);
         addFormField(pnlInfo, "Full Name:",   txtTenKH,   gbc, 2);

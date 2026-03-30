@@ -19,5 +19,5 @@ public interface HoaDonBanHangDAO {
     List<ThanhToan> getAllThanhToan(int maHD);
     KhachHang timKiemKhachHangTheoSDT(String sdt);
     List<SanPham> getAllSanPham();
-    boolean themHoaDonVaChiTietVaThanhToan(Date ngayTao, String loaiHD, double tongTien, int maKH, List<Map<Integer, Integer>> gioHang, String tenKH, String sdt, String diaChi, String hinhThucTT, String trangThai);
+    boolean themHoaDonVaChiTietVaThanhToan(Date ngayTao, String loaiHD, double tongTien, int maKH, List<Map<Integer, Integer>> gioHang, String tenKH, String sdt, String diaChi, String gioiTinh, String hinhThucTT, String trangThai);
 }

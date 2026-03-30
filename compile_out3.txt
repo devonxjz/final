@@ -1,0 +1,75 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< com.example:final >--------------------------
+[INFO] Building final 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ final ---
+[INFO] Deleting C:\Users\ADMIN\Documents\MyProject\final\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ final ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.12.1:compile (default-compile) @ final ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 72 source files with javac [debug target 17] to target\classes
+[INFO] /C:/Users/ADMIN/Documents/MyProject/final/src/main/java/com/example/dao/impl/ThongKeDAOImpl.java: C:\Users\ADMIN\Documents\MyProject\final\src\main\java\com\example\dao\impl\ThongKeDAOImpl.java uses unchecked or unsafe operations.
+[INFO] /C:/Users/ADMIN/Documents/MyProject/final/src/main/java/com/example/dao/impl/ThongKeDAOImpl.java: Recompile with -Xlint:unchecked for details.
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] system modules path not set in conjunction with -source 17
+[INFO] 1 warning
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/Users/ADMIN/Documents/MyProject/final/src/main/java/com/example/controller/ThemSanPhamController.java:[42,62] method parseCurrency in class com.example.util.InputValidator cannot be applied to given types;
+  required: java.lang.String,java.lang.String
+  found:    java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/ADMIN/Documents/MyProject/final/src/main/java/com/example/controller/ThemSanPhamController.java:[45,63] method parseCurrency in class com.example.util.InputValidator cannot be applied to given types;
+  required: java.lang.String,java.lang.String
+  found:    java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/ADMIN/Documents/MyProject/final/src/main/java/com/example/controller/SanPhamController.java:[158,58] method parseCurrency in class com.example.util.InputValidator cannot be applied to given types;
+  required: java.lang.String,java.lang.String
+  found:    java.lang.String
+  reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/ADMIN/Documents/MyProject/final/src/main/java/com/example/controller/SanPhamController.java:[161,59] method parseCurrency in class com.example.util.InputValidator cannot be applied to given types;
+  required: java.lang.String,java.lang.String
+  found:    java.lang.String
+  reason: actual and formal argument lists differ in length
+[INFO] 4 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  9.285 s
+[INFO] Finished at: 2026-03-30T08:41:50+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.12.1:compile (default-compile) on project final: Compilation failure: Compilation failure: 
+[ERROR] /C:/Users/ADMIN/Documents/MyProject/final/src/main/java/com/example/controller/ThemSanPhamController.java:[42,62] method parseCurrency in class com.example.util.InputValidator cannot be applied to given types;
+[ERROR]   required: java.lang.String,java.lang.String
+[ERROR]   found:    java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/ADMIN/Documents/MyProject/final/src/main/java/com/example/controller/ThemSanPhamController.java:[45,63] method parseCurrency in class com.example.util.InputValidator cannot be applied to given types;
+[ERROR]   required: java.lang.String,java.lang.String
+[ERROR]   found:    java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/ADMIN/Documents/MyProject/final/src/main/java/com/example/controller/SanPhamController.java:[158,58] method parseCurrency in class com.example.util.InputValidator cannot be applied to given types;
+[ERROR]   required: java.lang.String,java.lang.String
+[ERROR]   found:    java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] /C:/Users/ADMIN/Documents/MyProject/final/src/main/java/com/example/controller/SanPhamController.java:[161,59] method parseCurrency in class com.example.util.InputValidator cannot be applied to given types;
+[ERROR]   required: java.lang.String,java.lang.String
+[ERROR]   found:    java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

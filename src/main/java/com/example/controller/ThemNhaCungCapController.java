@@ -3,6 +3,8 @@ package com.example.controller;
 import com.example.dao.NhaCungCapDAO;
 import com.example.entity.NhaCungCap;
 import com.example.view.ThemNhaCungCapView;
+import com.example.util.InputValidator;
+import com.example.util.ValidationResult;
 
 import javax.swing.*;
 
@@ -22,14 +24,18 @@ public class ThemNhaCungCapController {
     }
 
     private void themNhaCungCap() {
-        String ten = view.txtTenNCC.getText().trim();
-        String sdt = view.txtSDT.getText().trim();
-        String diaChi = view.txtDiaChi.getText().trim();
+        ValidationResult<String> rTen = InputValidator.normalizeName(view.txtTenNCC.getText(), "Tên nhà cung cấp");
+        if (!rTen.isValid()) { JOptionPane.showMessageDialog(view, rTen.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
 
-        if (ten.isEmpty()) {
-            JOptionPane.showMessageDialog(view, "Vui lòng nhập tên nhà cung cấp!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        ValidationResult<String> rSdt = InputValidator.validatePhone(view.txtSDT.getText(), true);
+        if (!rSdt.isValid()) { JOptionPane.showMessageDialog(view, rSdt.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
+
+        ValidationResult<String> rDiaChi = InputValidator.normalizeAddress(view.txtDiaChi.getText(), "Địa chỉ");
+        if (!rDiaChi.isValid()) { JOptionPane.showMessageDialog(view, rDiaChi.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
+
+        String ten = rTen.getValue();
+        String sdt = rSdt.getValue();
+        String diaChi = rDiaChi.getValue();
 
         try {
             if (dao.themNhaCungCap(ten, diaChi, sdt)) {

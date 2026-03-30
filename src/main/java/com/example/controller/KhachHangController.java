@@ -1,8 +1,11 @@
 package com.example.controller;
 
+import com.example.dao.KhachHangDAO;
 import com.example.dto.KhachHangDTO;
 import com.example.services.KhachHangService;
 import com.example.view.KhachHangView;
+import com.example.util.InputValidator;
+import com.example.util.ValidationResult;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -118,10 +121,17 @@ public class KhachHangController {
     }
 
     private void saveKhachHang() {
-        if (view.txtTenKH.getText().isEmpty() || view.txtSDT.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(view, "Tên và Số điện thoại không được để trống!");
-            return;
-        }
+        ValidationResult<String> rTen = InputValidator.normalizeName(view.txtTenKH.getText(), "Tên khách hàng");
+        if (!rTen.isValid()) { JOptionPane.showMessageDialog(view, rTen.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
+
+        ValidationResult<String> rSdt = InputValidator.validatePhone(view.txtSDT.getText(), true);
+        if (!rSdt.isValid()) { JOptionPane.showMessageDialog(view, rSdt.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
+
+        ValidationResult<String> rDiaChi = InputValidator.normalizeAddress(view.txtDiaChi.getText(), "Địa chỉ");
+        if (!rDiaChi.isValid()) { JOptionPane.showMessageDialog(view, rDiaChi.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
+
+        ValidationResult<String> rEmail = InputValidator.validateEmail(view.txtEmail.getText(), false);
+        if (!rEmail.isValid()) { JOptionPane.showMessageDialog(view, rEmail.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
 
         Integer maKH = view.txtMaKH.getText().isEmpty() ? null : Integer.parseInt(view.txtMaKH.getText());
         String gioiTinh = view.cbGioiTinh != null ? view.cbGioiTinh.getSelectedItem().toString() : "";
@@ -129,11 +139,11 @@ public class KhachHangController {
         // Tạo DTO
         KhachHangDTO dto = new KhachHangDTO(
                 maKH,
-                view.txtTenKH.getText(),
+                rTen.getValue(),
                 gioiTinh,
-                view.txtDiaChi.getText(),
-                view.txtSDT.getText(),
-                view.txtEmail.getText()
+                rDiaChi.getValue(),
+                rSdt.getValue(),
+                rEmail.getValue()
         );
 
         boolean success;

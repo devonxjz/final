@@ -4,6 +4,8 @@ import com.example.entity.SanPham;
 import com.example.dao.SanPhamDAO;
 import com.example.view.SanPhamView;
 import com.example.view.ThemSanPhamView;
+import com.example.util.InputValidator;
+import com.example.util.ValidationResult;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -130,37 +132,60 @@ public class SanPhamController {
     }
 
     private void saveSanPham() {
-        try {
-            if (view.txtMaSP.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(view, "Vui lòng chọn một sản phẩm để cập nhật!");
-                return;
-            }
+        if (view.txtMaSP.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(view, "Vui lòng chọn một sản phẩm để cập nhật!");
+            return;
+        }
 
-            SanPham sp = new SanPham();
-            sp.setMaSP(Integer.parseInt(view.txtMaSP.getText()));
-            sp.setLoaiMay(view.txtLoaiMay.getText());
-            sp.setTenSP(view.txtTenSP.getText());
-            sp.setCPU(view.txtCPU.getText());
-            sp.setGPU(view.txtGPU.getText());
-            sp.setRAM(Integer.parseInt(view.txtRAM.getText()));
-            sp.setOCung(view.txtOCung.getText());
-            sp.setKichThuocMH(Float.parseFloat(view.txtKTManHinh.getText()));
-            sp.setDoPhanGiaiMH(view.txtDPGManHinh.getText());
-            sp.setCanNang(Float.parseFloat(view.txtCanNang.getText()));
-            sp.setSoLuongTrongKho(Integer.parseInt(view.txtSLTrongKho.getText()));
-            sp.setGiaBan(Double.parseDouble(view.txtGiaBan.getText()));
-            sp.setGiaNhap(Double.parseDouble(view.txtGiaNhap.getText()));
-            sp.setThoiGianBaoHanh(Integer.parseInt(view.txtThoiGianBaoHanh.getText()));
+        ValidationResult<String> rLoaiMay = InputValidator.validateRequiredString(view.txtLoaiMay.getText(), "Loại máy", 255);
+        if (!rLoaiMay.isValid()) { JOptionPane.showMessageDialog(view, rLoaiMay.getErrorMessage()); return; }
+        
+        ValidationResult<String> rTenSP = InputValidator.validateRequiredString(view.txtTenSP.getText(), "Tên sản phẩm", 255);
+        if (!rTenSP.isValid()) { JOptionPane.showMessageDialog(view, rTenSP.getErrorMessage()); return; }
+        
+        ValidationResult<Integer> rRAM = InputValidator.parseIntSafe(view.txtRAM.getText(), "RAM");
+        if (!rRAM.isValid()) { JOptionPane.showMessageDialog(view, rRAM.getErrorMessage()); return; }
+        
+        ValidationResult<Float> rKT = InputValidator.parseFloatSafe(view.txtKTManHinh.getText(), "Kích thước màn hình");
+        if (!rKT.isValid()) { JOptionPane.showMessageDialog(view, rKT.getErrorMessage()); return; }
+        
+        ValidationResult<Float> rCanNang = InputValidator.parseFloatSafe(view.txtCanNang.getText(), "Cân nặng");
+        if (!rCanNang.isValid()) { JOptionPane.showMessageDialog(view, rCanNang.getErrorMessage()); return; }
+        
+        ValidationResult<Integer> rSL = InputValidator.parseIntSafe(view.txtSLTrongKho.getText(), "Số lượng tồn kho");
+        if (!rSL.isValid()) { JOptionPane.showMessageDialog(view, rSL.getErrorMessage()); return; }
+        
+        ValidationResult<Double> rGiaBan = InputValidator.parseCurrency(view.txtGiaBan.getText(), "Giá bán");
+        if (!rGiaBan.isValid()) { JOptionPane.showMessageDialog(view, rGiaBan.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
+        
+        ValidationResult<Double> rGiaNhap = InputValidator.parseCurrency(view.txtGiaNhap.getText(), "Giá nhập");
+        if (!rGiaNhap.isValid()) { JOptionPane.showMessageDialog(view, rGiaNhap.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
+        
+        ValidationResult<Integer> rBH = InputValidator.parseIntSafe(view.txtThoiGianBaoHanh.getText(), "Thời gian bảo hành");
+        if (!rBH.isValid()) { JOptionPane.showMessageDialog(view, rBH.getErrorMessage()); return; }
 
-            if (dao.insertOrUpdate(sp)) {
-                JOptionPane.showMessageDialog(view, "Cập nhật thành công!");
-                loadData();
-                setInputEnabled(false);
-            } else {
-                JOptionPane.showMessageDialog(view, "Cập nhật thất bại!");
-            }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(view, "Vui lòng nhập đúng định dạng số!", "Lỗi định dạng", JOptionPane.ERROR_MESSAGE);
+        SanPham sp = new SanPham();
+        sp.setMaSP(Integer.parseInt(view.txtMaSP.getText()));
+        sp.setLoaiMay(rLoaiMay.getValue());
+        sp.setTenSP(rTenSP.getValue());
+        sp.setCPU(view.txtCPU.getText());
+        sp.setGPU(view.txtGPU.getText());
+        sp.setRAM(rRAM.getValue());
+        sp.setOCung(view.txtOCung.getText());
+        sp.setKichThuocMH(rKT.getValue());
+        sp.setDoPhanGiaiMH(view.txtDPGManHinh.getText());
+        sp.setCanNang(rCanNang.getValue());
+        sp.setSoLuongTrongKho(rSL.getValue());
+        sp.setGiaBan(rGiaBan.getValue());
+        sp.setGiaNhap(rGiaNhap.getValue());
+        sp.setThoiGianBaoHanh(rBH.getValue());
+
+        if (dao.insertOrUpdate(sp)) {
+            JOptionPane.showMessageDialog(view, "Cập nhật thành công!");
+            loadData();
+            setInputEnabled(false);
+        } else {
+            JOptionPane.showMessageDialog(view, "Cập nhật thất bại!");
         }
     }
 

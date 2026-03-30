@@ -1,9 +1,13 @@
 package com.example.controller;
 
 import com.example.dao.HoaDonBanHangDAO;
+import com.example.dao.HoaDonBanHangDAO;
+import com.example.dao.SanPhamDAO;
 import com.example.entity.KhachHang;
 import com.example.entity.SanPham;
 import com.example.view.ThemHoaDonBanView;
+import com.example.util.InputValidator;
+import com.example.util.ValidationResult;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -98,7 +102,13 @@ public class ThemHoaDonBanController {
 
         try {
             int maSP = Integer.parseInt(view.txtMaSP.getText());
-            int soLuong = Integer.parseInt(view.txtSoLuong.getText());
+            
+            ValidationResult<Integer> rSL = InputValidator.parseIntSafe(view.txtSoLuong.getText(), "Số lượng");
+            if (!rSL.isValid()) {
+                JOptionPane.showMessageDialog(view, rSL.getErrorMessage());
+                return;
+            }
+            int soLuong = rSL.getValue();
 
             if (soLuong <= 0) {
                 JOptionPane.showMessageDialog(view, "Số lượng phải lớn hơn 0!");
@@ -155,12 +165,14 @@ public class ThemHoaDonBanController {
             return;
         }
 
-        String sdt = view.txtSDT.getText().trim();
-        String tenKH = view.txtTenKH.getText().trim();
-        if (sdt.isEmpty() || tenKH.isEmpty()) {
-            JOptionPane.showMessageDialog(view, "Vui lòng nhập số điện thoại và tên khách hàng!");
-            return;
-        }
+        ValidationResult<String> rSdt = InputValidator.validatePhone(view.txtSDT.getText(), true);
+        if (!rSdt.isValid()) { JOptionPane.showMessageDialog(view, rSdt.getErrorMessage()); return; }
+
+        ValidationResult<String> rTen = InputValidator.normalizeName(view.txtTenKH.getText(), "Tên khách hàng");
+        if (!rTen.isValid()) { JOptionPane.showMessageDialog(view, rTen.getErrorMessage()); return; }
+
+        String sdt = rSdt.getValue();
+        String tenKH = rTen.getValue();
 
         Date ngayTao = view.dateChooser.getDate();
         if (ngayTao == null) {
@@ -176,17 +188,21 @@ public class ThemHoaDonBanController {
         int thoiHanTG = 0;
 
         if ("Trả góp".equals(loaiHD)) {
-            try {
-                laiSuat = Double.parseDouble(view.txtLaiSuat.getText().trim());
-                // Mặc định thời hạn trả góp vì view không có field này.
-                thoiHanTG = 6; 
-                String inputThoiHan = JOptionPane.showInputDialog(view, "Nhập thời hạn trả góp (tháng):", "6");
-                if (inputThoiHan != null && !inputThoiHan.isEmpty()) {
-                     thoiHanTG = Integer.parseInt(inputThoiHan);
+            ValidationResult<Double> rLaiSuat = InputValidator.parseFloatSafe(view.txtLaiSuat.getText(), "Lãi suất").isValid() ? 
+                ValidationResult.success((double) InputValidator.parseFloatSafe(view.txtLaiSuat.getText(), "Lãi suất").getValue()) : 
+                ValidationResult.fail("Lãi suất không hợp lệ");
+            if(!rLaiSuat.isValid()){ JOptionPane.showMessageDialog(view, rLaiSuat.getErrorMessage()); return; }
+            laiSuat = rLaiSuat.getValue();
+            
+            thoiHanTG = 6; 
+            String inputThoiHan = JOptionPane.showInputDialog(view, "Nhập thời hạn trả góp (tháng):", "6");
+            if (inputThoiHan != null && !inputThoiHan.isEmpty()) {
+                ValidationResult<Integer> resTH = InputValidator.parseIntSafe(inputThoiHan, "Thời hạn trả góp");
+                if (!resTH.isValid() || resTH.getValue() <= 0) {
+                     JOptionPane.showMessageDialog(view, "Thời hạn trả góp không hợp lệ!");
+                     return;
                 }
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(view, "Lãi suất / Thời hạn trả góp không hợp lệ!");
-                return;
+                thoiHanTG = resTH.getValue();
             }
         }
 
@@ -208,7 +224,7 @@ public class ThemHoaDonBanController {
 
         boolean success = dao.themHoaDonVaChiTietVaThanhToan(
                 ngayTao, loaiHD, tongTien, 0, chiTietList,
-                tenKH, sdt, diaChi, hinhThucTT, "Chua thanh toan"
+                tenKH, sdt, diaChi, gioiTinh, hinhThucTT, "Chua thanh toan"
         );
 
         if (success) {

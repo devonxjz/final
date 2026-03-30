@@ -3,6 +3,8 @@ package com.example.controller;
 import com.example.dao.NhaCungCapDAO;
 import com.example.entity.NhaCungCap;
 import com.example.view.NhaCungCapView;
+import com.example.util.InputValidator;
+import com.example.util.ValidationResult;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -97,14 +99,18 @@ public class NhaCungCapController {
     }
 
     private void saveNhaCungCap() {
-        if (view.txtTenNCC.getText().isEmpty() || view.txtSDT.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(view, "Tên và Số điện thoại không được để trống!");
-            return;
-        }
+        ValidationResult<String> rTen = InputValidator.normalizeName(view.txtTenNCC.getText(), "Tên nhà cung cấp");
+        if (!rTen.isValid()) { JOptionPane.showMessageDialog(view, rTen.getErrorMessage()); return; }
 
-        String tenNCC = view.txtTenNCC.getText();
-        String sdt = view.txtSDT.getText();
-        String diaChi = view.txtDiaChi.getText();
+        ValidationResult<String> rSdt = InputValidator.validatePhone(view.txtSDT.getText(), true);
+        if (!rSdt.isValid()) { JOptionPane.showMessageDialog(view, rSdt.getErrorMessage()); return; }
+
+        ValidationResult<String> rDiaChi = InputValidator.normalizeAddress(view.txtDiaChi.getText(), "Địa chỉ");
+        if (!rDiaChi.isValid()) { JOptionPane.showMessageDialog(view, rDiaChi.getErrorMessage()); return; }
+
+        String tenNCC = rTen.getValue();
+        String sdt = rSdt.getValue();
+        String diaChi = rDiaChi.getValue();
 
         boolean success;
         if (!view.txtMaNCC.getText().isEmpty()) {

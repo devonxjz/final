@@ -72,13 +72,10 @@ public class ThemHoaDonBanView extends JFrame {
 
         txtSDT = UITheme.createTextField(); txtTenKH = UITheme.createTextField();
         txtDiaChi = UITheme.createTextField(); txtLaiSuat = UITheme.createTextField();
-        cbGioiTinh = new JComboBox<>(new String[]{"Nam", "Nữ", "Khác"});
-        cbGioiTinh.setBackground(UITheme.BG_INPUT); cbGioiTinh.setForeground(UITheme.TEXT_PRIMARY);
+        cbGioiTinh = UITheme.createComboBox(new String[]{"Nam", "Nữ", "Khác"});
         dateChooser = new JDateChooser(); dateChooser.setDateFormatString("dd/MM/yyyy");
-        cbLoaiHD = new JComboBox<>(new String[]{"Trả thẳng", "Trả góp"});
-        cbLoaiHD.setBackground(UITheme.BG_INPUT); cbLoaiHD.setForeground(UITheme.TEXT_PRIMARY);
-        cbHinhThucTT = new JComboBox<>(new String[]{"Tiền mặt", "Chuyển khoản", "Thẻ tín dụng"});
-        cbHinhThucTT.setBackground(UITheme.BG_INPUT); cbHinhThucTT.setForeground(UITheme.TEXT_PRIMARY);
+        cbLoaiHD = UITheme.createComboBox(new String[]{"Trả thẳng", "Trả góp"});
+        cbHinhThucTT = UITheme.createComboBox(new String[]{"Tiền mặt", "Chuyển khoản", "Thẻ tín dụng"});
 
         pnlKH.add(UITheme.createLabel("SĐT:")); pnlKH.add(txtSDT);
         pnlKH.add(UITheme.createLabel("Tên KH:")); pnlKH.add(txtTenKH);

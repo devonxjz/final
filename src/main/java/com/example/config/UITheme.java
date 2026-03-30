@@ -52,18 +52,34 @@ public class UITheme {
         UIManager.put("Panel.background", new ColorUIResource(BG_DARK));
         UIManager.put("OptionPane.background", new ColorUIResource(BG_CARD));
         UIManager.put("OptionPane.messageForeground", new ColorUIResource(TEXT_PRIMARY));
+        UIManager.put("OptionPane.messageFont", FONT_BODY);
+        UIManager.put("OptionPane.buttonFont", FONT_BODY);
         UIManager.put("Button.background", new ColorUIResource(BG_INPUT));
         UIManager.put("Button.foreground", new ColorUIResource(TEXT_PRIMARY));
+        UIManager.put("Button.font", FONT_BODY);
+        UIManager.put("Button.focus", new ColorUIResource(BG_INPUT));
         UIManager.put("TextField.background", new ColorUIResource(BG_INPUT));
         UIManager.put("TextField.foreground", new ColorUIResource(TEXT_PRIMARY));
         UIManager.put("TextField.caretForeground", new ColorUIResource(TEXT_PRIMARY));
         UIManager.put("ComboBox.background", new ColorUIResource(BG_INPUT));
         UIManager.put("ComboBox.foreground", new ColorUIResource(TEXT_PRIMARY));
+        UIManager.put("ComboBox.selectionBackground", new ColorUIResource(ACCENT.darker()));
+        UIManager.put("ComboBox.selectionForeground", new ColorUIResource(Color.WHITE));
         UIManager.put("Label.foreground", new ColorUIResource(TEXT_PRIMARY));
         UIManager.put("TitledBorder.titleColor", new ColorUIResource(ACCENT));
         UIManager.put("ScrollPane.background", new ColorUIResource(BG_DARK));
         UIManager.put("Viewport.background", new ColorUIResource(BG_DARK));
-        
+
+        // OptionPane dialog buttons — dark mode
+        UIManager.put("OptionPane.buttonAreaBorder", BorderFactory.createEmptyBorder(6, 0, 6, 0));
+        UIManager.put("OptionPane.minimumSize", new Dimension(300, 120));
+
+        // List (for ComboBox popup)
+        UIManager.put("List.background", new ColorUIResource(BG_CARD));
+        UIManager.put("List.foreground", new ColorUIResource(TEXT_PRIMARY));
+        UIManager.put("List.selectionBackground", new ColorUIResource(ACCENT.darker()));
+        UIManager.put("List.selectionForeground", new ColorUIResource(Color.WHITE));
+
         // Custom ScrollBar
         UIManager.put("ScrollBarUI", DarkScrollBarUI.class.getName());
         UIManager.put("ScrollBar.width", 12);
@@ -96,6 +112,33 @@ public class UITheme {
     /** Tạo nút nguy hiểm (đỏ) */
     public static JButton createDangerButton(String text) {
         return createButton(text, ACCENT_RED);
+    }
+
+    /** Tạo ComboBox dark mode */
+    public static JComboBox<String> createComboBox(String[] items) {
+        JComboBox<String> cb = new JComboBox<>(items);
+        cb.setFont(FONT_BODY);
+        cb.setBackground(BG_INPUT);
+        cb.setForeground(TEXT_PRIMARY);
+        cb.setBorder(BorderFactory.createLineBorder(BORDER, 1));
+        cb.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value,
+                    int index, boolean isSelected, boolean cellHasFocus) {
+                JLabel lbl = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                lbl.setFont(FONT_BODY);
+                if (isSelected) {
+                    lbl.setBackground(ACCENT.darker());
+                    lbl.setForeground(Color.WHITE);
+                } else {
+                    lbl.setBackground(BG_CARD);
+                    lbl.setForeground(TEXT_PRIMARY);
+                }
+                lbl.setBorder(new EmptyBorder(4, 8, 4, 8));
+                return lbl;
+            }
+        });
+        return cb;
     }
 
     /** Tạo nút thành công (xanh lá) */

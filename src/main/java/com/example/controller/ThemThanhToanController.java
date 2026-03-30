@@ -1,7 +1,10 @@
 package com.example.controller;
 
 import com.example.dao.ThanhToanDAO;
+import com.example.dao.ThanhToanDAO;
 import com.example.view.ThemThanhToanView;
+import com.example.util.InputValidator;
+import com.example.util.ValidationResult;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -77,47 +80,54 @@ public class ThemThanhToanController {
     }
 
     private void thanhToan() {
-        try {
-            if (view.txtMaHDBH.getText().isEmpty() || view.txtMaKH.getText().isEmpty() || view.txtTienThanhToan.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(view, "Vui lòng chọn hóa đơn và nhập tiền thanh toán!");
-                return;
-            }
+        if (view.txtMaHDBH.getText().isEmpty() || view.txtMaKH.getText().isEmpty() || view.txtTienThanhToan.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(view, "Vui lòng chọn hóa đơn và nhập tiền thanh toán!");
+            return;
+        }
 
-            int maHDBH = Integer.parseInt(view.txtMaHDBH.getText());
-            int maKH = Integer.parseInt(view.txtMaKH.getText());
-            double tienTT = Double.parseDouble(view.txtTienThanhToan.getText());
-            String hinhThucTT = view.cmbHinhThucTT.getSelectedItem().toString();
-            Date date = view.dateChooserNgayThanhToan.getDate();
-            if (date == null) {
-                date = new Date();
-            }
+        ValidationResult<Integer> rMaHDBH = InputValidator.parseIntSafe(view.txtMaHDBH.getText(), "Mã hóa đơn");
+        if (!rMaHDBH.isValid()) { JOptionPane.showMessageDialog(view, rMaHDBH.getErrorMessage()); return; }
 
-            if (dao.themThanhToan(maHDBH, maKH, new java.sql.Date(date.getTime()), tienTT, hinhThucTT)) {
-                JOptionPane.showMessageDialog(view, "Thanh toán thành công!");
-                
-                // Hiển thị thông tin lên TextArea
-                view.txtAreaThongTin.setText(
-                        "THÔNG TIN THANH TOÁN:\n" +
-                        "- Mã HĐBH: " + maHDBH + "\n" +
-                        "- Khách hàng: " + view.txtTenKH.getText() + " (Mã: " + maKH + ")\n" +
-                        "- Tiền thanh toán: " + tienTT + " đ\n" +
-                        "- Hình thức: " + hinhThucTT + "\n" +
-                        "- Ngày TT: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(date)
-                );
-                
-                // Đặt lại text field
-                view.txtMaHDBH.setText("");
-                view.txtMaKH.setText("");
-                view.txtTenKH.setText("");
-                view.txtTienThanhToan.setText("");
-                view.dateChooserNgayThanhToan.setDate(null);
-                
-                loadData(); // Lưu ý: Tùy thuôc vào DB, nếu tiền còn lại <= 0 thì trạng thái sẽ đổi
-            } else {
-                JOptionPane.showMessageDialog(view, "Lỗi khi lưu thanh toán!");
-            }
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(view, "Dữ liệu không hợp lệ!");
+        ValidationResult<Integer> rMaKH = InputValidator.parseIntSafe(view.txtMaKH.getText(), "Mã khách hàng");
+        if (!rMaKH.isValid()) { JOptionPane.showMessageDialog(view, rMaKH.getErrorMessage()); return; }
+
+        ValidationResult<Double> rTienTT = InputValidator.parseCurrency(view.txtTienThanhToan.getText(), "Tiền thanh toán");
+        if (!rTienTT.isValid()) { JOptionPane.showMessageDialog(view, rTienTT.getErrorMessage()); return; }
+
+        int maHDBH = rMaHDBH.getValue();
+        int maKH = rMaKH.getValue();
+        double tienTT = rTienTT.getValue();
+        String hinhThucTT = view.cmbHinhThucTT.getSelectedItem().toString();
+        Date date = view.dateChooserNgayThanhToan.getDate();
+
+        if (date == null) {
+            JOptionPane.showMessageDialog(view, "Vui lòng chọn ngày thanh toán!");
+            return;
+        }
+
+        if (dao.themThanhToan(maHDBH, maKH, new java.sql.Date(date.getTime()), tienTT, hinhThucTT)) {
+            JOptionPane.showMessageDialog(view, "Thanh toán thành công!");
+            
+            // Hiển thị thông tin lên TextArea
+            view.txtAreaThongTin.setText(
+                    "THÔNG TIN THANH TOÁN:\n" +
+                    "- Mã HĐBH: " + maHDBH + "\n" +
+                    "- Khách hàng: " + view.txtTenKH.getText() + " (Mã: " + maKH + ")\n" +
+                    "- Tiền thanh toán: " + String.format("%.0f", tienTT) + " đ\n" +
+                    "- Hình thức: " + hinhThucTT + "\n" +
+                    "- Ngày TT: " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(date)
+            );
+            
+            // Đặt lại text field
+            view.txtMaHDBH.setText("");
+            view.txtMaKH.setText("");
+            view.txtTenKH.setText("");
+            view.txtTienThanhToan.setText("");
+            view.dateChooserNgayThanhToan.setDate(null);
+            
+            loadData(); // Lưu ý: Tùy thuôc vào DB, nếu tiền còn lại <= 0 thì trạng thái sẽ đổi
+        } else {
+            JOptionPane.showMessageDialog(view, "Lỗi khi lưu thanh toán!");
         }
     }
 }
