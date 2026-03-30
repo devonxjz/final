@@ -37,13 +37,13 @@ public class UITheme {
     public static final Color BORDER        = new Color(51, 65, 85);       // #334155
 
     // ========== FONT ==========
-    public static final Font FONT_TITLE     = new Font("Segoe UI Emoji", Font.BOLD, 22);
-    public static final Font FONT_SUBTITLE  = new Font("Segoe UI Emoji", Font.BOLD, 16);
-    public static final Font FONT_BODY      = new Font("Segoe UI Emoji", Font.PLAIN, 13);
-    public static final Font FONT_SMALL     = new Font("Segoe UI Emoji", Font.PLAIN, 11);
-    public static final Font FONT_MENU      = new Font("Segoe UI Emoji", Font.PLAIN, 14);
-    public static final Font FONT_TABLE     = new Font("Segoe UI Emoji", Font.PLAIN, 12);
-    public static final Font FONT_HEADER    = new Font("Segoe UI Emoji", Font.BOLD, 12);
+    public static final Font FONT_TITLE     = new Font("Segoe UI", Font.BOLD, 22);
+    public static final Font FONT_SUBTITLE  = new Font("Segoe UI", Font.BOLD, 16);
+    public static final Font FONT_BODY      = new Font("Segoe UI", Font.PLAIN, 13);
+    public static final Font FONT_SMALL     = new Font("Segoe UI", Font.PLAIN, 11);
+    public static final Font FONT_MENU      = new Font("Segoe UI", Font.PLAIN, 14);
+    public static final Font FONT_TABLE     = new Font("Segoe UI", Font.PLAIN, 12);
+    public static final Font FONT_HEADER    = new Font("Segoe UI", Font.BOLD, 12);
 
     // ========== FACTORY METHODS ==========
 
