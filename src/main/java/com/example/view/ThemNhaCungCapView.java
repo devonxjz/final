@@ -23,9 +23,9 @@ public class ThemNhaCungCapView extends JPanel {
                 BorderFactory.createMatteBorder(0, 0, 2, 0, UIThemeConfig.ACCENT),
                 new EmptyBorder(18, 28, 18, 28)));
 
-        JLabel lblTitle = UIThemeConfig.createTitleLabel("ADD NEW SUPPLIER");
+        JLabel lblTitle = UIThemeConfig.createTitleLabel("THÊM NHÀ CUNG CẤP MỚI");
         lblTitle.setForeground(UIThemeConfig.ACCENT);
-        JLabel lblSub = UIThemeConfig.createLabel("Register a new supplier for procurement.");
+        JLabel lblSub = UIThemeConfig.createLabel("Đăng ký nhà cung cấp mới để nhập hàng.");
         lblSub.setForeground(UIThemeConfig.TEXT_MUTED);
 
         JPanel pnlHeaderText = new JPanel();
@@ -54,7 +54,7 @@ public class ThemNhaCungCapView extends JPanel {
         txtSDT = UIThemeConfig.createTextField();
         txtDiaChi = UIThemeConfig.createTextField();
 
-        String[] labels = { "Supplier Name:", "Phone:", "Address:" };
+        String[] labels = { "Tên nhà cung cấp:", "Số điện thoại:", "Địa chỉ:" };
         JTextField[] fields = { txtTenNCC, txtSDT, txtDiaChi };
 
         for (int i = 0; i < labels.length; i++) {
@@ -83,8 +83,8 @@ public class ThemNhaCungCapView extends JPanel {
                 BorderFactory.createMatteBorder(1, 0, 0, 0, UIThemeConfig.BORDER),
                 new EmptyBorder(4, 24, 4, 24)));
 
-        btnClear = UIThemeConfig.createButton("Clear", UIThemeConfig.ACCENT_YELLOW);
-        btnThem = UIThemeConfig.createSuccessButton("Add Supplier");
+        btnClear = UIThemeConfig.createButton("Làm mới", UIThemeConfig.ACCENT_YELLOW);
+        btnThem = UIThemeConfig.createSuccessButton("Thêm nhà cung cấp");
         btnThem.setPreferredSize(new Dimension(150, 36));
 
         pnlBtns.add(btnClear);

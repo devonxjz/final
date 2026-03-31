@@ -12,7 +12,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.RoundRectangle2D;
 import java.util.List;
 import java.util.Map;
 
@@ -24,10 +23,10 @@ public class HomeView extends JFrame {
 
     private JPanel contentPanel;
     private JPanel sidebarPanel;
-    private String activeMenu = "Dashboard";
+    private String activeMenu = "Bảng điều khiển";
 
     public HomeView() {
-        setTitle("LaptopPU — Laptop Management Dashboard");
+        setTitle("LaptopPU — Hệ Thống Quản Lý Laptop");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(Toolkit.getDefaultToolkit().getScreenSize());
         setLocationRelativeTo(null);
@@ -72,23 +71,23 @@ public class HomeView extends JFrame {
         JPanel searchWrap = new JPanel(new BorderLayout());
         searchWrap.setOpaque(false);
         searchWrap.setPreferredSize(new Dimension(300, 34));
+        searchWrap.setBorder(new EmptyBorder(0, 40, 0, 0)); // Left margin to avoid logo overlap
         JTextField searchField = UIThemeConfig.createTextField();
-        searchField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(UIThemeConfig.BORDER, 1),
-                new EmptyBorder(5, 12, 5, 12)));
+        // Use the default border from createTextField() — don't override it
         // Set placeholder text via focus listener
         searchField.setForeground(UIThemeConfig.TEXT_MUTED);
-        searchField.setText("Search...");
+        searchField.setText("Tìm kiếm...");
         searchField.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
-                if (searchField.getText().equals("Search...")) {
+                if (searchField.getText().equals("Tìm kiếm...")) {
                     searchField.setText("");
                     searchField.setForeground(UIThemeConfig.TEXT_PRIMARY);
                 }
             }
+
             public void focusLost(FocusEvent e) {
                 if (searchField.getText().isEmpty()) {
-                    searchField.setText("Search...");
+                    searchField.setText("Tìm kiếm...");
                     searchField.setForeground(UIThemeConfig.TEXT_MUTED);
                 }
             }
@@ -104,7 +103,8 @@ public class HomeView extends JFrame {
         bellIcon.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         JPanel avatar = new JPanel() {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(UIThemeConfig.ACCENT);
@@ -147,13 +147,13 @@ public class HomeView extends JFrame {
         sidebar.add(Box.createRigidArea(new Dimension(0, 12)));
 
         String[][] items = {
-            {"📊", "Dashboard"},
-            {"📦", "Products"},
-            {"🏭", "Suppliers"},
-            {"👥", "Customers"},
-            {"📋", "Orders"},
-            {"💳", "Payments"},
-            {"📈", "Reports"},
+                { "📊", "Bảng điều khiển" },
+                { "📦", "Sản phẩm" },
+                { "🏭", "Nhà cung cấp" },
+                { "👥", "Khách hàng" },
+                { "📋", "Đơn hàng" },
+                { "💳", "Thanh toán" },
+                { "📈", "Báo cáo" },
         };
 
         for (String[] item : items) {
@@ -170,9 +170,9 @@ public class HomeView extends JFrame {
         sidebar.add(UIThemeConfig.createDivider());
         sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
 
-        JPanel exitItem = UIThemeConfig.createSidebarItem("🚪", "Exit", false, () -> {
+        JPanel exitItem = UIThemeConfig.createSidebarItem("🚪", "Thoát", false, () -> {
             int c = JOptionPane.showConfirmDialog(this,
-                    "Are you sure you want to exit?", "Confirm Exit", JOptionPane.YES_NO_OPTION);
+                    "Bạn có chắc chắn muốn thoát không?", "Xác nhận thoát", JOptionPane.YES_NO_OPTION);
             if (c == JOptionPane.YES_OPTION) {
                 HibernateConfig.shutdown();
                 System.exit(0);
@@ -194,7 +194,7 @@ public class HomeView extends JFrame {
         footer.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(1, 0, 0, 0, UIThemeConfig.BORDER),
                 new EmptyBorder(6, 0, 6, 0)));
-        JLabel lbl = new JLabel("© 2026 LaptopPU — All rights reserved.");
+        JLabel lbl = new JLabel("© 2026 LaptopPU — Bảo lưu mọi quyền.");
         lbl.setFont(UIThemeConfig.FONT_SMALL);
         lbl.setForeground(UIThemeConfig.TEXT_MUTED);
         footer.add(lbl);
@@ -205,7 +205,7 @@ public class HomeView extends JFrame {
     // DASHBOARD (default content)
     // ═══════════════════════════════════════════════════════════════════
     private void showDashboard() {
-        activeMenu = "Dashboard";
+        activeMenu = "Bảng điều khiển";
         rebuildSidebarItems(sidebarPanel);
         contentPanel.removeAll();
 
@@ -216,10 +216,10 @@ public class HomeView extends JFrame {
         // Welcome header
         JPanel welcomePanel = new JPanel(new BorderLayout());
         welcomePanel.setOpaque(false);
-        JLabel lblWelcome = new JLabel("Dashboard");
+        JLabel lblWelcome = new JLabel("Bảng điều khiển");
         lblWelcome.setFont(UIThemeConfig.FONT_TITLE);
         lblWelcome.setForeground(UIThemeConfig.TEXT_PRIMARY);
-        JLabel lblSub = new JLabel("Welcome back! Here's what's happening today.");
+        JLabel lblSub = new JLabel("Chào mừng bạn trở lại! Đây là tình hình hôm nay.");
         lblSub.setFont(UIThemeConfig.FONT_BODY);
         lblSub.setForeground(UIThemeConfig.TEXT_MUTED);
         welcomePanel.add(lblWelcome, BorderLayout.NORTH);
@@ -237,13 +237,13 @@ public class HomeView extends JFrame {
             status = new DashboardStatusDTO(0, 0, 0, 0);
         }
 
-        statsRow.add(UIThemeConfig.createStatCard("REVENUE TODAY",
+        statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY",
                 String.format("%,.0f VND", status.revenueToday()), "$", UIThemeConfig.ACCENT));
-        statsRow.add(UIThemeConfig.createStatCard("TOTAL ORDERS",
+        statsRow.add(UIThemeConfig.createStatCard("TỔNG ĐƠN HÀNG",
                 String.valueOf(status.totalOrders()), "#", UIThemeConfig.ACCENT_GREEN));
-        statsRow.add(UIThemeConfig.createStatCard("IN STOCK",
+        statsRow.add(UIThemeConfig.createStatCard("SẢN PHẨM TRONG KHO",
                 String.valueOf(status.productsInStock()), "📦", UIThemeConfig.ACCENT_YELLOW));
-        statsRow.add(UIThemeConfig.createStatCard("CUSTOMERS",
+        statsRow.add(UIThemeConfig.createStatCard("KHÁCH HÀNG",
                 String.valueOf(status.totalCustomers()), "👥", UIThemeConfig.ACCENT_PURPLE));
 
         JPanel topSection = new JPanel(new BorderLayout(0, 16));
@@ -260,26 +260,30 @@ public class HomeView extends JFrame {
         // Recent Orders
         JPanel ordersPanel = UIThemeConfig.createGlassPanel(new BorderLayout(0, 10));
         ordersPanel.setBorder(new EmptyBorder(18, 18, 18, 18));
-        JLabel lblOrders = new JLabel("Recent Orders");
+        JLabel lblOrders = new JLabel("Đơn hàng gần đây");
         lblOrders.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblOrders.setForeground(UIThemeConfig.TEXT_PRIMARY);
         ordersPanel.add(lblOrders, BorderLayout.NORTH);
 
         // Recent orders table
-        String[] orderCols = {"Order ID", "Date", "Total", "Status"};
+        String[] orderCols = { "Mã đơn hàng", "Ngày", "Tổng tiền", "Trạng thái" };
         DefaultTableModel orderModel = new DefaultTableModel(orderCols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         try {
             List<HoaDonBanHangDTO> recent = AppConfig.getHoaDonBanHangService().getAllHoaDon();
             int limit = Math.min(recent.size(), 8);
             for (int i = 0; i < limit; i++) {
                 HoaDonBanHangDTO hd = recent.get(i);
-                orderModel.addRow(new Object[]{
+                orderModel.addRow(new Object[] {
                         hd.maHDBH(), hd.ngayTao(), String.format("%,.0f", hd.tongTien()), hd.trangThai()
                 });
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         JTable ordersTable = new JTable(orderModel);
         UIThemeConfig.styleTable(ordersTable);
@@ -288,62 +292,74 @@ public class HomeView extends JFrame {
         // Revenue Chart placeholder
         JPanel chartPanel = UIThemeConfig.createGlassPanel(new BorderLayout(0, 10));
         chartPanel.setBorder(new EmptyBorder(18, 18, 18, 18));
-        JLabel lblChart = new JLabel("Revenue Trend (7 days)");
+        JLabel lblChart = new JLabel("Xu hướng doanh thu (7 ngày)");
         lblChart.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblChart.setForeground(UIThemeConfig.TEXT_PRIMARY);
         chartPanel.add(lblChart, BorderLayout.NORTH);
 
+        // Load revenue data once (not in paintComponent to avoid DB calls during paint)
+        Map<String, Double> revenueData;
+        try {
+            java.time.LocalDate now = java.time.LocalDate.now();
+            String to = now.toString();
+            String from = now.minusDays(6).toString();
+            revenueData = AppConfig.getThongKeService().getRevenueByDay(from, to);
+        } catch (Exception ignored) {
+            revenueData = null;
+        }
+        final Map<String, Double> chartRevenueData = revenueData;
+
         // Simple bar chart
         JPanel chartArea = new JPanel() {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                Map<String, Double> revenueData = null;
                 try {
-                    java.time.LocalDate now = java.time.LocalDate.now();
-                    String to = now.toString();
-                    String from = now.minusDays(6).toString();
-                    revenueData = AppConfig.getThongKeService().getRevenueByDay(from, to);
-                } catch (Exception ignored) {}
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                if (revenueData == null || revenueData.isEmpty()) {
-                    g2.setColor(UIThemeConfig.TEXT_MUTED);
-                    g2.setFont(UIThemeConfig.FONT_BODY);
-                    g2.drawString("No revenue data available", 20, getHeight() / 2);
+                    // Paint dark background to prevent blue screen flash
+                    g2.setColor(UIThemeConfig.BG_CARD);
+                    g2.fillRect(0, 0, getWidth(), getHeight());
+
+                    if (chartRevenueData == null || chartRevenueData.isEmpty()) {
+                        g2.setColor(UIThemeConfig.TEXT_MUTED);
+                        g2.setFont(UIThemeConfig.FONT_BODY);
+                        g2.drawString("Không có dữ liệu doanh thu", 20, getHeight() / 2);
+                        return;
+                    }
+
+                    int w = getWidth() - 40;
+                    int h = getHeight() - 50;
+                    int barWidth = Math.max(20, w / chartRevenueData.size() - 10);
+                    double maxVal = chartRevenueData.values().stream().mapToDouble(Double::doubleValue).max().orElse(1);
+
+                    int x = 20;
+                    for (Map.Entry<String, Double> entry : chartRevenueData.entrySet()) {
+                        double val = entry.getValue();
+                        int barH = maxVal > 0 ? (int) (val / maxVal * h) : 0;
+                        int y = getHeight() - 30 - barH;
+
+                        // Gradient bar
+                        GradientPaint gp = new GradientPaint(x, y, UIThemeConfig.ACCENT,
+                                x, getHeight() - 30, new Color(63, 132, 229, 60));
+                        g2.setPaint(gp);
+                        g2.fillRoundRect(x, y, barWidth, barH, 6, 6);
+
+                        // Label
+                        g2.setColor(UIThemeConfig.TEXT_MUTED);
+                        g2.setFont(UIThemeConfig.FONT_SMALL);
+                        String label = entry.getKey().length() > 5 ? entry.getKey().substring(5) : entry.getKey();
+                        g2.drawString(label, x + 2, getHeight() - 14);
+
+                        x += barWidth + 10;
+                    }
+                } finally {
                     g2.dispose();
-                    return;
                 }
-
-                int w = getWidth() - 40;
-                int h = getHeight() - 50;
-                int barWidth = Math.max(20, w / revenueData.size() - 10);
-                double maxVal = revenueData.values().stream().mapToDouble(Double::doubleValue).max().orElse(1);
-
-                int x = 20;
-                for (Map.Entry<String, Double> entry : revenueData.entrySet()) {
-                    double val = entry.getValue();
-                    int barH = maxVal > 0 ? (int) (val / maxVal * h) : 0;
-                    int y = getHeight() - 30 - barH;
-
-                    // Gradient bar
-                    GradientPaint gp = new GradientPaint(x, y, UIThemeConfig.ACCENT,
-                            x, getHeight() - 30, new Color(63, 132, 229, 60));
-                    g2.setPaint(gp);
-                    g2.fillRoundRect(x, y, barWidth, barH, 6, 6);
-
-                    // Label
-                    g2.setColor(UIThemeConfig.TEXT_MUTED);
-                    g2.setFont(UIThemeConfig.FONT_SMALL);
-                    String label = entry.getKey().length() > 5 ? entry.getKey().substring(5) : entry.getKey();
-                    g2.drawString(label, x + 2, getHeight() - 14);
-
-                    x += barWidth + 10;
-                }
-                g2.dispose();
             }
         };
+        chartArea.setBackground(UIThemeConfig.BG_CARD);
         chartArea.setOpaque(false);
         chartPanel.add(chartArea, BorderLayout.CENTER);
 
@@ -364,8 +380,8 @@ public class HomeView extends JFrame {
         rebuildSidebarItems(sidebarPanel);
 
         switch (name) {
-            case "Dashboard" -> showDashboard();
-            case "Products" -> {
+            case "Bảng điều khiển" -> showDashboard();
+            case "Sản phẩm" -> {
                 SanPhamView view = new SanPhamView();
                 new SanPhamController(AppConfig.getSanPhamService(), view);
                 showSubView("Products", view);
@@ -429,7 +445,7 @@ public class HomeView extends JFrame {
                 BorderFactory.createMatteBorder(0, 0, 1, 0, UIThemeConfig.BORDER),
                 new EmptyBorder(9, 18, 9, 18)));
 
-        JButton btnBack = UIThemeConfig.createButton("← Back", UIThemeConfig.BG_INPUT);
+        JButton btnBack = UIThemeConfig.createButton("← Quay lại", UIThemeConfig.BG_INPUT);
         btnBack.setPreferredSize(new Dimension(120, 33));
         btnBack.addActionListener(e -> onBack.run());
 

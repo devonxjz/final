@@ -40,25 +40,25 @@ public class ThongKeView extends JPanel {
         JPanel pnlTop = UIThemeConfig.createGlassPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
         pnlTop.setBorder(new EmptyBorder(8, 12, 8, 12));
 
-        JLabel lblFilter = new JLabel("Analytics");
+        JLabel lblFilter = new JLabel("Thống kê");
         lblFilter.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblFilter.setForeground(UIThemeConfig.TEXT_PRIMARY);
         pnlTop.add(lblFilter);
 
-        pnlTop.add(UIThemeConfig.createLabel("From:"));
+        pnlTop.add(UIThemeConfig.createLabel("Từ ngày:"));
         dateFrom = new JDateChooser();
         dateFrom.setDateFormatString("yyyy-MM-dd");
         dateFrom.setPreferredSize(new Dimension(150, 30));
         pnlTop.add(dateFrom);
 
-        pnlTop.add(UIThemeConfig.createLabel("To:"));
+        pnlTop.add(UIThemeConfig.createLabel("Đến ngày:"));
         dateTo = new JDateChooser();
         dateTo.setDateFormatString("yyyy-MM-dd");
         dateTo.setPreferredSize(new Dimension(150, 30));
         pnlTop.add(dateTo);
 
-        btnSubmit = UIThemeConfig.createSuccessButton("Generate Report");
-        btnExportExcel = UIThemeConfig.createPrimaryButton("Export Excel");
+        btnSubmit = UIThemeConfig.createSuccessButton("Lập báo cáo");
+        btnExportExcel = UIThemeConfig.createPrimaryButton("Xuất Excel");
         pnlTop.add(btnSubmit);
         pnlTop.add(btnExportExcel);
 
@@ -77,9 +77,9 @@ public class ThongKeView extends JPanel {
         lblTongDonHang = new JLabel("0");
         lblLoiNhuan = new JLabel("0 VND");
 
-        pnlCards.add(createStatCard("TOTAL REVENUE", lblTongDoanhThu, new Color(251, 146, 60)));
-        pnlCards.add(createStatCard("TOTAL ORDERS", lblTongDonHang, new Color(56, 189, 248)));
-        pnlCards.add(createStatCard("TOTAL PROFIT", lblLoiNhuan, new Color(52, 211, 153)));
+        pnlCards.add(createStatCard("TỔNG DOANH THU", lblTongDoanhThu, new Color(251, 146, 60)));
+        pnlCards.add(createStatCard("TỔNG ĐƠN HÀNG", lblTongDonHang, new Color(56, 189, 248)));
+        pnlCards.add(createStatCard("TỔNG LỢI NHUẬN", lblLoiNhuan, new Color(52, 211, 153)));
 
         pnlCenter.add(pnlCards, BorderLayout.NORTH);
 
@@ -92,13 +92,13 @@ public class ThongKeView extends JPanel {
         pnlBestSeller.setBorder(new EmptyBorder(12, 12, 12, 12));
         pnlBestSeller.setPreferredSize(new Dimension(350, 0));
 
-        JLabel lblBestSeller = new JLabel("Top 5 Best Sellers");
+        JLabel lblBestSeller = new JLabel("Top 5 sản phẩm bán chạy");
         lblBestSeller.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblBestSeller.setForeground(UIThemeConfig.ACCENT_YELLOW);
         pnlBestSeller.add(lblBestSeller, BorderLayout.NORTH);
 
         tableBestSeller = new JTable(new DefaultTableModel(
-                new Object[]{"Product Name", "Quantity Sold"}, 0));
+                new Object[]{"Tên sản phẩm", "Số lượng bán"}, 0));
         UIThemeConfig.styleTable(tableBestSeller);
         tableBestSeller.setRowHeight(30);
         pnlBestSeller.add(UIThemeConfig.createScrollPane(tableBestSeller), BorderLayout.CENTER);

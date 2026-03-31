@@ -27,12 +27,12 @@ public class ThemHoaDonBanView extends JPanel {
                 BorderFactory.createMatteBorder(0, 0, 2, 0, UIThemeConfig.ACCENT),
                 new EmptyBorder(12, 20, 12, 20)));
 
-        JLabel lblSearch = UIThemeConfig.createLabel("Search Product:");
+        JLabel lblSearch = UIThemeConfig.createLabel("Tìm sản phẩm:");
         lblSearch.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblSearch.setForeground(UIThemeConfig.TEXT_PRIMARY);
         txtTimKiem = UIThemeConfig.createTextField();
 
-        btnXuatHoaDon = UIThemeConfig.createSuccessButton("Issue Invoice");
+        btnXuatHoaDon = UIThemeConfig.createSuccessButton("Xuất hóa đơn");
         btnXuatHoaDon.setPreferredSize(new Dimension(150, 34));
 
         pnlHeader.add(lblSearch, BorderLayout.WEST);
@@ -50,7 +50,7 @@ public class ThemHoaDonBanView extends JPanel {
         pnlLeft.setBackground(UIThemeConfig.BG_DARK);
         pnlLeft.setPreferredSize(new Dimension(530, 0));
 
-        JLabel lblCatalog = UIThemeConfig.createLabel("Product Catalog");
+        JLabel lblCatalog = UIThemeConfig.createLabel("Danh mục sản phẩm");
         lblCatalog.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblCatalog.setForeground(UIThemeConfig.ACCENT);
         lblCatalog.setBorder(new EmptyBorder(0, 2, 6, 0));
@@ -68,10 +68,10 @@ public class ThemHoaDonBanView extends JPanel {
         JPanel pnlChonHeader = new JPanel(new BorderLayout(8, 0));
         pnlChonHeader.setBackground(UIThemeConfig.BG_DARK);
         pnlChonHeader.setBorder(new EmptyBorder(4, 0, 6, 0));
-        JLabel lblChon = UIThemeConfig.createLabel("Selected Items");
+        JLabel lblChon = UIThemeConfig.createLabel("Sản phẩm đã chọn");
         lblChon.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblChon.setForeground(UIThemeConfig.ACCENT_YELLOW);
-        btnHuyChon = UIThemeConfig.createDangerButton("Remove");
+        btnHuyChon = UIThemeConfig.createDangerButton("Xóa");
         btnHuyChon.setPreferredSize(new Dimension(100, 30));
         pnlChonHeader.add(lblChon, BorderLayout.WEST);
         pnlChonHeader.add(btnHuyChon, BorderLayout.EAST);
@@ -100,7 +100,7 @@ public class ThemHoaDonBanView extends JPanel {
         g.insets = new Insets(5, 6, 5, 6);
         g.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel lblKHTitle = UIThemeConfig.createLabel("Customer & Order Info");
+        JLabel lblKHTitle = UIThemeConfig.createLabel("Thông tin khách hàng & Đơn hàng");
         lblKHTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblKHTitle.setForeground(UIThemeConfig.ACCENT);
         g.gridx = 0;
@@ -114,18 +114,18 @@ public class ThemHoaDonBanView extends JPanel {
         txtTenKH = UIThemeConfig.createTextField();
         txtDiaChi = UIThemeConfig.createTextField();
         txtLaiSuat = UIThemeConfig.createTextField();
-        cbGioiTinh = UIThemeConfig.createComboBox(new String[] { "Male", "Female", "Other" });
+        cbGioiTinh = UIThemeConfig.createComboBox(new String[] { "Nam", "Nữ", "Khác" });
         dateChooser = new JDateChooser();
         dateChooser.setDateFormatString("dd/MM/yyyy");
         dateChooser.setBackground(UIThemeConfig.BG_INPUT);
-        cbLoaiHD = UIThemeConfig.createComboBox(new String[] { "Direct Pay", "Installment" });
-        cbHinhThucTT = UIThemeConfig.createComboBox(new String[] { "Cash", "Bank Transfer", "Credit Card" });
+        cbLoaiHD = UIThemeConfig.createComboBox(new String[] { "Trả trực tiếp", "Trả góp" });
+        cbHinhThucTT = UIThemeConfig.createComboBox(new String[] { "Tiền mặt", "Chuyển khoản", "Thẻ tín dụng" });
 
         Object[][] formRows = {
-                { "Phone:", txtSDT, "Gender:", cbGioiTinh },
-                { "Customer Name:", txtTenKH, "Address:", txtDiaChi },
-                { "Order Date:", dateChooser, "Order Type:", cbLoaiHD },
-                { "Interest Rate:", txtLaiSuat, "Payment:", cbHinhThucTT },
+                { "SĐT:", txtSDT, "Giới tính:", cbGioiTinh },
+                { "Tên khách hàng:", txtTenKH, "Địa chỉ:", txtDiaChi },
+                { "Ngày lập:", dateChooser, "Loại đơn:", cbLoaiHD },
+                { "Lãi suất:", txtLaiSuat, "Thanh toán:", cbHinhThucTT },
         };
 
         for (int i = 0; i < formRows.length; i++) {
@@ -158,7 +158,7 @@ public class ThemHoaDonBanView extends JPanel {
         gs.insets = new Insets(5, 6, 5, 6);
         gs.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel lblSPTitle = UIThemeConfig.createLabel("Add Product to Order");
+        JLabel lblSPTitle = UIThemeConfig.createLabel("Thêm sản phẩm vào đơn");
         lblSPTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblSPTitle.setForeground(UIThemeConfig.ACCENT_YELLOW);
         gs.gridx = 0;
@@ -173,8 +173,8 @@ public class ThemHoaDonBanView extends JPanel {
         txtSoLuong = UIThemeConfig.createTextField();
 
         Object[][] spRows = {
-                { "Product ID:", txtMaSP, "Name:", txtTenSP },
-                { "Qty:", txtSoLuong, null, null },
+                { "Mã sản phẩm:", txtMaSP, "Tên SP:", txtTenSP },
+                { "Số lượng:", txtSoLuong, null, null },
         };
 
         for (int i = 0; i < spRows.length; i++) {
@@ -195,7 +195,7 @@ public class ThemHoaDonBanView extends JPanel {
             }
         }
 
-        btnThem = UIThemeConfig.createPrimaryButton("Add to Order");
+        btnThem = UIThemeConfig.createPrimaryButton("Thêm vào đơn");
         btnThem.setPreferredSize(new Dimension(140, 34));
         gs.gridy = 3;
         gs.gridx = 3;

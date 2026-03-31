@@ -33,17 +33,17 @@ public class HoaDonView extends JPanel {
         JPanel pnlLeft = UIThemeConfig.createGlassPanel(new BorderLayout(0, 8));
         pnlLeft.setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        JLabel lblCatalog = new JLabel("Product Catalog");
+        JLabel lblCatalog = new JLabel("Danh mục sản phẩm");
         lblCatalog.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblCatalog.setForeground(UIThemeConfig.ACCENT);
         pnlLeft.add(lblCatalog, BorderLayout.NORTH);
 
         tableSanPham = new JTable(new DefaultTableModel(
-                new Object[]{"ID", "Product Name", "Price", "Stock"}, 0));
+                new Object[]{"Mã SP", "Tên sản phẩm", "Giá bán", "Số lượng"}, 0));
         UIThemeConfig.styleTable(tableSanPham);
         pnlLeft.add(UIThemeConfig.createScrollPane(tableSanPham), BorderLayout.CENTER);
 
-        btnAddToCard = UIThemeConfig.createSuccessButton("Add to Cart >>");
+        btnAddToCard = UIThemeConfig.createSuccessButton("Thêm vào giỏ >>");
         btnAddToCard.setPreferredSize(new Dimension(0, 36));
         pnlLeft.add(btnAddToCard, BorderLayout.SOUTH);
 
@@ -55,13 +55,13 @@ public class HoaDonView extends JPanel {
         JPanel pnlCart = UIThemeConfig.createGlassPanel(new BorderLayout(0, 8));
         pnlCart.setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        JLabel lblCart = new JLabel("Order Details");
+        JLabel lblCart = new JLabel("Chi tiết đơn hàng");
         lblCart.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblCart.setForeground(UIThemeConfig.ACCENT);
         pnlCart.add(lblCart, BorderLayout.NORTH);
 
         tableGioHang = new JTable(new DefaultTableModel(
-                new Object[]{"ID", "Product", "Qty", "Price", "Subtotal"}, 0));
+                new Object[]{"Mã SP", "Sản phẩm", "SL", "Giá", "Thành tiền"}, 0));
         UIThemeConfig.styleTable(tableGioHang);
         pnlCart.add(UIThemeConfig.createScrollPane(tableGioHang), BorderLayout.CENTER);
 
@@ -73,7 +73,7 @@ public class HoaDonView extends JPanel {
         gc.insets = new Insets(4, 6, 4, 6);
         gc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel lblPayment = new JLabel("Payment");
+        JLabel lblPayment = new JLabel("Thanh toán");
         lblPayment.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblPayment.setForeground(UIThemeConfig.ACCENT);
         gc.gridx = 0; gc.gridy = 0; gc.gridwidth = 2; gc.weightx = 1;
@@ -86,19 +86,19 @@ public class HoaDonView extends JPanel {
         txtTongTien.setEditable(false);
         cbLoaiHD = UIThemeConfig.createComboBox(new String[]{"Trực tiếp", "Trả góp"});
 
-        addField(pnlPayment, gc, 1, "Customer ID:", txtMaKH);
-        addField(pnlPayment, gc, 2, "Customer Name:", txtTenKH);
-        addField(pnlPayment, gc, 3, "Payment Type:", cbLoaiHD);
-        addField(pnlPayment, gc, 4, "TOTAL:", txtTongTien);
+        addField(pnlPayment, gc, 1, "Mã khách hàng:", txtMaKH);
+        addField(pnlPayment, gc, 2, "Tên khách hàng:", txtTenKH);
+        addField(pnlPayment, gc, 3, "Hình thức:", cbLoaiHD);
+        addField(pnlPayment, gc, 4, "TỔNG TIỀN:", txtTongTien);
 
         // Installment panel
         panelTraGop = new JPanel(new GridLayout(1, 4, 6, 0));
         panelTraGop.setOpaque(false);
         txtLaiSuat = UIThemeConfig.createTextField();
         txtThoiHan = UIThemeConfig.createTextField();
-        panelTraGop.add(UIThemeConfig.createLabel("Interest (%):"));
+        panelTraGop.add(UIThemeConfig.createLabel("Lãi suất (%):"));
         panelTraGop.add(txtLaiSuat);
-        panelTraGop.add(UIThemeConfig.createLabel("Term (months):"));
+        panelTraGop.add(UIThemeConfig.createLabel("Kì hạn (tháng):"));
         panelTraGop.add(txtThoiHan);
 
         gc.gridx = 0; gc.gridy = 5; gc.gridwidth = 2;
@@ -107,9 +107,9 @@ public class HoaDonView extends JPanel {
         // Action buttons
         JPanel pnlBtns = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         pnlBtns.setOpaque(false);
-        btnRemoveFromCard = UIThemeConfig.createDangerButton("Remove");
-        btnThanhToan = UIThemeConfig.createPrimaryButton("Checkout & Print");
-        btnHuy = UIThemeConfig.createButton("Cancel", UIThemeConfig.BG_INPUT);
+        btnRemoveFromCard = UIThemeConfig.createDangerButton("Xóa");
+        btnThanhToan = UIThemeConfig.createPrimaryButton("Thanh toán & In");
+        btnHuy = UIThemeConfig.createButton("Hủy", UIThemeConfig.BG_INPUT);
         pnlBtns.add(btnRemoveFromCard);
         pnlBtns.add(btnThanhToan);
         pnlBtns.add(btnHuy);

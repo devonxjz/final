@@ -25,10 +25,10 @@ public class ThemSanPhamView extends JPanel {
                 BorderFactory.createMatteBorder(0, 0, 2, 0, UIThemeConfig.ACCENT),
                 new EmptyBorder(18, 28, 18, 28)));
 
-        JLabel lblTitle = UIThemeConfig.createTitleLabel("ADD NEW PRODUCT");
+        JLabel lblTitle = UIThemeConfig.createTitleLabel("THÊM SẢN PHẨM MỚI");
         lblTitle.setForeground(UIThemeConfig.ACCENT);
 
-        JLabel lblSub = UIThemeConfig.createLabel("Fill in all fields below to add a new laptop to inventory.");
+        JLabel lblSub = UIThemeConfig.createLabel("Điền đầy đủ các thông tin dưới đây để thêm laptop mới vào kho hàng.");
         lblSub.setForeground(UIThemeConfig.TEXT_MUTED);
 
         JPanel pnlHeaderText = new JPanel();
@@ -69,13 +69,13 @@ public class ThemSanPhamView extends JPanel {
 
         // Chia 2 cột, 7 hàng
         Object[][] rows = {
-                { "Type:", txtLoaiMay, "Screen Size:", txtKTManHinh },
-                { "Product Name:", txtTenSP, "Resolution:", txtDPGiaiMH },
-                { "CPU:", txtCPU, "Stock Qty:", txtSoLuong },
-                { "GPU:", txtGPU, "Sale Price (VND):", txtGiaBan },
-                { "RAM (GB):", txtRAM, "Import Price:", txtGiaNhap },
-                { "Storage:", txtOCung, "Warranty (months):", txtBaoHanh },
-                { "Weight (kg):", txtCanNang, null, null },
+                { "Loại máy:", txtLoaiMay, "Kích thước màn hình:", txtKTManHinh },
+                { "Tên sản phẩm:", txtTenSP, "Độ phân giải:", txtDPGiaiMH },
+                { "CPU:", txtCPU, "Số lượng tồn:", txtSoLuong },
+                { "GPU:", txtGPU, "Giá bán (VND):", txtGiaBan },
+                { "RAM (GB):", txtRAM, "Giá nhập:", txtGiaNhap },
+                { "Ổ cứng:", txtOCung, "Bảo hành (tháng):", txtBaoHanh },
+                { "Trọng lượng (kg):", txtCanNang, null, null },
         };
 
         for (int r = 0; r < rows.length; r++) {
@@ -119,8 +119,8 @@ public class ThemSanPhamView extends JPanel {
                 BorderFactory.createMatteBorder(1, 0, 0, 0, UIThemeConfig.BORDER),
                 new EmptyBorder(4, 24, 4, 24)));
 
-        btnClear = UIThemeConfig.createButton("Clear", UIThemeConfig.ACCENT_YELLOW);
-        btnThem = UIThemeConfig.createSuccessButton("Add Product");
+        btnClear = UIThemeConfig.createButton("Làm mới", UIThemeConfig.ACCENT_YELLOW);
+        btnThem = UIThemeConfig.createSuccessButton("Thêm sản phẩm");
         btnThem.setPreferredSize(new Dimension(150, 36));
 
         pnlBtns.add(btnClear);

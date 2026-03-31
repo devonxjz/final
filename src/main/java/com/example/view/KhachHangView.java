@@ -30,7 +30,7 @@ public class KhachHangView extends JPanel {
         JPanel pnlHeader = UIThemeConfig.createGlassPanel(new BorderLayout(10, 0));
         pnlHeader.setBorder(new EmptyBorder(12, 18, 12, 18));
 
-        JLabel lblTitle = new JLabel("Customer Management");
+        JLabel lblTitle = new JLabel("Quản lý khách hàng");
         lblTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblTitle.setForeground(UIThemeConfig.TEXT_PRIMARY);
 
@@ -38,8 +38,8 @@ public class KhachHangView extends JPanel {
         pnlSearch.setOpaque(false);
         pnlSearch.setPreferredSize(new Dimension(350, 32));
         txtTimKiem = UIThemeConfig.createTextField();
-        btnReload = UIThemeConfig.createPrimaryButton("Refresh");
-        pnlSearch.add(UIThemeConfig.createLabel("Search:"), BorderLayout.WEST);
+        btnReload = UIThemeConfig.createPrimaryButton("Làm mới");
+        pnlSearch.add(UIThemeConfig.createLabel("Tìm kiếm:"), BorderLayout.WEST);
         pnlSearch.add(txtTimKiem, BorderLayout.CENTER);
         pnlSearch.add(btnReload, BorderLayout.EAST);
 
@@ -47,7 +47,7 @@ public class KhachHangView extends JPanel {
         pnlHeader.add(pnlSearch, BorderLayout.EAST);
 
         // ── Table ──
-        String[] headers = {"ID", "Full Name", "Phone", "Address", "Email", "Gender"};
+        String[] headers = {"Mã KH", "Họ và tên", "Số điện thoại", "Địa chỉ", "Email", "Giới tính"};
         model = new DefaultTableModel(headers, 0) {
             @Override
             public boolean isCellEditable(int r, int c) {
@@ -67,7 +67,7 @@ public class KhachHangView extends JPanel {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel lblFormTitle = new JLabel("Customer Info");
+        JLabel lblFormTitle = new JLabel("Thông tin khách hàng");
         lblFormTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblFormTitle.setForeground(UIThemeConfig.ACCENT);
         gbc.gridx = 0;
@@ -82,24 +82,24 @@ public class KhachHangView extends JPanel {
         txtSDT = UIThemeConfig.createTextField();
         txtDiaChi = UIThemeConfig.createTextField();
         txtEmail = UIThemeConfig.createTextField();
-        cbGioiTinh = UIThemeConfig.createComboBox(new String[]{"Male", "Female", "Other"});
+        cbGioiTinh = UIThemeConfig.createComboBox(new String[]{"Nam", "Nữ", "Khác"});
 
-        addFormField(pnlInfo, "Customer ID:", txtMaKH, gbc, 1);
-        addFormField(pnlInfo, "Full Name:", txtTenKH, gbc, 2);
-        addFormField(pnlInfo, "Phone:", txtSDT, gbc, 3);
-        addFormField(pnlInfo, "Address:", txtDiaChi, gbc, 4);
+        addFormField(pnlInfo, "Mã khách hàng:", txtMaKH, gbc, 1);
+        addFormField(pnlInfo, "Họ và tên:", txtTenKH, gbc, 2);
+        addFormField(pnlInfo, "Số điện thoại:", txtSDT, gbc, 3);
+        addFormField(pnlInfo, "Địa chỉ:", txtDiaChi, gbc, 4);
         addFormField(pnlInfo, "Email:", txtEmail, gbc, 5);
-        addFormField(pnlInfo, "Gender:", cbGioiTinh, gbc, 6);
+        addFormField(pnlInfo, "Giới tính:", cbGioiTinh, gbc, 6);
 
         // ── Buttons ──
         JPanel pnlAction = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 0));
         pnlAction.setOpaque(false);
         pnlAction.setBorder(new EmptyBorder(10, 0, 5, 0));
 
-        btnAdd = UIThemeConfig.createSuccessButton("+ Add New");
-        btnUpdate = UIThemeConfig.createPrimaryButton("Edit");
-        btnSave = UIThemeConfig.createButton("Save", UIThemeConfig.ACCENT_PURPLE);
-        btnDelete = UIThemeConfig.createDangerButton("Delete");
+        btnAdd = UIThemeConfig.createSuccessButton("+ Thêm mới");
+        btnUpdate = UIThemeConfig.createPrimaryButton("Sửa");
+        btnSave = UIThemeConfig.createButton("Lưu", UIThemeConfig.ACCENT_PURPLE);
+        btnDelete = UIThemeConfig.createDangerButton("Xóa");
 
         pnlAction.add(btnAdd);
         pnlAction.add(btnUpdate);

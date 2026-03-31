@@ -25,7 +25,7 @@ public class ThanhToanView extends JPanel {
         JPanel pnlHeader = UIThemeConfig.createGlassPanel(new BorderLayout(10, 0));
         pnlHeader.setBorder(new EmptyBorder(12, 18, 12, 18));
 
-        JLabel lblTitle = new JLabel("Payment Management");
+        JLabel lblTitle = new JLabel("Quản lý thanh toán");
         lblTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblTitle.setForeground(UIThemeConfig.TEXT_PRIMARY);
 
@@ -33,10 +33,10 @@ public class ThanhToanView extends JPanel {
         pnlTools.setOpaque(false);
         txtTimKiem = UIThemeConfig.createTextField();
         txtTimKiem.setPreferredSize(new Dimension(200, 30));
-        btnThem = UIThemeConfig.createSuccessButton("+ Add Payment");
-        btnReload = UIThemeConfig.createPrimaryButton("Refresh");
-        btnXoa = UIThemeConfig.createDangerButton("Delete");
-        pnlTools.add(UIThemeConfig.createLabel("Search:"));
+        btnThem = UIThemeConfig.createSuccessButton("+ Thêm thanh toán");
+        btnReload = UIThemeConfig.createPrimaryButton("Làm mới");
+        btnXoa = UIThemeConfig.createDangerButton("Xóa");
+        pnlTools.add(UIThemeConfig.createLabel("Tìm kiếm:"));
         pnlTools.add(txtTimKiem);
         pnlTools.add(btnThem);
         pnlTools.add(btnXoa);
@@ -47,7 +47,7 @@ public class ThanhToanView extends JPanel {
         add(pnlHeader, BorderLayout.NORTH);
 
         // ── Table ──
-        String[] cols = {"Payment ID", "Invoice ID", "Customer", "Amount", "Date", "Method", "Status"};
+        String[] cols = {"Mã thanh toán", "Mã hóa đơn", "Khách hàng", "Số tiền", "Ngày", "Phương thức", "Trạng thái"};
         tableModel = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };

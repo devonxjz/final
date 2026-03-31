@@ -24,10 +24,10 @@ public class NhaCungCapView extends JPanel {
         // ── Header ──
         JPanel pnlHeader = UIThemeConfig.createGlassPanel(new BorderLayout(10, 0));
         pnlHeader.setBorder(new EmptyBorder(12, 18, 12, 18));
-        JLabel lblTitle = new JLabel("Supplier Management");
+        JLabel lblTitle = new JLabel("Quản lý nhà cung cấp");
         lblTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblTitle.setForeground(UIThemeConfig.TEXT_PRIMARY);
-        btnThem = UIThemeConfig.createSuccessButton("+ Add Supplier");
+        btnThem = UIThemeConfig.createSuccessButton("+ Thêm nhà cung cấp");
         pnlHeader.add(lblTitle, BorderLayout.WEST);
         pnlHeader.add(btnThem, BorderLayout.EAST);
 
@@ -40,10 +40,10 @@ public class NhaCungCapView extends JPanel {
         txtSDT = UIThemeConfig.createTextField();
         txtDiaChi = UIThemeConfig.createTextField();
 
-        pnlForm.add(UIThemeConfig.createLabel("Supplier ID:"));  pnlForm.add(txtMaNCC);
-        pnlForm.add(UIThemeConfig.createLabel("Phone:"));        pnlForm.add(txtSDT);
-        pnlForm.add(UIThemeConfig.createLabel("Supplier Name:")); pnlForm.add(txtTenNCC);
-        pnlForm.add(UIThemeConfig.createLabel("Address:"));      pnlForm.add(txtDiaChi);
+        pnlForm.add(UIThemeConfig.createLabel("Mã nhà cung cấp:"));  pnlForm.add(txtMaNCC);
+        pnlForm.add(UIThemeConfig.createLabel("Số điện thoại:"));        pnlForm.add(txtSDT);
+        pnlForm.add(UIThemeConfig.createLabel("Tên nhà cung cấp:")); pnlForm.add(txtTenNCC);
+        pnlForm.add(UIThemeConfig.createLabel("Địa chỉ:"));      pnlForm.add(txtDiaChi);
 
         JPanel pnlFormWrap = new JPanel(new BorderLayout());
         pnlFormWrap.setOpaque(false);
@@ -59,10 +59,10 @@ public class NhaCungCapView extends JPanel {
         JPanel pnlSearch = new JPanel(new BorderLayout(10, 0));
         pnlSearch.setOpaque(false);
         pnlSearch.setBorder(new EmptyBorder(10, 0, 5, 0));
-        JLabel lblSearch = UIThemeConfig.createLabel("Search:");
+        JLabel lblSearch = UIThemeConfig.createLabel("Tìm kiếm:");
         lblSearch.setFont(UIThemeConfig.FONT_SUBTITLE);
         txtTimKiem = UIThemeConfig.createTextField();
-        btnReload = UIThemeConfig.createButton("Reload", UIThemeConfig.ACCENT_YELLOW);
+        btnReload = UIThemeConfig.createButton("Tải lại", UIThemeConfig.ACCENT_YELLOW);
         pnlSearch.add(lblSearch, BorderLayout.WEST);
         pnlSearch.add(txtTimKiem, BorderLayout.CENTER);
         pnlSearch.add(btnReload, BorderLayout.EAST);
@@ -71,7 +71,9 @@ public class NhaCungCapView extends JPanel {
         add(pnlTop, BorderLayout.NORTH);
 
         // ── Table ──
-        tableNCC = new JTable();
+        String[] cols = {"Mã NCC", "Tên NCC", "SĐT", "Địa chỉ"};
+        DefaultTableModel tableModel = new DefaultTableModel(cols, 0);
+        tableNCC = new JTable(tableModel);
         UIThemeConfig.styleTable(tableNCC);
         JScrollPane sp = UIThemeConfig.createScrollPane(tableNCC);
         add(sp, BorderLayout.CENTER);
@@ -79,9 +81,9 @@ public class NhaCungCapView extends JPanel {
         // ── Buttons ──
         JPanel pnlButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
         pnlButtons.setOpaque(false);
-        btnUpdate = UIThemeConfig.createButton("Edit", UIThemeConfig.ACCENT_PURPLE);
-        btnDelete = UIThemeConfig.createDangerButton("Delete");
-        btnSave = UIThemeConfig.createSuccessButton("Save");
+        btnUpdate = UIThemeConfig.createButton("Sửa", UIThemeConfig.ACCENT_PURPLE);
+        btnDelete = UIThemeConfig.createDangerButton("Xóa");
+        btnSave = UIThemeConfig.createSuccessButton("Lưu");
         pnlButtons.add(btnUpdate);
         pnlButtons.add(btnDelete);
         pnlButtons.add(btnSave);

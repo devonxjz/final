@@ -25,9 +25,9 @@ public class XacNhanHoaDonView extends JPanel {
                 BorderFactory.createMatteBorder(0, 0, 2, 0, UIThemeConfig.ACCENT),
                 new EmptyBorder(16, 26, 16, 26)));
 
-        JLabel lblTitle = UIThemeConfig.createTitleLabel("CONFIRM SALES ORDER");
+        JLabel lblTitle = UIThemeConfig.createTitleLabel("XÁC NHẬN ĐƠN HÀNG");
         lblTitle.setForeground(UIThemeConfig.ACCENT);
-        JLabel lblSub = UIThemeConfig.createLabel("Review the order details before confirming.");
+        JLabel lblSub = UIThemeConfig.createLabel("Kiểm tra chi tiết đơn hàng trước khi xác nhận.");
         lblSub.setForeground(UIThemeConfig.TEXT_MUTED);
 
         JPanel pnlHdrText = new JPanel();
@@ -49,7 +49,7 @@ public class XacNhanHoaDonView extends JPanel {
         pnlInfo.setBorder(new EmptyBorder(10, 14, 10, 14));
         pnlInfo.setPreferredSize(new Dimension(0, 170));
 
-        JLabel lblInfo = UIThemeConfig.createLabel("Order Information");
+        JLabel lblInfo = UIThemeConfig.createLabel("Thông tin đơn hàng");
         lblInfo.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblInfo.setForeground(UIThemeConfig.ACCENT);
         lblInfo.setBorder(new EmptyBorder(0, 0, 6, 0));
@@ -69,7 +69,7 @@ public class XacNhanHoaDonView extends JPanel {
         JPanel pnlTable = UIThemeConfig.createGlassPanel(new BorderLayout());
         pnlTable.setBorder(new EmptyBorder(10, 14, 10, 14));
 
-        JLabel lblSP = UIThemeConfig.createLabel("Products in Order");
+        JLabel lblSP = UIThemeConfig.createLabel("Sản phẩm trong đơn hàng");
         lblSP.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblSP.setForeground(UIThemeConfig.ACCENT_YELLOW);
         lblSP.setBorder(new EmptyBorder(0, 0, 6, 0));
@@ -89,8 +89,8 @@ public class XacNhanHoaDonView extends JPanel {
                 BorderFactory.createMatteBorder(1, 0, 0, 0, UIThemeConfig.BORDER),
                 new EmptyBorder(4, 20, 4, 20)));
 
-        btnHuy = UIThemeConfig.createDangerButton("Cancel");
-        btnXacNhan = UIThemeConfig.createSuccessButton("Confirm Order");
+        btnHuy = UIThemeConfig.createDangerButton("Hủy");
+        btnXacNhan = UIThemeConfig.createSuccessButton("Xác nhận đơn hàng");
         btnXacNhan.setPreferredSize(new Dimension(160, 36));
 
         pnlBtns.add(btnHuy);

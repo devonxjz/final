@@ -28,7 +28,7 @@ public class SanPhamView extends JPanel {
         // ── Header ──
         JPanel pnlHeader = UIThemeConfig.createGlassPanel(new BorderLayout(10, 0));
         pnlHeader.setBorder(new EmptyBorder(12, 18, 12, 18));
-        JLabel lblTitle = new JLabel("Product Management");
+        JLabel lblTitle = new JLabel("Quản lý sản phẩm");
         lblTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblTitle.setForeground(UIThemeConfig.TEXT_PRIMARY);
 
@@ -36,8 +36,8 @@ public class SanPhamView extends JPanel {
         pnlSearch.setOpaque(false);
         pnlSearch.setPreferredSize(new Dimension(350, 32));
         txtTimKiem = UIThemeConfig.createTextField();
-        btnReload = UIThemeConfig.createPrimaryButton("Refresh");
-        pnlSearch.add(UIThemeConfig.createLabel("Search:"), BorderLayout.WEST);
+        btnReload = UIThemeConfig.createPrimaryButton("Làm mới");
+        pnlSearch.add(UIThemeConfig.createLabel("Tìm kiếm:"), BorderLayout.WEST);
         pnlSearch.add(txtTimKiem, BorderLayout.CENTER);
         pnlSearch.add(btnReload, BorderLayout.EAST);
 
@@ -45,8 +45,8 @@ public class SanPhamView extends JPanel {
         pnlHeader.add(pnlSearch, BorderLayout.EAST);
 
         // ── Table ──
-        String[] headers = {"ID", "Type", "Name", "CPU", "GPU", "RAM", "Storage",
-                "Screen", "Resolution", "Weight", "Stock", "Price", "Import", "Warranty"};
+        String[] headers = {"Mã SP", "Loại máy", "Tên SP", "CPU", "GPU", "RAM", "Ổ cứng",
+                "Màn hình", "Độ phân giải", "Cân nặng", "Tồn kho", "Giá bán", "Giá nhập", "Bảo hành"};
         model = new DefaultTableModel(headers, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -63,7 +63,7 @@ public class SanPhamView extends JPanel {
         gbc.insets = new Insets(4, 5, 4, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel lblFormTitle = new JLabel("Product Details");
+        JLabel lblFormTitle = new JLabel("Chi tiết sản phẩm");
         lblFormTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblFormTitle.setForeground(UIThemeConfig.ACCENT);
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2; gbc.weightx = 1;
@@ -85,30 +85,30 @@ public class SanPhamView extends JPanel {
         txtGiaNhap = UIThemeConfig.createTextField();
         txtThoiGianBaoHanh = UIThemeConfig.createTextField();
 
-        addFormField(pnlInfo, "Product ID:", txtMaSP, gbc, 1);
-        addFormField(pnlInfo, "Type:", txtLoaiMay, gbc, 2);
-        addFormField(pnlInfo, "Name:", txtTenSP, gbc, 3);
+        addFormField(pnlInfo, "Mã sản phẩm:", txtMaSP, gbc, 1);
+        addFormField(pnlInfo, "Loại máy:", txtLoaiMay, gbc, 2);
+        addFormField(pnlInfo, "Tên sản phẩm:", txtTenSP, gbc, 3);
         addFormField(pnlInfo, "CPU:", txtCPU, gbc, 4);
         addFormField(pnlInfo, "GPU:", txtGPU, gbc, 5);
         addFormField(pnlInfo, "RAM:", txtRAM, gbc, 6);
-        addFormField(pnlInfo, "Storage:", txtOCung, gbc, 7);
-        addFormField(pnlInfo, "Screen:", txtKTManHinh, gbc, 8);
-        addFormField(pnlInfo, "Resolution:", txtDPGManHinh, gbc, 9);
-        addFormField(pnlInfo, "Weight:", txtCanNang, gbc, 10);
-        addFormField(pnlInfo, "Stock:", txtSLTrongKho, gbc, 11);
-        addFormField(pnlInfo, "Price:", txtGiaBan, gbc, 12);
-        addFormField(pnlInfo, "Import Price:", txtGiaNhap, gbc, 13);
-        addFormField(pnlInfo, "Warranty:", txtThoiGianBaoHanh, gbc, 14);
+        addFormField(pnlInfo, "Ổ cứng:", txtOCung, gbc, 7);
+        addFormField(pnlInfo, "Màn hình:", txtKTManHinh, gbc, 8);
+        addFormField(pnlInfo, "Độ phân giải:", txtDPGManHinh, gbc, 9);
+        addFormField(pnlInfo, "Cân nặng:", txtCanNang, gbc, 10);
+        addFormField(pnlInfo, "Tồn kho:", txtSLTrongKho, gbc, 11);
+        addFormField(pnlInfo, "Giá bán:", txtGiaBan, gbc, 12);
+        addFormField(pnlInfo, "Giá nhập:", txtGiaNhap, gbc, 13);
+        addFormField(pnlInfo, "Bảo hành:", txtThoiGianBaoHanh, gbc, 14);
 
         // ── Action Buttons ──
         JPanel pnlAction = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         pnlAction.setOpaque(false);
         pnlAction.setBorder(new EmptyBorder(10, 0, 5, 0));
 
-        btnThem = UIThemeConfig.createSuccessButton("+ Add New");
-        btnUpdate = UIThemeConfig.createPrimaryButton("Edit");
-        btnSave = UIThemeConfig.createButton("Save", UIThemeConfig.ACCENT_PURPLE);
-        btnDelete = UIThemeConfig.createDangerButton("Delete");
+        btnThem = UIThemeConfig.createSuccessButton("+ Thêm mới");
+        btnUpdate = UIThemeConfig.createPrimaryButton("Sửa");
+        btnSave = UIThemeConfig.createButton("Lưu", UIThemeConfig.ACCENT_PURPLE);
+        btnDelete = UIThemeConfig.createDangerButton("Xóa");
 
         pnlAction.add(btnThem);
         pnlAction.add(btnUpdate);

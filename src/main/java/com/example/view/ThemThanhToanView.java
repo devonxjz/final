@@ -32,9 +32,9 @@ public class ThemThanhToanView extends JPanel {
                 BorderFactory.createMatteBorder(0, 0, 2, 0, UIThemeConfig.ACCENT),
                 new EmptyBorder(14, 24, 14, 24)));
 
-        JLabel lblTitle = UIThemeConfig.createTitleLabel("PAYMENT ENTRY");
+        JLabel lblTitle = UIThemeConfig.createTitleLabel("GHI NHẬN THANH TOÁN");
         lblTitle.setForeground(UIThemeConfig.ACCENT);
-        JLabel lblSub = UIThemeConfig.createLabel("Record a payment against an existing sales order.");
+        JLabel lblSub = UIThemeConfig.createLabel("Ghi nhận thanh toán cho một đơn hàng hiện có.");
         lblSub.setForeground(UIThemeConfig.TEXT_MUTED);
 
         JPanel pnlHdrText = new JPanel();
@@ -70,12 +70,12 @@ public class ThemThanhToanView extends JPanel {
         dateChooserNgayThanhToan = new JDateChooser();
         dateChooserNgayThanhToan.setDateFormatString("dd/MM/yyyy");
         dateChooserNgayThanhToan.setBackground(UIThemeConfig.BG_INPUT);
-        cmbHinhThucTT = UIThemeConfig.createComboBox(new String[] { "Cash", "Bank Transfer" });
+        cmbHinhThucTT = UIThemeConfig.createComboBox(new String[] { "Tiền mặt", "Chuyển khoản" });
 
         Object[][] rows = {
-                { "Order ID:", txtMaHDBH, "Payment Amount:", txtTienThanhToan },
-                { "Customer ID:", txtMaKH, "Payment Date:", dateChooserNgayThanhToan },
-                { "Customer Name:", txtTenKH, "Method:", cmbHinhThucTT },
+                { "Mã đơn hàng:", txtMaHDBH, "Số tiền thanh toán:", txtTienThanhToan },
+                { "Mã khách hàng:", txtMaKH, "Ngày thanh toán:", dateChooserNgayThanhToan },
+                { "Tên khách hàng:", txtTenKH, "Phương thức:", cmbHinhThucTT },
         };
 
         for (int r = 0; r < rows.length; r++) {
@@ -106,17 +106,17 @@ public class ThemThanhToanView extends JPanel {
 
         JPanel pnlSearch = UIThemeConfig.createGlassPanel(new BorderLayout(10, 0));
         pnlSearch.setBorder(new EmptyBorder(10, 14, 10, 14));
-        JLabel lblSearch = UIThemeConfig.createLabel("Search by Customer Name:");
+        JLabel lblSearch = UIThemeConfig.createLabel("Tìm theo tên khách hàng:");
         lblSearch.setFont(UIThemeConfig.FONT_SUBTITLE);
         txtNhapTenKH = UIThemeConfig.createTextField();
-        btnXuatHoaDon = UIThemeConfig.createPrimaryButton("Issue Receipt");
+        btnXuatHoaDon = UIThemeConfig.createPrimaryButton("Xuất biên lai");
         btnXuatHoaDon.setPreferredSize(new Dimension(150, 34));
         pnlSearch.add(lblSearch, BorderLayout.WEST);
         pnlSearch.add(txtNhapTenKH, BorderLayout.CENTER);
         pnlSearch.add(btnXuatHoaDon, BorderLayout.EAST);
         pnlCenter.add(pnlSearch, BorderLayout.NORTH);
 
-        String[] cols = { "Order ID", "Customer ID", "Customer Name", "Total", "Monthly Payment", "Date" };
+        String[] cols = { "Mã đơn", "Mã KH", "Tên khách hàng", "Tổng tiền", "Tiền góp tháng", "Ngày tạo" };
         tableModel = new DefaultTableModel(cols, 0);
         table = new JTable(tableModel);
         UIThemeConfig.styleTable(table);
@@ -137,7 +137,7 @@ public class ThemThanhToanView extends JPanel {
         scrollInfo.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder(
                         BorderFactory.createLineBorder(UIThemeConfig.BORDER),
-                        "Payment Info", 0, 0, UIThemeConfig.FONT_BODY, UIThemeConfig.ACCENT),
+                        "Thông tin thanh toán", 0, 0, UIThemeConfig.FONT_BODY, UIThemeConfig.ACCENT),
                 new EmptyBorder(4, 6, 4, 6)));
         scrollInfo.setPreferredSize(new Dimension(0, 110));
         pnlBody.add(scrollInfo, BorderLayout.SOUTH);

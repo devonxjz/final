@@ -23,23 +23,23 @@ public class HoaDonBanHangView extends JPanel {
         JPanel pnlHeader = UIThemeConfig.createGlassPanel(new BorderLayout(10, 0));
         pnlHeader.setBorder(new EmptyBorder(12, 18, 12, 18));
 
-        JLabel lblTitle = new JLabel("Sales Order Management");
+        JLabel lblTitle = new JLabel("Quản lý đơn hàng bán");
         lblTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblTitle.setForeground(UIThemeConfig.TEXT_PRIMARY);
 
         JPanel pnlTools = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         pnlTools.setOpaque(false);
-        pnlTools.add(UIThemeConfig.createLabel("Date:"));
+        pnlTools.add(UIThemeConfig.createLabel("Ngày:"));
         dateChooser = new JDateChooser();
         dateChooser.setDateFormatString("dd/MM/yyyy");
         dateChooser.setPreferredSize(new Dimension(130, 30));
         dateChooser.setBackground(UIThemeConfig.BG_INPUT);
         pnlTools.add(dateChooser);
-        btnTimKiem = UIThemeConfig.createPrimaryButton("Search");
+        btnTimKiem = UIThemeConfig.createPrimaryButton("Tìm kiếm");
         pnlTools.add(btnTimKiem);
-        btnThem = UIThemeConfig.createSuccessButton("+ Add Order");
+        btnThem = UIThemeConfig.createSuccessButton("+ Thêm đơn hàng");
         pnlTools.add(btnThem);
-        btnReload = UIThemeConfig.createButton("Reload", UIThemeConfig.ACCENT_YELLOW);
+        btnReload = UIThemeConfig.createButton("Tải lại", UIThemeConfig.ACCENT_YELLOW);
         pnlTools.add(btnReload);
 
         pnlHeader.add(lblTitle, BorderLayout.WEST);
@@ -59,7 +59,7 @@ public class HoaDonBanHangView extends JPanel {
         // Chi tiết
         JPanel pnlChiTiet = UIThemeConfig.createGlassPanel(new BorderLayout());
         pnlChiTiet.setBorder(new EmptyBorder(10, 12, 10, 12));
-        JLabel lblCT = new JLabel("Order Details");
+        JLabel lblCT = new JLabel("Chi tiết đơn hàng");
         lblCT.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblCT.setForeground(UIThemeConfig.ACCENT);
         pnlChiTiet.add(lblCT, BorderLayout.NORTH);
@@ -71,7 +71,7 @@ public class HoaDonBanHangView extends JPanel {
         // Thanh toán
         JPanel pnlTT = UIThemeConfig.createGlassPanel(new BorderLayout());
         pnlTT.setBorder(new EmptyBorder(10, 12, 10, 12));
-        JLabel lblTT = new JLabel("Payment");
+        JLabel lblTT = new JLabel("Thanh toán");
         lblTT.setFont(UIThemeConfig.FONT_SUBTITLE);
         lblTT.setForeground(UIThemeConfig.ACCENT);
         pnlTT.add(lblTT, BorderLayout.NORTH);
