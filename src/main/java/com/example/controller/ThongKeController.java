@@ -1,6 +1,6 @@
 package com.example.controller;
 
-import com.example.dao.ThongKeDAO;
+import com.example.services.ThongKeService;
 import com.example.view.ThongKeView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,11 +16,11 @@ import org.jfree.data.category.DefaultCategoryDataset;
  * Tương ứng với chương cuối của phần Controller trong tài liệu
  */
 public class ThongKeController {
-    private final ThongKeDAO dao;
+    private final ThongKeService service;
     private final ThongKeView view;
 
-    public ThongKeController(ThongKeDAO dao, ThongKeView view) {
-        this.dao = dao;
+    public ThongKeController(ThongKeService service, ThongKeView view) {
+        this.service = service;
         this.view = view;
         initController();
         loadDefaultStatistics();
@@ -51,9 +51,9 @@ public class ThongKeController {
         String denNgay = view.getDenNgay();
 
         // 1. Cập nhật các con số tổng quát (Cards)
-        double tongDoanhThu = dao.getTongDoanhThu(tuNgay, denNgay);
-        int tongDonHang = dao.getTongDonHang(tuNgay, denNgay);
-        double loiNhuan = dao.getLoiNhuan(tuNgay, denNgay);
+        double tongDoanhThu = service.getTongDoanhThu(tuNgay, denNgay);
+        int tongDonHang = service.getTongDonHang(tuNgay, denNgay);
+        double loiNhuan = service.getLoiNhuan(tuNgay, denNgay);
 
         view.lblTongDoanhThu.setText(String.format("%,.0f VNĐ", tongDoanhThu));
         view.lblTongDonHang.setText(String.valueOf(tongDonHang));
@@ -70,7 +70,7 @@ public class ThongKeController {
         DefaultTableModel model = (DefaultTableModel) view.tableBestSeller.getModel();
         model.setRowCount(0);
 
-        Map<String, Integer> data = dao.getTopSellingProducts(tuNgay, denNgay);
+        Map<String, Integer> data = service.getTopSellingProducts(tuNgay, denNgay);
         for (Map.Entry<String, Integer> entry : data.entrySet()) {
             model.addRow(new Object[] { entry.getKey(), entry.getValue() });
         }
@@ -78,7 +78,7 @@ public class ThongKeController {
 
     private void drawRevenueChart(String tuNgay, String denNgay) {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        Map<String, Double> chartData = dao.getRevenueByDay(tuNgay, denNgay);
+        Map<String, Double> chartData = service.getRevenueByDay(tuNgay, denNgay);
 
         for (Map.Entry<String, Double> entry : chartData.entrySet()) {
             dataset.addValue(entry.getValue(), "Doanh thu", entry.getKey());

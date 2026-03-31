@@ -1,89 +1,66 @@
 package com.example.view;
 
-import com.example.config.UITheme;
-import com.example.dao.ThanhToanDAO;
-import com.example.dao.impl.ThanhToanDAOImpl;
-import com.example.entity.ThanhToan;
+import com.example.config.UIThemeConfig;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.List;
 
-public class ThanhToanView extends JFrame {
-    private JTextField txtCustomerName;
-    private JButton btnAdd, btnReload;
-    private JTable table;
+/**
+ * ThanhToanView — Payment management (Glassmorphism dark mode).
+ */
+public class ThanhToanView extends JPanel {
+
+    private JTable tableThanhToan;
     private DefaultTableModel tableModel;
-    private ThanhToanDAO thanhToanDAO = new ThanhToanDAOImpl();
+    private JTextField txtTimKiem;
+    private JButton btnThem, btnReload, btnXoa;
 
     public ThanhToanView() {
-        setTitle("Payment Management");
-        setSize(1050, 700);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-        getContentPane().setBackground(UITheme.BG_DARK);
         setLayout(new BorderLayout(10, 10));
+        setBackground(UIThemeConfig.BG_DARK);
+        setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        // Header
-        JPanel pnlHeader = new JPanel(new BorderLayout(10, 0));
-        pnlHeader.setBackground(UITheme.BG_DARK);
-        pnlHeader.setBorder(BorderFactory.createEmptyBorder(12, 20, 5, 20));
+        // ── Header ──
+        JPanel pnlHeader = UIThemeConfig.createGlassPanel(new BorderLayout(10, 0));
+        pnlHeader.setBorder(new EmptyBorder(12, 18, 12, 18));
 
-        JLabel lblTitle = UITheme.createTitleLabel("PAYMENT MANAGEMENT");
-        lblTitle.setForeground(UITheme.ACCENT);
-        lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        pnlHeader.add(lblTitle, BorderLayout.CENTER);
+        JLabel lblTitle = new JLabel("Payment Management");
+        lblTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblTitle.setForeground(UIThemeConfig.TEXT_PRIMARY);
 
-        // Search bar
-        JPanel pnlSearch = new JPanel(new BorderLayout(8, 0));
-        pnlSearch.setBackground(UITheme.BG_DARK);
-        pnlSearch.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
-        JLabel lblCustomer = UITheme.createLabel("Customer Name:");
-        lblCustomer.setFont(UITheme.FONT_SUBTITLE);
-        txtCustomerName = UITheme.createTextField();
-        btnAdd = UITheme.createPrimaryButton("+ Add Payment");
-        pnlSearch.add(lblCustomer, BorderLayout.WEST);
-        pnlSearch.add(txtCustomerName, BorderLayout.CENTER);
-        pnlSearch.add(btnAdd, BorderLayout.EAST);
+        JPanel pnlTools = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        pnlTools.setOpaque(false);
+        txtTimKiem = UIThemeConfig.createTextField();
+        txtTimKiem.setPreferredSize(new Dimension(200, 30));
+        btnThem = UIThemeConfig.createSuccessButton("+ Add Payment");
+        btnReload = UIThemeConfig.createPrimaryButton("Refresh");
+        btnXoa = UIThemeConfig.createDangerButton("Delete");
+        pnlTools.add(UIThemeConfig.createLabel("Search:"));
+        pnlTools.add(txtTimKiem);
+        pnlTools.add(btnThem);
+        pnlTools.add(btnXoa);
+        pnlTools.add(btnReload);
 
-        JPanel pnlNorth = new JPanel(new BorderLayout());
-        pnlNorth.setBackground(UITheme.BG_DARK);
-        pnlNorth.add(pnlHeader, BorderLayout.NORTH);
-        pnlNorth.add(pnlSearch, BorderLayout.SOUTH);
-        add(pnlNorth, BorderLayout.NORTH);
+        pnlHeader.add(lblTitle, BorderLayout.WEST);
+        pnlHeader.add(pnlTools, BorderLayout.EAST);
+        add(pnlHeader, BorderLayout.NORTH);
 
-        // Table
-        tableModel = new DefaultTableModel(new Object[]{
-                "Order ID", "Customer ID", "Payment Date", "Amount", "Payment Method"
-        }, 0);
-        table = new JTable(tableModel);
-        UITheme.styleTable(table);
-        add(UITheme.createScrollPane(table), BorderLayout.CENTER);
-
-        // Bottom
-        JPanel pnlBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        pnlBottom.setBackground(UITheme.BG_DARK);
-        btnReload = UITheme.createButton("Reload", UITheme.ACCENT_YELLOW);
-        pnlBottom.add(btnReload);
-        add(pnlBottom, BorderLayout.SOUTH);
-
-        setVisible(true);
+        // ── Table ──
+        String[] cols = {"Payment ID", "Invoice ID", "Customer", "Amount", "Date", "Method", "Status"};
+        tableModel = new DefaultTableModel(cols, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+        tableThanhToan = new JTable(tableModel);
+        UIThemeConfig.styleTable(tableThanhToan);
+        add(UIThemeConfig.createScrollPane(tableThanhToan), BorderLayout.CENTER);
     }
 
-    public JTextField getTxtTenKhachHang() { return txtCustomerName; }
-    public JButton getBtnThem()            { return btnAdd; }
-    public JButton getBtnReload()          { return btnReload; }
-    public JTable getTable()               { return table; }
-
-    public void taiLaiDuLieu() {
-        List<ThanhToan> list = thanhToanDAO.layTatCaThanhToan();
-        tableModel.setRowCount(0);
-        for (ThanhToan tt : list) {
-            tableModel.addRow(new Object[]{
-                    tt.getHoaDonBanHang() != null ? tt.getHoaDonBanHang().getMaHDBH() : "",
-                    tt.getKhachHang()     != null ? tt.getKhachHang().getMaKH()        : "",
-                    tt.getNgayTT(), tt.getTienThanhToan(), tt.getHinhThucTT()
-            });
-        }
-    }
+    // ── Getters ──
+    public JTable getTableThanhToan() { return tableThanhToan; }
+    public DefaultTableModel getTableModel() { return tableModel; }
+    public JTextField getTxtTimKiem() { return txtTimKiem; }
+    public JButton getBtnThem() { return btnThem; }
+    public JButton getBtnReload() { return btnReload; }
+    public JButton getBtnXoa() { return btnXoa; }
 }

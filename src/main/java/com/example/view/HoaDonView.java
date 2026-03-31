@@ -1,10 +1,15 @@
 
 package com.example.view;
 
+import com.example.config.UIThemeConfig;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
+/**
+ * HoaDonView — POS split-pane (Glassmorphism dark mode).
+ */
 public class HoaDonView extends JPanel {
     public JTable tableSanPham, tableGioHang;
     public JTextField txtMaKH, txtTenKH, txtTongTien, txtLaiSuat, txtThoiHan;
@@ -18,58 +23,119 @@ public class HoaDonView extends JPanel {
 
     private void initComponents() {
         setLayout(new GridBagLayout());
+        setBackground(UIThemeConfig.BG_DARK);
+        setBorder(new EmptyBorder(15, 15, 15, 15));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(8, 8, 8, 8);
 
-        // 1. Danh sách sản phẩm (Bên trái)
-        JPanel pnlLeft = new JPanel(new BorderLayout());
-        pnlLeft.setBorder(BorderFactory.createTitledBorder("Danh mục Laptop"));
-        tableSanPham = new JTable(new DefaultTableModel(new Object[]{"Mã", "Tên SP", "Giá bán", "Kho"}, 0));
-        pnlLeft.add(new JScrollPane(tableSanPham), BorderLayout.CENTER);
-        btnAddToCard = new JButton("Thêm vào giỏ >>");
+        // ── LEFT: Product Catalog ──
+        JPanel pnlLeft = UIThemeConfig.createGlassPanel(new BorderLayout(0, 8));
+        pnlLeft.setBorder(new EmptyBorder(15, 15, 15, 15));
+
+        JLabel lblCatalog = new JLabel("Product Catalog");
+        lblCatalog.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblCatalog.setForeground(UIThemeConfig.ACCENT);
+        pnlLeft.add(lblCatalog, BorderLayout.NORTH);
+
+        tableSanPham = new JTable(new DefaultTableModel(
+                new Object[]{"ID", "Product Name", "Price", "Stock"}, 0));
+        UIThemeConfig.styleTable(tableSanPham);
+        pnlLeft.add(UIThemeConfig.createScrollPane(tableSanPham), BorderLayout.CENTER);
+
+        btnAddToCard = UIThemeConfig.createSuccessButton("Add to Cart >>");
+        btnAddToCard.setPreferredSize(new Dimension(0, 36));
         pnlLeft.add(btnAddToCard, BorderLayout.SOUTH);
 
-        // 2. Giỏ hàng & Thanh toán (Bên phải)
-        JPanel pnlRight = new JPanel(new BorderLayout());
-        pnlRight.setBorder(BorderFactory.createTitledBorder("Chi tiết đơn hàng"));
+        // ── RIGHT: Cart + Payment ──
+        JPanel pnlRight = new JPanel(new BorderLayout(0, 8));
+        pnlRight.setOpaque(false);
 
-        tableGioHang = new JTable(new DefaultTableModel(new Object[]{"Mã", "Tên SP", "SL", "Đơn giá", "Thành tiền"}, 0));
-        pnlRight.add(new JScrollPane(tableGioHang), BorderLayout.CENTER);
+        // Cart table
+        JPanel pnlCart = UIThemeConfig.createGlassPanel(new BorderLayout(0, 8));
+        pnlCart.setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        // Form thông tin khách hàng & Loại HD
-        JPanel pnlThanhToan = new JPanel(new GridLayout(0, 2, 5, 5));
-        txtMaKH = new JTextField(); txtTenKH = new JTextField();
-        txtTongTien = new JTextField(); txtTongTien.setEditable(false);
-        cbLoaiHD = new JComboBox<>(new String[]{"Trực tiếp", "Trả góp"});
+        JLabel lblCart = new JLabel("Order Details");
+        lblCart.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblCart.setForeground(UIThemeConfig.ACCENT);
+        pnlCart.add(lblCart, BorderLayout.NORTH);
 
-        pnlThanhToan.add(new JLabel("Mã khách hàng:")); pnlThanhToan.add(txtMaKH);
-        pnlThanhToan.add(new JLabel("Tên khách hàng:")); pnlThanhToan.add(txtTenKH);
-        pnlThanhToan.add(new JLabel("Loại hình:")); pnlThanhToan.add(cbLoaiHD);
-        pnlThanhToan.add(new JLabel("TỔNG TIỀN:")); pnlThanhToan.add(txtTongTien);
+        tableGioHang = new JTable(new DefaultTableModel(
+                new Object[]{"ID", "Product", "Qty", "Price", "Subtotal"}, 0));
+        UIThemeConfig.styleTable(tableGioHang);
+        pnlCart.add(UIThemeConfig.createScrollPane(tableGioHang), BorderLayout.CENTER);
 
-        // Panel phụ cho Trả góp
-        panelTraGop = new JPanel(new GridLayout(1, 4, 5, 5));
-        txtLaiSuat = new JTextField(); txtThoiHan = new JTextField();
-        panelTraGop.add(new JLabel("Lãi suất (%):")); panelTraGop.add(txtLaiSuat);
-        panelTraGop.add(new JLabel("Kỳ hạn (tháng):")); panelTraGop.add(txtThoiHan);
+        // Payment form
+        JPanel pnlPayment = UIThemeConfig.createGlassPanel(new GridBagLayout());
+        pnlPayment.setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        JPanel pnlBottomRight = new JPanel(new BorderLayout());
-        pnlBottomRight.add(pnlThanhToan, BorderLayout.NORTH);
-        pnlBottomRight.add(panelTraGop, BorderLayout.CENTER);
+        GridBagConstraints gc = new GridBagConstraints();
+        gc.insets = new Insets(4, 6, 4, 6);
+        gc.fill = GridBagConstraints.HORIZONTAL;
 
-        JPanel pnlBtns = new JPanel();
-        btnThanhToan = new JButton("Thanh toán & In");
-        btnHuy = new JButton("Hủy đơn");
-        btnRemoveFromCard = new JButton("Xóa khỏi giỏ");
-        pnlBtns.add(btnRemoveFromCard); pnlBtns.add(btnThanhToan); pnlBtns.add(btnHuy);
-        pnlBottomRight.add(pnlBtns, BorderLayout.SOUTH);
+        JLabel lblPayment = new JLabel("Payment");
+        lblPayment.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblPayment.setForeground(UIThemeConfig.ACCENT);
+        gc.gridx = 0; gc.gridy = 0; gc.gridwidth = 2; gc.weightx = 1;
+        pnlPayment.add(lblPayment, gc);
+        gc.gridwidth = 1;
 
-        pnlRight.add(pnlBottomRight, BorderLayout.SOUTH);
+        txtMaKH    = UIThemeConfig.createTextField();
+        txtTenKH   = UIThemeConfig.createTextField();
+        txtTongTien = UIThemeConfig.createTextField();
+        txtTongTien.setEditable(false);
+        cbLoaiHD = UIThemeConfig.createComboBox(new String[]{"Trực tiếp", "Trả góp"});
 
-        // Layout chính
-        gbc.gridx = 0; gbc.weightx = 0.4; gbc.weighty = 1.0; add(pnlLeft, gbc);
-        gbc.gridx = 1; gbc.weightx = 0.6; add(pnlRight, gbc);
+        addField(pnlPayment, gc, 1, "Customer ID:", txtMaKH);
+        addField(pnlPayment, gc, 2, "Customer Name:", txtTenKH);
+        addField(pnlPayment, gc, 3, "Payment Type:", cbLoaiHD);
+        addField(pnlPayment, gc, 4, "TOTAL:", txtTongTien);
+
+        // Installment panel
+        panelTraGop = new JPanel(new GridLayout(1, 4, 6, 0));
+        panelTraGop.setOpaque(false);
+        txtLaiSuat = UIThemeConfig.createTextField();
+        txtThoiHan = UIThemeConfig.createTextField();
+        panelTraGop.add(UIThemeConfig.createLabel("Interest (%):"));
+        panelTraGop.add(txtLaiSuat);
+        panelTraGop.add(UIThemeConfig.createLabel("Term (months):"));
+        panelTraGop.add(txtThoiHan);
+
+        gc.gridx = 0; gc.gridy = 5; gc.gridwidth = 2;
+        pnlPayment.add(panelTraGop, gc);
+
+        // Action buttons
+        JPanel pnlBtns = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        pnlBtns.setOpaque(false);
+        btnRemoveFromCard = UIThemeConfig.createDangerButton("Remove");
+        btnThanhToan = UIThemeConfig.createPrimaryButton("Checkout & Print");
+        btnHuy = UIThemeConfig.createButton("Cancel", UIThemeConfig.BG_INPUT);
+        pnlBtns.add(btnRemoveFromCard);
+        pnlBtns.add(btnThanhToan);
+        pnlBtns.add(btnHuy);
+
+        gc.gridy = 6;
+        gc.insets = new Insets(12, 6, 4, 6);
+        pnlPayment.add(pnlBtns, gc);
+
+        pnlRight.add(pnlCart, BorderLayout.CENTER);
+        pnlRight.add(pnlPayment, BorderLayout.SOUTH);
+
+        // Layout
+        gbc.gridx = 0; gbc.weightx = 0.4; gbc.weighty = 1.0;
+        add(pnlLeft, gbc);
+        gbc.gridx = 1; gbc.weightx = 0.6;
+        add(pnlRight, gbc);
+    }
+
+    private void addField(JPanel panel, GridBagConstraints gc, int row, String label, JComponent field) {
+        gc.gridy = row;
+        gc.gridx = 0; gc.weightx = 0;
+        JLabel lbl = UIThemeConfig.createLabel(label);
+        lbl.setPreferredSize(new Dimension(110, 28));
+        panel.add(lbl, gc);
+        gc.gridx = 1; gc.weightx = 1;
+        panel.add(field, gc);
     }
 
     public void hienThiDanhSachSanPham(java.util.List<com.example.entity.SanPham> ds) {

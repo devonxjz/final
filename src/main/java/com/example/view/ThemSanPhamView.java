@@ -1,66 +1,130 @@
 package com.example.view;
 
-import com.example.config.UITheme;
-import com.example.controller.ThemSanPhamController;
-import com.example.dao.impl.SanPhamDAOImpl;
+import com.example.config.UIThemeConfig;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-public class ThemSanPhamView extends JFrame {
+/**
+ * Form thêm sản phẩm — hiển thị nhúng vào ContentPanel, không mở cửa sổ mới.
+ * Đổi từ JFrame → JPanel.
+ */
+public class ThemSanPhamView extends JPanel {
+
     public JTextField txtLoaiMay, txtTenSP, txtCPU, txtGPU, txtRAM, txtOCung, txtCanNang;
     public JTextField txtKTManHinh, txtDPGiaiMH, txtSoLuong, txtGiaBan, txtGiaNhap, txtBaoHanh;
     public JButton btnThem, btnClear;
-    private ThemSanPhamController controller;
 
     public ThemSanPhamView() {
-        setTitle("Add New Product");
-        setSize(750, 480);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-        getContentPane().setBackground(UITheme.BG_DARK);
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout(0, 0));
+        setBackground(UIThemeConfig.BG_DARK);
 
-        JLabel lblTitle = UITheme.createTitleLabel("ADD NEW PRODUCT");
-        lblTitle.setForeground(UITheme.ACCENT);
-        lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        lblTitle.setBorder(BorderFactory.createEmptyBorder(15, 0, 5, 0));
-        add(lblTitle, BorderLayout.NORTH);
+        // ── HEADER ──
+        JPanel pnlHeader = UIThemeConfig.createGlassPanel(new BorderLayout());
+        pnlHeader.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 2, 0, UIThemeConfig.ACCENT),
+                new EmptyBorder(18, 28, 18, 28)));
 
-        JPanel pnlForm = UITheme.createCard();
-        pnlForm.setLayout(new GridLayout(7, 4, 12, 8));
-        pnlForm.setBorder(BorderFactory.createEmptyBorder(10, 25, 10, 25));
+        JLabel lblTitle = UIThemeConfig.createTitleLabel("ADD NEW PRODUCT");
+        lblTitle.setForeground(UIThemeConfig.ACCENT);
 
-        txtLoaiMay   = UITheme.createTextField(); txtTenSP     = UITheme.createTextField();
-        txtCPU       = UITheme.createTextField(); txtGPU       = UITheme.createTextField();
-        txtRAM       = UITheme.createTextField(); txtOCung     = UITheme.createTextField();
-        txtCanNang   = UITheme.createTextField(); txtKTManHinh = UITheme.createTextField();
-        txtDPGiaiMH  = UITheme.createTextField(); txtSoLuong   = UITheme.createTextField();
-        txtGiaBan    = UITheme.createTextField(); txtGiaNhap   = UITheme.createTextField();
-        txtBaoHanh   = UITheme.createTextField();
+        JLabel lblSub = UIThemeConfig.createLabel("Fill in all fields below to add a new laptop to inventory.");
+        lblSub.setForeground(UIThemeConfig.TEXT_MUTED);
 
-        pnlForm.add(UITheme.createLabel("Type:"));            pnlForm.add(txtLoaiMay);
-        pnlForm.add(UITheme.createLabel("Screen Size:"));     pnlForm.add(txtKTManHinh);
-        pnlForm.add(UITheme.createLabel("Product Name:"));    pnlForm.add(txtTenSP);
-        pnlForm.add(UITheme.createLabel("Resolution:"));      pnlForm.add(txtDPGiaiMH);
-        pnlForm.add(UITheme.createLabel("CPU:"));             pnlForm.add(txtCPU);
-        pnlForm.add(UITheme.createLabel("Stock Qty:"));       pnlForm.add(txtSoLuong);
-        pnlForm.add(UITheme.createLabel("GPU:"));             pnlForm.add(txtGPU);
-        pnlForm.add(UITheme.createLabel("Sale Price:"));      pnlForm.add(txtGiaBan);
-        pnlForm.add(UITheme.createLabel("RAM (GB):"));        pnlForm.add(txtRAM);
-        pnlForm.add(UITheme.createLabel("Import Price:"));    pnlForm.add(txtGiaNhap);
-        pnlForm.add(UITheme.createLabel("Storage:"));         pnlForm.add(txtOCung);
-        pnlForm.add(UITheme.createLabel("Warranty (months):")); pnlForm.add(txtBaoHanh);
-        pnlForm.add(UITheme.createLabel("Weight (kg):"));     pnlForm.add(txtCanNang);
-        pnlForm.add(new JLabel()); pnlForm.add(new JLabel()); // spacer
-        add(pnlForm, BorderLayout.CENTER);
+        JPanel pnlHeaderText = new JPanel();
+        pnlHeaderText.setOpaque(false);
+        pnlHeaderText.setLayout(new BoxLayout(pnlHeaderText, BoxLayout.Y_AXIS));
+        pnlHeaderText.add(lblTitle);
+        pnlHeaderText.add(Box.createRigidArea(new Dimension(0, 4)));
+        pnlHeaderText.add(lblSub);
 
-        JPanel pnlBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        pnlBtns.setBackground(UITheme.BG_DARK);
-        btnThem  = UITheme.createSuccessButton("Add Product");
-        btnClear = UITheme.createDangerButton("Clear");
-        pnlBtns.add(btnThem); pnlBtns.add(btnClear);
+        pnlHeader.add(pnlHeaderText, BorderLayout.WEST);
+        add(pnlHeader, BorderLayout.NORTH);
+
+        // ── FORM ──
+        JPanel pnlWrap = new JPanel(new GridBagLayout());
+        pnlWrap.setBackground(UIThemeConfig.BG_DARK);
+        pnlWrap.setBorder(new EmptyBorder(24, 32, 16, 32));
+
+        JPanel pnlForm = UIThemeConfig.createGlassPanel(new GridBagLayout());
+        pnlForm.setBorder(new EmptyBorder(20, 24, 20, 24));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(7, 8, 7, 8);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        txtLoaiMay = UIThemeConfig.createTextField();
+        txtTenSP = UIThemeConfig.createTextField();
+        txtCPU = UIThemeConfig.createTextField();
+        txtGPU = UIThemeConfig.createTextField();
+        txtRAM = UIThemeConfig.createTextField();
+        txtOCung = UIThemeConfig.createTextField();
+        txtCanNang = UIThemeConfig.createTextField();
+        txtKTManHinh = UIThemeConfig.createTextField();
+        txtDPGiaiMH = UIThemeConfig.createTextField();
+        txtSoLuong = UIThemeConfig.createTextField();
+        txtGiaBan = UIThemeConfig.createTextField();
+        txtGiaNhap = UIThemeConfig.createTextField();
+        txtBaoHanh = UIThemeConfig.createTextField();
+
+        // Chia 2 cột, 7 hàng
+        Object[][] rows = {
+                { "Type:", txtLoaiMay, "Screen Size:", txtKTManHinh },
+                { "Product Name:", txtTenSP, "Resolution:", txtDPGiaiMH },
+                { "CPU:", txtCPU, "Stock Qty:", txtSoLuong },
+                { "GPU:", txtGPU, "Sale Price (VND):", txtGiaBan },
+                { "RAM (GB):", txtRAM, "Import Price:", txtGiaNhap },
+                { "Storage:", txtOCung, "Warranty (months):", txtBaoHanh },
+                { "Weight (kg):", txtCanNang, null, null },
+        };
+
+        for (int r = 0; r < rows.length; r++) {
+            // col A — label
+            gbc.gridy = r;
+            gbc.gridx = 0;
+            gbc.weightx = 0;
+            JLabel lA = UIThemeConfig.createLabel((String) rows[r][0]);
+            lA.setPreferredSize(new Dimension(135, 26));
+            pnlForm.add(lA, gbc);
+            // col A — field
+            gbc.gridx = 1;
+            gbc.weightx = 1;
+            pnlForm.add((Component) rows[r][1], gbc);
+
+            if (rows[r][2] != null) {
+                // col B — label
+                gbc.gridx = 2;
+                gbc.weightx = 0;
+                JLabel lB = UIThemeConfig.createLabel((String) rows[r][2]);
+                lB.setPreferredSize(new Dimension(145, 26));
+                pnlForm.add(lB, gbc);
+                // col B — field
+                gbc.gridx = 3;
+                gbc.weightx = 1;
+                pnlForm.add((Component) rows[r][3], gbc);
+            }
+        }
+
+        GridBagConstraints wgbc = new GridBagConstraints();
+        wgbc.fill = GridBagConstraints.BOTH;
+        wgbc.weightx = 1;
+        wgbc.weighty = 1;
+        pnlWrap.add(pnlForm, wgbc);
+        add(pnlWrap, BorderLayout.CENTER);
+
+        // ── BUTTONS ──
+        JPanel pnlBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 14));
+        pnlBtns.setBackground(UIThemeConfig.BG_DARK);
+        pnlBtns.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 0, 0, 0, UIThemeConfig.BORDER),
+                new EmptyBorder(4, 24, 4, 24)));
+
+        btnClear = UIThemeConfig.createButton("Clear", UIThemeConfig.ACCENT_YELLOW);
+        btnThem = UIThemeConfig.createSuccessButton("Add Product");
+        btnThem.setPreferredSize(new Dimension(150, 36));
+
+        pnlBtns.add(btnClear);
+        pnlBtns.add(btnThem);
         add(pnlBtns, BorderLayout.SOUTH);
-
-        controller = new ThemSanPhamController(new SanPhamDAOImpl(), this);
     }
 }

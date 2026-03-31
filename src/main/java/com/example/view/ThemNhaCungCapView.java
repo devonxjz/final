@@ -1,48 +1,94 @@
 package com.example.view;
 
-import com.example.config.UITheme;
-import com.example.controller.ThemNhaCungCapController;
-import com.example.dao.impl.NhaCungCapDAOImpl;
+import com.example.config.UIThemeConfig;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-public class ThemNhaCungCapView extends JFrame {
+/**
+ * Form thêm nhà cung cấp — nhúng vào ContentPanel, không mở cửa sổ mới.
+ */
+public class ThemNhaCungCapView extends JPanel {
+
     public JTextField txtTenNCC, txtSDT, txtDiaChi;
     public JButton btnThem, btnClear;
-    private ThemNhaCungCapController controller;
 
     public ThemNhaCungCapView() {
-        setTitle("Add New Supplier");
-        setSize(600, 280);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        getContentPane().setBackground(UITheme.BG_DARK);
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout(0, 0));
+        setBackground(UIThemeConfig.BG_DARK);
 
-        JLabel lblTitle = UITheme.createTitleLabel("ADD NEW SUPPLIER");
-        lblTitle.setForeground(UITheme.ACCENT);
-        lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        lblTitle.setBorder(BorderFactory.createEmptyBorder(15, 0, 5, 0));
-        add(lblTitle, BorderLayout.NORTH);
+        // ── HEADER ──
+        JPanel pnlHeader = UIThemeConfig.createGlassPanel(new BorderLayout());
+        pnlHeader.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 2, 0, UIThemeConfig.ACCENT),
+                new EmptyBorder(18, 28, 18, 28)));
 
-        JPanel pnlForm = UITheme.createCard();
-        pnlForm.setLayout(new GridLayout(3, 2, 15, 10));
-        pnlForm.setBorder(BorderFactory.createEmptyBorder(10, 30, 10, 30));
-        txtTenNCC = UITheme.createTextField();
-        txtSDT    = UITheme.createTextField();
-        txtDiaChi = UITheme.createTextField();
-        pnlForm.add(UITheme.createLabel("Supplier Name:")); pnlForm.add(txtTenNCC);
-        pnlForm.add(UITheme.createLabel("Phone:"));        pnlForm.add(txtSDT);
-        pnlForm.add(UITheme.createLabel("Address:"));      pnlForm.add(txtDiaChi);
-        add(pnlForm, BorderLayout.CENTER);
+        JLabel lblTitle = UIThemeConfig.createTitleLabel("ADD NEW SUPPLIER");
+        lblTitle.setForeground(UIThemeConfig.ACCENT);
+        JLabel lblSub = UIThemeConfig.createLabel("Register a new supplier for procurement.");
+        lblSub.setForeground(UIThemeConfig.TEXT_MUTED);
 
-        JPanel pnlBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        pnlBtns.setBackground(UITheme.BG_DARK);
-        btnThem  = UITheme.createSuccessButton("Add");
-        btnClear = UITheme.createDangerButton("Clear");
-        pnlBtns.add(btnThem); pnlBtns.add(btnClear);
+        JPanel pnlHeaderText = new JPanel();
+        pnlHeaderText.setOpaque(false);
+        pnlHeaderText.setLayout(new BoxLayout(pnlHeaderText, BoxLayout.Y_AXIS));
+        pnlHeaderText.add(lblTitle);
+        pnlHeaderText.add(Box.createRigidArea(new Dimension(0, 4)));
+        pnlHeaderText.add(lblSub);
+        pnlHeader.add(pnlHeaderText, BorderLayout.WEST);
+        add(pnlHeader, BorderLayout.NORTH);
+
+        // ── FORM (giữa màn hình, compact) ──
+        JPanel pnlWrap = new JPanel(new GridBagLayout());
+        pnlWrap.setBackground(UIThemeConfig.BG_DARK);
+        pnlWrap.setBorder(new EmptyBorder(40, 0, 20, 0));
+
+        JPanel pnlForm = UIThemeConfig.createGlassPanel(new GridBagLayout());
+        pnlForm.setBorder(new EmptyBorder(28, 32, 28, 32));
+        pnlForm.setPreferredSize(new Dimension(520, 0));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(9, 8, 9, 8);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        txtTenNCC = UIThemeConfig.createTextField();
+        txtSDT = UIThemeConfig.createTextField();
+        txtDiaChi = UIThemeConfig.createTextField();
+
+        String[] labels = { "Supplier Name:", "Phone:", "Address:" };
+        JTextField[] fields = { txtTenNCC, txtSDT, txtDiaChi };
+
+        for (int i = 0; i < labels.length; i++) {
+            gbc.gridy = i;
+            gbc.gridx = 0;
+            gbc.weightx = 0;
+            JLabel lbl = UIThemeConfig.createLabel(labels[i]);
+            lbl.setPreferredSize(new Dimension(130, 26));
+            lbl.setFont(UIThemeConfig.FONT_BODY);
+            pnlForm.add(lbl, gbc);
+
+            gbc.gridx = 1;
+            gbc.weightx = 1;
+            fields[i].setPreferredSize(new Dimension(280, 32));
+            pnlForm.add(fields[i], gbc);
+        }
+
+        GridBagConstraints wgbc = new GridBagConstraints();
+        pnlWrap.add(pnlForm, wgbc);
+        add(pnlWrap, BorderLayout.CENTER);
+
+        // ── BUTTONS ──
+        JPanel pnlBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 14));
+        pnlBtns.setBackground(UIThemeConfig.BG_DARK);
+        pnlBtns.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 0, 0, 0, UIThemeConfig.BORDER),
+                new EmptyBorder(4, 24, 4, 24)));
+
+        btnClear = UIThemeConfig.createButton("Clear", UIThemeConfig.ACCENT_YELLOW);
+        btnThem = UIThemeConfig.createSuccessButton("Add Supplier");
+        btnThem.setPreferredSize(new Dimension(150, 36));
+
+        pnlBtns.add(btnClear);
+        pnlBtns.add(btnThem);
         add(pnlBtns, BorderLayout.SOUTH);
-
-        controller = new ThemNhaCungCapController(new NhaCungCapDAOImpl(), this);
     }
 }

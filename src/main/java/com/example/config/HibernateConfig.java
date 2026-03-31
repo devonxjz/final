@@ -8,7 +8,7 @@ import jakarta.persistence.Persistence;
  * Lớp tiện ích quản lý EntityManagerFactory cho Hibernate/JPA.
  * Sử dụng persistence-unit "LaptopPU" được cấu hình trong persistence.xml.
  */
-public class HibernateUtil {
+public class HibernateConfig {
     private static final String PERSISTENCE_UNIT_NAME = "LaptopPU";
     private static EntityManagerFactory factory;
 

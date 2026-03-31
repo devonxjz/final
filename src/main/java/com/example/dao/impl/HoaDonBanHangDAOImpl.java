@@ -1,6 +1,6 @@
 package com.example.dao.impl;
 
-import com.example.config.HibernateUtil;
+import com.example.config.HibernateConfig;
 import com.example.dao.HoaDonBanHangDAO;
 import com.example.entity.*;
 
@@ -14,26 +14,26 @@ public class HoaDonBanHangDAOImpl implements HoaDonBanHangDAO {
 
     @Override
     public List<HoaDonBanHang> getAllHDBH() {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             return em.createQuery("SELECT hd FROM HoaDonBanHang hd", HoaDonBanHang.class).getResultList();
         }
     }
 
     @Override
     public HoaDonBanHang getById(int maHD) {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             return em.find(HoaDonBanHang.class, maHD);
         }
     }
 
     @Override
     public boolean saveHoaDonFull(HoaDonBanHang hd) {
-        EntityManager em = HibernateUtil.getEntityManager();
+        EntityManager em = HibernateConfig.getEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
             em.persist(hd);
-            
+
             if (hd.getDanhSachChiTiet() != null) {
                 for (var ct : hd.getDanhSachChiTiet()) {
                     var sp = ct.getSanPham();
@@ -54,7 +54,7 @@ public class HoaDonBanHangDAOImpl implements HoaDonBanHangDAO {
 
     @Override
     public List<HoaDonBanHang> timKiemTheoTrangThai(String keyword) {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             TypedQuery<HoaDonBanHang> q = em.createQuery("SELECT hd FROM HoaDonBanHang hd WHERE hd.trangThai LIKE :kw", HoaDonBanHang.class);
             q.setParameter("kw", "%" + keyword + "%");
             return q.getResultList();
@@ -63,7 +63,7 @@ public class HoaDonBanHangDAOImpl implements HoaDonBanHangDAO {
 
     @Override
     public List<HoaDonBanHang> timKiem(java.util.Date date) {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             TypedQuery<HoaDonBanHang> q = em.createQuery("SELECT hd FROM HoaDonBanHang hd WHERE FUNC('DATE', hd.ngayTao) = FUNC('DATE', :dt)", HoaDonBanHang.class);
             q.setParameter("dt", date);
             return q.getResultList();
@@ -72,7 +72,7 @@ public class HoaDonBanHangDAOImpl implements HoaDonBanHangDAO {
 
     @Override
     public List<ChiTietHDBH> getAllChiTiet(int maHD) {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             HoaDonBanHang hd = em.find(HoaDonBanHang.class, maHD);
             if (hd != null) {
                 hd.getDanhSachChiTiet().size();
@@ -84,7 +84,7 @@ public class HoaDonBanHangDAOImpl implements HoaDonBanHangDAO {
 
     @Override
     public List<ThanhToan> getAllThanhToan(int maHD) {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             HoaDonBanHang hd = em.find(HoaDonBanHang.class, maHD);
             if (hd != null) {
                 hd.getDanhSachThanhToan().size();
@@ -96,7 +96,7 @@ public class HoaDonBanHangDAOImpl implements HoaDonBanHangDAO {
 
     @Override
     public KhachHang timKiemKhachHangTheoSDT(String sdt) {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             TypedQuery<KhachHang> q = em.createQuery("SELECT k FROM KhachHang k WHERE k.sdt = :sdt", KhachHang.class);
             q.setParameter("sdt", sdt);
             List<KhachHang> list = q.getResultList();
@@ -106,7 +106,7 @@ public class HoaDonBanHangDAOImpl implements HoaDonBanHangDAO {
 
     @Override
     public List<SanPham> getAllSanPham() {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             return em.createQuery("SELECT sp FROM SanPham sp", SanPham.class).getResultList();
         }
     }
@@ -115,7 +115,7 @@ public class HoaDonBanHangDAOImpl implements HoaDonBanHangDAO {
     public boolean themHoaDonVaChiTietVaThanhToan(java.util.Date ngayTao, String loaiHD, double tongTien, int maKH,
             List<Map<Integer, Integer>> gioHang, String tenKH, String sdt, String diaChi,
             String gioiTinh, String hinhThucTT, String trangThai) {
-        EntityManager em = HibernateUtil.getEntityManager();
+        EntityManager em = HibernateConfig.getEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();

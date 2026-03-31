@@ -4,7 +4,7 @@ import com.example.dao.KhachHangDAO;
 import com.example.dao.impl.KhachHangDAOImpl;
 import com.example.dto.KhachHangDTO;
 import com.example.entity.KhachHang;
-import com.example.services.IKhachHangService;
+import com.example.services.KhachHangService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 /**
  * Triển khai IKhachHangService — Xử lý nghiệp vụ Khách Hàng
  */
-public class KhachHangServiceImpl implements IKhachHangService {
+public class KhachHangServiceImpl implements KhachHangService {
     private final KhachHangDAO dao;
 
     public KhachHangServiceImpl() {
@@ -36,7 +36,9 @@ public class KhachHangServiceImpl implements IKhachHangService {
         KhachHang entity = new KhachHang();
         entity.setTenKH(dto.tenKH()); entity.setGioiTinh(dto.gioiTinh());
         entity.setDiaChi(dto.diaChi()); entity.setSdt(dto.sdt()); entity.setEmail(dto.email());
-        return dao.insert(entity);
+        boolean success = dao.insert(entity);
+        if (!success) throw new com.example.exception.ServiceException("Thêm khách hàng thất bại (Lỗi CSDL)");
+        return true;
     }
 
     @Override
@@ -45,13 +47,17 @@ public class KhachHangServiceImpl implements IKhachHangService {
         if (entity == null) return false;
         entity.setTenKH(dto.tenKH()); entity.setGioiTinh(dto.gioiTinh());
         entity.setDiaChi(dto.diaChi()); entity.setSdt(dto.sdt()); entity.setEmail(dto.email());
-        return dao.update(entity);
+        boolean success = dao.update(entity);
+        if (!success) throw new com.example.exception.ServiceException("Cập nhật khách hàng thất bại (Lỗi CSDL)");
+        return true;
     }
 
     @Override
     public boolean deleteKhachHang(Integer maKH) {
-        if (dao.hasInvoices(maKH)) return false;
-        return dao.delete(maKH);
+        if (dao.hasInvoices(maKH)) throw new com.example.exception.ServiceException("Không thể xóa khách hàng đã có lịch sử đơn hàng!");
+        boolean success = dao.delete(maKH);
+        if (!success) throw new com.example.exception.ServiceException("Xóa khách hàng thất bại (Lỗi CSDL)");
+        return true;
     }
 
     @Override

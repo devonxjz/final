@@ -2,7 +2,7 @@ USE QLNVBCHLapTop;
 
 
 -- =============================================
--- 1. NHÀ CUNG CẤP (20 records)
+-- 1. NHÀ CUNG CẤP
 -- =============================================
 INSERT INTO NhaCungCap (TenNCC, DiaChi, SDT) VALUES
 ('Asus Việt Nam', 'Q1, TP.HCM', '02839111222'),
@@ -27,7 +27,7 @@ INSERT INTO NhaCungCap (TenNCC, DiaChi, SDT) VALUES
 ('AMD Vietnam', 'Thủ Đức, TP.HCM', '02839001122');
 
 -- =============================================
--- 2. KHÁCH HÀNG (30 records)
+-- 2. KHÁCH HÀNG
 -- =============================================
 INSERT INTO KhachHang (TenKH, GioiTinh, DiaChi, SDT, Email) VALUES
 ('Nguyễn Văn An', 'Nam', 'Thủ Đức, TP.HCM', '0901000001', 'an.nv@gmail.com'),
@@ -62,7 +62,7 @@ INSERT INTO KhachHang (TenKH, GioiTinh, DiaChi, SDT, Email) VALUES
 ('Lương Thị Trang', 'Nữ', 'Ninh Kiều, Cần Thơ', '0901000030', 'trang.lt@gmail.com');
 
 -- =============================================
--- 3. SẢN PHẨM (30 records) - đầy đủ cấu hình
+-- 3. SẢN PHẨM
 -- =============================================
 INSERT INTO SanPham (LoaiMay, TenSP, CPU, GPU, RAM, OCung, KichThuocMH, DoPhanGiaiMH, CanNang, SLTrongKho, GiaBan, GiaNhap, ThoiGianBaoHanh, MaNCC) VALUES
 ('Gaming', 'Asus ROG Strix G16', 'Intel i7-13650HX', 'RTX 4060 8GB', 16, 'SSD 512GB', 16.0, '1920x1200', 2.5, 15, 32990000, 28000000, 24, 1),
@@ -97,7 +97,7 @@ INSERT INTO SanPham (LoaiMay, TenSP, CPU, GPU, RAM, OCung, KichThuocMH, DoPhanGi
 ('Ultrabook', 'Xiaomi Book Pro 14', 'Intel i5-1240P', 'Intel Iris Xe', 16, 'SSD 512GB', 14.0, '2880x1800', 1.4, 11, 19990000, 16000000, 12, 13);
 
 -- =============================================
--- 4. HÓA ĐƠN BÁN HÀNG (25 records)
+-- 4. HÓA ĐƠN BÁN HÀNG
 -- =============================================
 INSERT INTO HoaDonBanHang (NgayTao, LoaiHD, TongTien, TienCoc, LaiSuat, ThoiHanTG, TienGopHangThang, SoTienConLai, TrangThai) VALUES
 ('2025-10-05', 'Trả thẳng', 32990000, 32990000, 0, 0, 0, 0, 'Đã thanh toán'),
@@ -127,7 +127,7 @@ INSERT INTO HoaDonBanHang (NgayTao, LoaiHD, TongTien, TienCoc, LaiSuat, ThoiHanT
 ('2026-03-25', 'Trả thẳng', 13990000, 13990000, 0, 0, 0, 0, 'Đã thanh toán');
 
 -- =============================================
--- 5. CHI TIẾT HÓA ĐƠN (30 records)
+-- 5. CHI TIẾT HÓA ĐƠN 
 -- =============================================
 INSERT INTO ChiTietHDBH (MaHDBH, MaSP, SoLuong, TongTien) VALUES
 (1, 1, 1, 32990000),
@@ -158,7 +158,7 @@ INSERT INTO ChiTietHDBH (MaHDBH, MaSP, SoLuong, TongTien) VALUES
 (25, 22, 1, 13990000);
 
 -- =============================================
--- 6. THANH TOÁN (30 records)
+-- 6. THANH TOÁN
 -- =============================================
 INSERT INTO ThanhToan (MaHDBH, MaKH, NgayTT, TienThanhToan, HinhThucTT) VALUES
 (1, 1, '2025-10-05', 32990000, 'Tiền mặt'),

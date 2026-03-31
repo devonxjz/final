@@ -1,7 +1,6 @@
 package com.example.controller;
 
 import com.example.dao.NhaCungCapDAO;
-import com.example.entity.NhaCungCap;
 import com.example.view.ThemNhaCungCapView;
 import com.example.util.InputValidator;
 import com.example.util.ValidationResult;

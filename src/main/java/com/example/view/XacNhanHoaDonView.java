@@ -1,70 +1,100 @@
 package com.example.view;
 
-import com.example.config.UITheme;
+import com.example.config.UIThemeConfig;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-public class XacNhanHoaDonView extends JFrame {
+/**
+ * Xác nhận hóa đơn — nhúng vào ContentPanel, không mở cửa sổ mới.
+ */
+public class XacNhanHoaDonView extends JPanel {
+
     public JTextArea txtThongTinHoaDon;
     public JTable tableSanPham;
     public JButton btnXacNhan;
     public JButton btnHuy;
 
     public XacNhanHoaDonView() {
-        setTitle("Xác nhận hóa đơn bán hàng");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(600, 500);
-        setLocationRelativeTo(null);
-        getContentPane().setBackground(UITheme.BG_DARK);
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout(0, 0));
+        setBackground(UIThemeConfig.BG_DARK);
 
-        // Title
-        JLabel lblTitle = UITheme.createTitleLabel("XÁC NHẬN HÓA ĐƠN");
-        lblTitle.setForeground(UITheme.ACCENT);
-        lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        lblTitle.setBorder(BorderFactory.createEmptyBorder(12, 0, 5, 0));
-        add(lblTitle, BorderLayout.NORTH);
+        // ── HEADER ──
+        JPanel pnlHeader = UIThemeConfig.createGlassPanel(new BorderLayout());
+        pnlHeader.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 2, 0, UIThemeConfig.ACCENT),
+                new EmptyBorder(16, 26, 16, 26)));
 
-        // Center: Info + Table
-        JPanel pnlCenter = new JPanel(new BorderLayout(5, 8));
-        pnlCenter.setBackground(UITheme.BG_DARK);
-        pnlCenter.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
+        JLabel lblTitle = UIThemeConfig.createTitleLabel("CONFIRM SALES ORDER");
+        lblTitle.setForeground(UIThemeConfig.ACCENT);
+        JLabel lblSub = UIThemeConfig.createLabel("Review the order details before confirming.");
+        lblSub.setForeground(UIThemeConfig.TEXT_MUTED);
 
-        JPanel pnlInfo = new JPanel(new BorderLayout());
-        pnlInfo.setBackground(UITheme.BG_CARD);
-        pnlInfo.setPreferredSize(new Dimension(0, 160));
-        JLabel lblInfo = UITheme.createLabel("Thông tin hóa đơn:");
-        lblInfo.setFont(UITheme.FONT_SUBTITLE); lblInfo.setForeground(UITheme.ACCENT);
-        lblInfo.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 0));
+        JPanel pnlHdrText = new JPanel();
+        pnlHdrText.setOpaque(false);
+        pnlHdrText.setLayout(new BoxLayout(pnlHdrText, BoxLayout.Y_AXIS));
+        pnlHdrText.add(lblTitle);
+        pnlHdrText.add(Box.createRigidArea(new Dimension(0, 3)));
+        pnlHdrText.add(lblSub);
+        pnlHeader.add(pnlHdrText, BorderLayout.WEST);
+        add(pnlHeader, BorderLayout.NORTH);
+
+        // ── CENTER ──
+        JPanel pnlCenter = new JPanel(new BorderLayout(0, 12));
+        pnlCenter.setBackground(UIThemeConfig.BG_DARK);
+        pnlCenter.setBorder(new EmptyBorder(20, 24, 12, 24));
+
+        // Info section
+        JPanel pnlInfo = UIThemeConfig.createGlassPanel(new BorderLayout());
+        pnlInfo.setBorder(new EmptyBorder(10, 14, 10, 14));
+        pnlInfo.setPreferredSize(new Dimension(0, 170));
+
+        JLabel lblInfo = UIThemeConfig.createLabel("Order Information");
+        lblInfo.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblInfo.setForeground(UIThemeConfig.ACCENT);
+        lblInfo.setBorder(new EmptyBorder(0, 0, 6, 0));
         pnlInfo.add(lblInfo, BorderLayout.NORTH);
+
         txtThongTinHoaDon = new JTextArea();
         txtThongTinHoaDon.setEditable(false);
-        txtThongTinHoaDon.setFont(UITheme.FONT_BODY);
-        txtThongTinHoaDon.setBackground(UITheme.BG_CARD);
-        txtThongTinHoaDon.setForeground(UITheme.TEXT_PRIMARY);
+        txtThongTinHoaDon.setFont(UIThemeConfig.FONT_BODY);
+        txtThongTinHoaDon.setBackground(UIThemeConfig.BG_CARD);
+        txtThongTinHoaDon.setForeground(UIThemeConfig.TEXT_PRIMARY);
+        txtThongTinHoaDon.setLineWrap(true);
+        txtThongTinHoaDon.setWrapStyleWord(true);
         pnlInfo.add(new JScrollPane(txtThongTinHoaDon), BorderLayout.CENTER);
         pnlCenter.add(pnlInfo, BorderLayout.NORTH);
 
-        JPanel pnlTable = new JPanel(new BorderLayout());
-        pnlTable.setBackground(UITheme.BG_CARD);
-        JLabel lblSP = UITheme.createLabel("Danh sách sản phẩm:");
-        lblSP.setFont(UITheme.FONT_SUBTITLE); lblSP.setForeground(UITheme.ACCENT);
-        lblSP.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 0));
+        // Table section
+        JPanel pnlTable = UIThemeConfig.createGlassPanel(new BorderLayout());
+        pnlTable.setBorder(new EmptyBorder(10, 14, 10, 14));
+
+        JLabel lblSP = UIThemeConfig.createLabel("Products in Order");
+        lblSP.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblSP.setForeground(UIThemeConfig.ACCENT_YELLOW);
+        lblSP.setBorder(new EmptyBorder(0, 0, 6, 0));
         pnlTable.add(lblSP, BorderLayout.NORTH);
-        tableSanPham = new JTable(); UITheme.styleTable(tableSanPham);
-        pnlTable.add(UITheme.createScrollPane(tableSanPham), BorderLayout.CENTER);
+
+        tableSanPham = new JTable();
+        UIThemeConfig.styleTable(tableSanPham);
+        pnlTable.add(UIThemeConfig.createScrollPane(tableSanPham), BorderLayout.CENTER);
         pnlCenter.add(pnlTable, BorderLayout.CENTER);
+
         add(pnlCenter, BorderLayout.CENTER);
 
-        // Buttons
-        JPanel pnlBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
-        pnlBtns.setBackground(UITheme.BG_DARK);
-        pnlBtns.setBorder(BorderFactory.createEmptyBorder(0, 15, 10, 15));
-        btnXacNhan = UITheme.createSuccessButton("Xác nhận");
-        btnHuy = UITheme.createDangerButton("Hủy");
-        pnlBtns.add(btnXacNhan); pnlBtns.add(btnHuy);
-        add(pnlBtns, BorderLayout.SOUTH);
+        // ── BUTTONS ──
+        JPanel pnlBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 12));
+        pnlBtns.setBackground(UIThemeConfig.BG_DARK);
+        pnlBtns.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(1, 0, 0, 0, UIThemeConfig.BORDER),
+                new EmptyBorder(4, 20, 4, 20)));
 
-        setVisible(true);
+        btnHuy = UIThemeConfig.createDangerButton("Cancel");
+        btnXacNhan = UIThemeConfig.createSuccessButton("Confirm Order");
+        btnXacNhan.setPreferredSize(new Dimension(160, 36));
+
+        pnlBtns.add(btnHuy);
+        pnlBtns.add(btnXacNhan);
+        add(pnlBtns, BorderLayout.SOUTH);
     }
 }

@@ -1,7 +1,7 @@
 package com.example;
 
-import com.example.config.HibernateUtil;
-import com.example.config.UITheme;
+import com.example.config.HibernateConfig;
+import com.example.config.UIThemeConfig;
 import com.example.view.HomeView;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -30,14 +30,18 @@ public class Main {
                 setGlobalFont(new Font("Segoe UI", Font.PLAIN, 13));
 
                 // 3. Apply Dark Mode theme
-                UITheme.applyGlobalTheme();
+                UIThemeConfig.applyGlobalTheme();
 
                 // 4. Initialize Hibernate/JPA connection pool
                 System.out.println("Connecting to Database via Hibernate JPA...");
-                HibernateUtil.getEntityManager().close();
+                HibernateConfig.getEntityManager().close();
                 System.out.println("Database connection successful!");
 
-                // 5. Open main UI
+                // 5. Initialize Dependency Injection container
+                com.example.config.AppConfig.initialize();
+                System.out.println("AppConfig initialized.");
+
+                // 6. Open main UI
                 new HomeView();
 
             } catch (Exception ex) {

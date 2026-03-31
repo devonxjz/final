@@ -1,26 +1,26 @@
 package com.example.dao.impl;
 
-import com.example.config.HibernateUtil;
+import com.example.config.HibernateConfig;
 import com.example.dao.NhaCungCapDAO;
 import com.example.entity.NhaCungCap;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.TypedQuery;
+
 import java.util.List;
 
 public class NhaCungCapDAOImpl implements NhaCungCapDAO {
 
     @Override
     public List<NhaCungCap> getAllNhaCungCap() {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             return em.createQuery("SELECT n FROM NhaCungCap n", NhaCungCap.class).getResultList();
         }
     }
 
     @Override
     public boolean themNhaCungCap(String tenNCC, String diaChi, String sdt) {
-        EntityManager em = HibernateUtil.getEntityManager();
+        EntityManager em = HibernateConfig.getEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -42,7 +42,7 @@ public class NhaCungCapDAOImpl implements NhaCungCapDAO {
 
     @Override
     public boolean xoaNhaCungCap(int maNCC) {
-        EntityManager em = HibernateUtil.getEntityManager();
+        EntityManager em = HibernateConfig.getEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -63,7 +63,7 @@ public class NhaCungCapDAOImpl implements NhaCungCapDAO {
 
     @Override
     public boolean capNhatNhaCungCap(int maNCC, String tenNCC, String diaChi, String sdt) {
-        EntityManager em = HibernateUtil.getEntityManager();
+        EntityManager em = HibernateConfig.getEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -87,7 +87,7 @@ public class NhaCungCapDAOImpl implements NhaCungCapDAO {
 
     @Override
     public boolean kiemTraNhaCungCapDuocXoa(String maNCC) {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             String jpql = "SELECT COUNT(sp) FROM SanPham sp WHERE sp.nhaCungCap.maNCC = :maNCC";
             Long count = em.createQuery(jpql, Long.class)
                     .setParameter("maNCC", Integer.parseInt(maNCC))

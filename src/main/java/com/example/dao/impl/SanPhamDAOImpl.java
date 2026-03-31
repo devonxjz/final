@@ -1,6 +1,6 @@
 package com.example.dao.impl;
 
-import com.example.config.HibernateUtil;
+import com.example.config.HibernateConfig;
 import com.example.dao.SanPhamDAO;
 import com.example.entity.SanPham;
 
@@ -13,21 +13,21 @@ public class SanPhamDAOImpl implements SanPhamDAO {
 
     @Override
     public List<SanPham> getAllSanPham() {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             return em.createQuery("SELECT s FROM SanPham s LEFT JOIN FETCH s.nhaCungCap", SanPham.class).getResultList();
         }
     }
 
     @Override
     public SanPham getById(int maSP) {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             return em.find(SanPham.class, maSP);
         }
     }
 
     @Override
     public boolean insertOrUpdate(SanPham sp) {
-        EntityManager em = HibernateUtil.getEntityManager();
+        EntityManager em = HibernateConfig.getEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -49,7 +49,7 @@ public class SanPhamDAOImpl implements SanPhamDAO {
 
     @Override
     public boolean xoaSanPham(int maSP) {
-        EntityManager em = HibernateUtil.getEntityManager();
+        EntityManager em = HibernateConfig.getEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -73,7 +73,7 @@ public class SanPhamDAOImpl implements SanPhamDAO {
         if (keyword == null || keyword.trim().isEmpty()) {
             return getAllSanPham();
         }
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             String jpql = "SELECT s FROM SanPham s LEFT JOIN FETCH s.nhaCungCap WHERE UPPER(s.tenSP) LIKE UPPER(:keyword)";
             TypedQuery<SanPham> query = em.createQuery(jpql, SanPham.class);
             query.setParameter("keyword", "%" + keyword + "%");

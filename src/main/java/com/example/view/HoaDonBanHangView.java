@@ -1,90 +1,85 @@
 package com.example.view;
 
-import com.example.config.UITheme;
+import com.example.config.UIThemeConfig;
 import com.toedter.calendar.JDateChooser;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-public class HoaDonBanHangView extends JFrame {
+/**
+ * HoaDonBanHangView — Sales order management (Glassmorphism dark mode).
+ */
+public class HoaDonBanHangView extends JPanel {
     public JDateChooser dateChooser;
     public JButton btnTimKiem, btnThem, btnReload;
     public JTable tableDsHDBH, tableChiTietHD, tableThanhToan;
 
     public HoaDonBanHangView() {
-        setTitle("Sales Order Management");
-        setSize(1000, 700);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-        getContentPane().setBackground(UITheme.BG_DARK);
+        setBackground(UIThemeConfig.BG_DARK);
         setLayout(new BorderLayout(8, 8));
+        setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        // Header
-        JPanel pnlHeader = new JPanel(new BorderLayout(10, 0));
-        pnlHeader.setBackground(UITheme.BG_DARK);
-        pnlHeader.setBorder(BorderFactory.createEmptyBorder(12, 20, 5, 20));
+        // ── Header ──
+        JPanel pnlHeader = UIThemeConfig.createGlassPanel(new BorderLayout(10, 0));
+        pnlHeader.setBorder(new EmptyBorder(12, 18, 12, 18));
 
-        JLabel lblTitle = UITheme.createTitleLabel("SALES ORDER MANAGEMENT");
-        lblTitle.setForeground(UITheme.ACCENT);
-        lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        pnlHeader.add(lblTitle, BorderLayout.CENTER);
+        JLabel lblTitle = new JLabel("Sales Order Management");
+        lblTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblTitle.setForeground(UIThemeConfig.TEXT_PRIMARY);
 
-        JPanel pnlTop = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
-        pnlTop.setBackground(UITheme.BG_DARK);
-        pnlTop.add(UITheme.createLabel("Select Date:"));
+        JPanel pnlTools = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        pnlTools.setOpaque(false);
+        pnlTools.add(UIThemeConfig.createLabel("Date:"));
         dateChooser = new JDateChooser();
         dateChooser.setDateFormatString("dd/MM/yyyy");
         dateChooser.setPreferredSize(new Dimension(130, 30));
-        pnlTop.add(dateChooser);
-        btnTimKiem = UITheme.createPrimaryButton("Search");
-        pnlTop.add(btnTimKiem);
-        btnThem = UITheme.createSuccessButton("+ Add Order");
-        pnlTop.add(btnThem);
+        dateChooser.setBackground(UIThemeConfig.BG_INPUT);
+        pnlTools.add(dateChooser);
+        btnTimKiem = UIThemeConfig.createPrimaryButton("Search");
+        pnlTools.add(btnTimKiem);
+        btnThem = UIThemeConfig.createSuccessButton("+ Add Order");
+        pnlTools.add(btnThem);
+        btnReload = UIThemeConfig.createButton("Reload", UIThemeConfig.ACCENT_YELLOW);
+        pnlTools.add(btnReload);
 
-        JPanel pnlNorth = new JPanel(new BorderLayout());
-        pnlNorth.setBackground(UITheme.BG_DARK);
-        pnlNorth.add(pnlHeader, BorderLayout.NORTH);
-        pnlNorth.add(pnlTop,    BorderLayout.SOUTH);
+        pnlHeader.add(lblTitle, BorderLayout.WEST);
+        pnlHeader.add(pnlTools, BorderLayout.EAST);
+        add(pnlHeader, BorderLayout.NORTH);
 
-        btnReload = UITheme.createButton("Reload", UITheme.ACCENT_YELLOW);
-        JPanel pnlReload = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        pnlReload.setBackground(UITheme.BG_DARK);
-        pnlReload.add(btnReload);
-        pnlNorth.add(pnlReload, BorderLayout.CENTER);
-
-        add(pnlNorth, BorderLayout.NORTH);
-
-        // Main table
+        // ── Main table ──
         tableDsHDBH = new JTable();
-        UITheme.styleTable(tableDsHDBH);
-        add(UITheme.createScrollPane(tableDsHDBH), BorderLayout.CENTER);
+        UIThemeConfig.styleTable(tableDsHDBH);
+        add(UIThemeConfig.createScrollPane(tableDsHDBH), BorderLayout.CENTER);
 
-        // Bottom: Order detail + Payment
+        // ── Bottom: Order detail + Payment ──
         JPanel pnlBottom = new JPanel(new GridLayout(1, 2, 10, 0));
-        pnlBottom.setBackground(UITheme.BG_DARK);
-        pnlBottom.setBorder(BorderFactory.createEmptyBorder(5, 15, 10, 15));
+        pnlBottom.setOpaque(false);
         pnlBottom.setPreferredSize(new Dimension(0, 200));
 
-        JPanel pnlChiTiet = new JPanel(new BorderLayout());
-        pnlChiTiet.setBackground(UITheme.BG_CARD);
-        JLabel lblCT = UITheme.createLabel("Order Details");
-        lblCT.setFont(UITheme.FONT_SUBTITLE); lblCT.setForeground(UITheme.ACCENT);
-        lblCT.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 0));
+        // Chi tiết
+        JPanel pnlChiTiet = UIThemeConfig.createGlassPanel(new BorderLayout());
+        pnlChiTiet.setBorder(new EmptyBorder(10, 12, 10, 12));
+        JLabel lblCT = new JLabel("Order Details");
+        lblCT.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblCT.setForeground(UIThemeConfig.ACCENT);
         pnlChiTiet.add(lblCT, BorderLayout.NORTH);
-        tableChiTietHD = new JTable(); UITheme.styleTable(tableChiTietHD);
-        pnlChiTiet.add(UITheme.createScrollPane(tableChiTietHD), BorderLayout.CENTER);
+        tableChiTietHD = new JTable();
+        UIThemeConfig.styleTable(tableChiTietHD);
+        pnlChiTiet.add(UIThemeConfig.createScrollPane(tableChiTietHD), BorderLayout.CENTER);
         pnlBottom.add(pnlChiTiet);
 
-        JPanel pnlTT = new JPanel(new BorderLayout());
-        pnlTT.setBackground(UITheme.BG_CARD);
-        JLabel lblTT = UITheme.createLabel("Payment");
-        lblTT.setFont(UITheme.FONT_SUBTITLE); lblTT.setForeground(UITheme.ACCENT);
-        lblTT.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 0));
+        // Thanh toán
+        JPanel pnlTT = UIThemeConfig.createGlassPanel(new BorderLayout());
+        pnlTT.setBorder(new EmptyBorder(10, 12, 10, 12));
+        JLabel lblTT = new JLabel("Payment");
+        lblTT.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblTT.setForeground(UIThemeConfig.ACCENT);
         pnlTT.add(lblTT, BorderLayout.NORTH);
-        tableThanhToan = new JTable(); UITheme.styleTable(tableThanhToan);
-        pnlTT.add(UITheme.createScrollPane(tableThanhToan), BorderLayout.CENTER);
+        tableThanhToan = new JTable();
+        UIThemeConfig.styleTable(tableThanhToan);
+        pnlTT.add(UIThemeConfig.createScrollPane(tableThanhToan), BorderLayout.CENTER);
         pnlBottom.add(pnlTT);
 
         add(pnlBottom, BorderLayout.SOUTH);
-        setVisible(true);
     }
 }

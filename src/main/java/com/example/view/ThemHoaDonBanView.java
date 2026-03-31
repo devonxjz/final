@@ -1,11 +1,16 @@
 package com.example.view;
 
-import com.example.config.UITheme;
+import com.example.config.UIThemeConfig;
 import com.toedter.calendar.JDateChooser;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-public class ThemHoaDonBanView extends JFrame {
+/**
+ * Form thêm hóa đơn bán hàng — nhúng vào ContentPanel, không mở cửa sổ mới.
+ */
+public class ThemHoaDonBanView extends JPanel {
+
     public JTextField txtTimKiem, txtSDT, txtTenKH, txtDiaChi, txtMaSP, txtTenSP, txtSoLuong, txtLaiSuat;
     public JComboBox<String> cbGioiTinh, cbLoaiHD, cbHinhThucTT;
     public JDateChooser dateChooser;
@@ -13,109 +18,198 @@ public class ThemHoaDonBanView extends JFrame {
     public JButton btnHuyChon, btnThem, btnXuatHoaDon;
 
     public ThemHoaDonBanView() {
-        setTitle("Thêm hoá đơn bán hàng");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(1050, 650);
-        setLocationRelativeTo(null);
-        getContentPane().setBackground(UITheme.BG_DARK);
-        setLayout(new BorderLayout(8, 8));
+        setLayout(new BorderLayout(0, 8));
+        setBackground(UIThemeConfig.BG_DARK);
 
-        // === HEADER ===
-        JPanel pnlHeader = new JPanel(new BorderLayout(10, 0));
-        pnlHeader.setBackground(UITheme.BG_DARK);
-        pnlHeader.setBorder(BorderFactory.createEmptyBorder(10, 15, 5, 15));
-        JLabel lblSearch = UITheme.createLabel("Tìm kiếm SP:");
-        lblSearch.setFont(UITheme.FONT_SUBTITLE);
-        txtTimKiem = UITheme.createTextField();
-        btnXuatHoaDon = UITheme.createSuccessButton("Xuất hóa đơn");
+        // ── HEADER ──
+        JPanel pnlHeader = UIThemeConfig.createGlassPanel(new BorderLayout(12, 0));
+        pnlHeader.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 2, 0, UIThemeConfig.ACCENT),
+                new EmptyBorder(12, 20, 12, 20)));
+
+        JLabel lblSearch = UIThemeConfig.createLabel("Search Product:");
+        lblSearch.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblSearch.setForeground(UIThemeConfig.TEXT_PRIMARY);
+        txtTimKiem = UIThemeConfig.createTextField();
+
+        btnXuatHoaDon = UIThemeConfig.createSuccessButton("Issue Invoice");
+        btnXuatHoaDon.setPreferredSize(new Dimension(150, 34));
+
         pnlHeader.add(lblSearch, BorderLayout.WEST);
         pnlHeader.add(txtTimKiem, BorderLayout.CENTER);
         pnlHeader.add(btnXuatHoaDon, BorderLayout.EAST);
         add(pnlHeader, BorderLayout.NORTH);
 
-        // === LEFT: Tables ===
-        JPanel pnlLeft = new JPanel(new BorderLayout(5, 5));
-        pnlLeft.setBackground(UITheme.BG_DARK);
-        pnlLeft.setPreferredSize(new Dimension(520, 0));
-        pnlLeft.setBorder(BorderFactory.createEmptyBorder(0, 15, 10, 5));
+        // ── BODY: LEFT (tables) + RIGHT (form) ──
+        JPanel pnlBody = new JPanel(new BorderLayout(10, 0));
+        pnlBody.setBackground(UIThemeConfig.BG_DARK);
+        pnlBody.setBorder(new EmptyBorder(8, 16, 8, 16));
 
-        tableSanPham = new JTable(); UITheme.styleTable(tableSanPham);
-        JScrollPane spSP = UITheme.createScrollPane(tableSanPham);
-        pnlLeft.add(spSP, BorderLayout.CENTER);
+        // LEFT — Product list + selected
+        JPanel pnlLeft = new JPanel(new BorderLayout(0, 8));
+        pnlLeft.setBackground(UIThemeConfig.BG_DARK);
+        pnlLeft.setPreferredSize(new Dimension(530, 0));
 
-        JPanel pnlChon = new JPanel(new BorderLayout(5, 2));
-        pnlChon.setBackground(UITheme.BG_DARK);
-        pnlChon.setPreferredSize(new Dimension(0, 180));
-        JPanel pnlChonHeader = new JPanel(new BorderLayout());
-        pnlChonHeader.setBackground(UITheme.BG_DARK);
-        JLabel lblChon = UITheme.createLabel("Sản phẩm đã chọn");
-        lblChon.setFont(UITheme.FONT_SUBTITLE); lblChon.setForeground(UITheme.ACCENT);
-        btnHuyChon = UITheme.createDangerButton("Hủy chọn");
+        JLabel lblCatalog = UIThemeConfig.createLabel("Product Catalog");
+        lblCatalog.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblCatalog.setForeground(UIThemeConfig.ACCENT);
+        lblCatalog.setBorder(new EmptyBorder(0, 2, 6, 0));
+
+        tableSanPham = new JTable();
+        UIThemeConfig.styleTable(tableSanPham);
+
+        JPanel pnlCatalog = new JPanel(new BorderLayout());
+        pnlCatalog.setBackground(UIThemeConfig.BG_DARK);
+        pnlCatalog.add(lblCatalog, BorderLayout.NORTH);
+        pnlCatalog.add(UIThemeConfig.createScrollPane(tableSanPham), BorderLayout.CENTER);
+        pnlLeft.add(pnlCatalog, BorderLayout.CENTER);
+
+        // Selected products panel
+        JPanel pnlChonHeader = new JPanel(new BorderLayout(8, 0));
+        pnlChonHeader.setBackground(UIThemeConfig.BG_DARK);
+        pnlChonHeader.setBorder(new EmptyBorder(4, 0, 6, 0));
+        JLabel lblChon = UIThemeConfig.createLabel("Selected Items");
+        lblChon.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblChon.setForeground(UIThemeConfig.ACCENT_YELLOW);
+        btnHuyChon = UIThemeConfig.createDangerButton("Remove");
+        btnHuyChon.setPreferredSize(new Dimension(100, 30));
         pnlChonHeader.add(lblChon, BorderLayout.WEST);
         pnlChonHeader.add(btnHuyChon, BorderLayout.EAST);
-        pnlChon.add(pnlChonHeader, BorderLayout.NORTH);
-        tableSanPhamChon = new JTable(); UITheme.styleTable(tableSanPhamChon);
-        pnlChon.add(UITheme.createScrollPane(tableSanPhamChon), BorderLayout.CENTER);
-        pnlLeft.add(pnlChon, BorderLayout.SOUTH);
-        add(pnlLeft, BorderLayout.WEST);
 
-        // === RIGHT: Info form ===
-        JPanel pnlRight = new JPanel(new BorderLayout(5, 8));
-        pnlRight.setBackground(UITheme.BG_DARK);
-        pnlRight.setBorder(BorderFactory.createEmptyBorder(0, 5, 10, 15));
+        tableSanPhamChon = new JTable();
+        UIThemeConfig.styleTable(tableSanPhamChon);
 
-        JPanel pnlKH = UITheme.createCard();
-        pnlKH.setLayout(new GridLayout(7, 2, 8, 6));
-        pnlKH.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(UITheme.BORDER),
-            BorderFactory.createEmptyBorder(10, 12, 10, 12)));
+        JPanel pnlSelected = new JPanel(new BorderLayout());
+        pnlSelected.setBackground(UIThemeConfig.BG_DARK);
+        pnlSelected.setPreferredSize(new Dimension(0, 180));
+        pnlSelected.add(pnlChonHeader, BorderLayout.NORTH);
+        pnlSelected.add(UIThemeConfig.createScrollPane(tableSanPhamChon), BorderLayout.CENTER);
+        pnlLeft.add(pnlSelected, BorderLayout.SOUTH);
 
-        txtSDT = UITheme.createTextField(); txtTenKH = UITheme.createTextField();
-        txtDiaChi = UITheme.createTextField(); txtLaiSuat = UITheme.createTextField();
-        cbGioiTinh = UITheme.createComboBox(new String[]{"Nam", "Nữ", "Khác"});
-        dateChooser = new JDateChooser(); dateChooser.setDateFormatString("dd/MM/yyyy");
-        cbLoaiHD = UITheme.createComboBox(new String[]{"Trả thẳng", "Trả góp"});
-        cbHinhThucTT = UITheme.createComboBox(new String[]{"Tiền mặt", "Chuyển khoản", "Thẻ tín dụng"});
+        pnlBody.add(pnlLeft, BorderLayout.WEST);
 
-        pnlKH.add(UITheme.createLabel("SĐT:")); pnlKH.add(txtSDT);
-        pnlKH.add(UITheme.createLabel("Tên KH:")); pnlKH.add(txtTenKH);
-        pnlKH.add(UITheme.createLabel("Giới tính:")); pnlKH.add(cbGioiTinh);
-        pnlKH.add(UITheme.createLabel("Địa chỉ:")); pnlKH.add(txtDiaChi);
-        pnlKH.add(UITheme.createLabel("Ngày tạo:")); pnlKH.add(dateChooser);
-        pnlKH.add(UITheme.createLabel("Loại HĐ:")); pnlKH.add(cbLoaiHD);
-        pnlKH.add(UITheme.createLabel("Lãi suất:")); pnlKH.add(txtLaiSuat);
+        // RIGHT — Customer info + Product entry
+        JPanel pnlRight = new JPanel(new BorderLayout(0, 8));
+        pnlRight.setBackground(UIThemeConfig.BG_DARK);
+
+        // Customer card
+        JPanel pnlKH = UIThemeConfig.createGlassPanel(new GridBagLayout());
+        pnlKH.setBorder(new EmptyBorder(14, 16, 14, 16));
+
+        GridBagConstraints g = new GridBagConstraints();
+        g.insets = new Insets(5, 6, 5, 6);
+        g.fill = GridBagConstraints.HORIZONTAL;
+
+        JLabel lblKHTitle = UIThemeConfig.createLabel("Customer & Order Info");
+        lblKHTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblKHTitle.setForeground(UIThemeConfig.ACCENT);
+        g.gridx = 0;
+        g.gridy = 0;
+        g.gridwidth = 4;
+        g.weightx = 1;
+        pnlKH.add(lblKHTitle, g);
+        g.gridwidth = 1;
+
+        txtSDT = UIThemeConfig.createTextField();
+        txtTenKH = UIThemeConfig.createTextField();
+        txtDiaChi = UIThemeConfig.createTextField();
+        txtLaiSuat = UIThemeConfig.createTextField();
+        cbGioiTinh = UIThemeConfig.createComboBox(new String[] { "Male", "Female", "Other" });
+        dateChooser = new JDateChooser();
+        dateChooser.setDateFormatString("dd/MM/yyyy");
+        dateChooser.setBackground(UIThemeConfig.BG_INPUT);
+        cbLoaiHD = UIThemeConfig.createComboBox(new String[] { "Direct Pay", "Installment" });
+        cbHinhThucTT = UIThemeConfig.createComboBox(new String[] { "Cash", "Bank Transfer", "Credit Card" });
+
+        Object[][] formRows = {
+                { "Phone:", txtSDT, "Gender:", cbGioiTinh },
+                { "Customer Name:", txtTenKH, "Address:", txtDiaChi },
+                { "Order Date:", dateChooser, "Order Type:", cbLoaiHD },
+                { "Interest Rate:", txtLaiSuat, "Payment:", cbHinhThucTT },
+        };
+
+        for (int i = 0; i < formRows.length; i++) {
+            g.gridy = i + 1;
+            g.gridx = 0;
+            g.weightx = 0;
+            JLabel lA = UIThemeConfig.createLabel((String) formRows[i][0]);
+            lA.setPreferredSize(new Dimension(110, 24));
+            pnlKH.add(lA, g);
+            g.gridx = 1;
+            g.weightx = 1;
+            pnlKH.add((Component) formRows[i][1], g);
+            g.gridx = 2;
+            g.weightx = 0;
+            JLabel lB = UIThemeConfig.createLabel((String) formRows[i][2]);
+            lB.setPreferredSize(new Dimension(100, 24));
+            pnlKH.add(lB, g);
+            g.gridx = 3;
+            g.weightx = 1;
+            pnlKH.add((Component) formRows[i][3], g);
+        }
+
         pnlRight.add(pnlKH, BorderLayout.CENTER);
 
-        JPanel pnlSP = UITheme.createCard();
-        pnlSP.setLayout(new GridLayout(3, 2, 8, 6));
-        pnlSP.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(UITheme.BORDER),
-            BorderFactory.createEmptyBorder(10, 12, 10, 12)));
-        pnlSP.setPreferredSize(new Dimension(0, 140));
-        txtMaSP = UITheme.createTextField(); txtTenSP = UITheme.createTextField();
-        txtSoLuong = UITheme.createTextField();
-        pnlSP.add(UITheme.createLabel("Mã SP:")); pnlSP.add(txtMaSP);
-        pnlSP.add(UITheme.createLabel("Tên SP:")); pnlSP.add(txtTenSP);
-        pnlSP.add(UITheme.createLabel("Số lượng:")); pnlSP.add(txtSoLuong);
+        // Product entry card
+        JPanel pnlSP = UIThemeConfig.createGlassPanel(new GridBagLayout());
+        pnlSP.setBorder(new EmptyBorder(12, 16, 12, 16));
 
-        JPanel pnlBottom = new JPanel(new BorderLayout(0, 5));
-        pnlBottom.setBackground(UITheme.BG_DARK);
-        pnlBottom.add(pnlSP, BorderLayout.CENTER);
-        btnThem = UITheme.createPrimaryButton("Thêm vào đơn");
-        JPanel pnlBtnAdd = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        pnlBtnAdd.setBackground(UITheme.BG_DARK);
-        pnlBtnAdd.add(btnThem);
-        pnlBottom.add(pnlBtnAdd, BorderLayout.SOUTH);
-        pnlRight.add(pnlBottom, BorderLayout.SOUTH);
+        GridBagConstraints gs = new GridBagConstraints();
+        gs.insets = new Insets(5, 6, 5, 6);
+        gs.fill = GridBagConstraints.HORIZONTAL;
 
-        JPanel pnlHTTT = new JPanel(new GridLayout(1, 2, 8, 0));
-        pnlHTTT.setBackground(UITheme.BG_CARD);
-        pnlHTTT.setBorder(BorderFactory.createEmptyBorder(5, 12, 5, 12));
-        pnlHTTT.setPreferredSize(new Dimension(0, 35));
-        pnlHTTT.add(UITheme.createLabel("Hình thức TT:")); pnlHTTT.add(cbHinhThucTT);
-        pnlRight.add(pnlHTTT, BorderLayout.NORTH);
+        JLabel lblSPTitle = UIThemeConfig.createLabel("Add Product to Order");
+        lblSPTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
+        lblSPTitle.setForeground(UIThemeConfig.ACCENT_YELLOW);
+        gs.gridx = 0;
+        gs.gridy = 0;
+        gs.gridwidth = 4;
+        gs.weightx = 1;
+        pnlSP.add(lblSPTitle, gs);
+        gs.gridwidth = 1;
 
-        add(pnlRight, BorderLayout.CENTER);
-        setVisible(true);
+        txtMaSP = UIThemeConfig.createTextField();
+        txtTenSP = UIThemeConfig.createTextField();
+        txtSoLuong = UIThemeConfig.createTextField();
+
+        Object[][] spRows = {
+                { "Product ID:", txtMaSP, "Name:", txtTenSP },
+                { "Qty:", txtSoLuong, null, null },
+        };
+
+        for (int i = 0; i < spRows.length; i++) {
+            gs.gridy = i + 1;
+            gs.gridx = 0;
+            gs.weightx = 0;
+            pnlSP.add(UIThemeConfig.createLabel((String) spRows[i][0]), gs);
+            gs.gridx = 1;
+            gs.weightx = 1;
+            pnlSP.add((Component) spRows[i][1], gs);
+            if (spRows[i][2] != null) {
+                gs.gridx = 2;
+                gs.weightx = 0;
+                pnlSP.add(UIThemeConfig.createLabel((String) spRows[i][2]), gs);
+                gs.gridx = 3;
+                gs.weightx = 1;
+                pnlSP.add((Component) spRows[i][3], gs);
+            }
+        }
+
+        btnThem = UIThemeConfig.createPrimaryButton("Add to Order");
+        btnThem.setPreferredSize(new Dimension(140, 34));
+        gs.gridy = 3;
+        gs.gridx = 3;
+        gs.gridwidth = 1;
+        gs.anchor = GridBagConstraints.EAST;
+        pnlSP.add(btnThem, gs);
+
+        JPanel pnlSPWrap = new JPanel(new BorderLayout());
+        pnlSPWrap.setBackground(UIThemeConfig.BG_DARK);
+        pnlSPWrap.setPreferredSize(new Dimension(0, 160));
+        pnlSPWrap.add(pnlSP, BorderLayout.CENTER);
+        pnlRight.add(pnlSPWrap, BorderLayout.SOUTH);
+
+        pnlBody.add(pnlRight, BorderLayout.CENTER);
+        add(pnlBody, BorderLayout.CENTER);
     }
 }

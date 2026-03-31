@@ -2,14 +2,14 @@ package com.example.services.impl;
 
 import com.example.dao.ThongKeDAO;
 import com.example.dao.impl.ThongKeDAOImpl;
-import com.example.services.IThongKeService;
+import com.example.services.ThongKeService;
 
 import java.util.Map;
 
 /**
  * Triển khai IThongKeService — Xử lý nghiệp vụ Thống Kê
  */
-public class ThongKeServiceImpl implements IThongKeService {
+public class ThongKeServiceImpl implements ThongKeService {
     private final ThongKeDAO dao;
 
     public ThongKeServiceImpl() {

@@ -1,55 +1,25 @@
 package com.example.services;
 
-import com.example.dao.KhachHangDAO;
-import com.example.dao.impl.KhachHangDAOImpl;
 import com.example.dto.KhachHangDTO;
-import com.example.entity.KhachHang;
-
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * Service Layer điều phối logic kinh doanh cho Khách Hàng
+ * Interface Service cho Khách Hàng
+ * Định nghĩa các phương thức nghiệp vụ CRUD cho Khách Hàng
  */
-public class KhachHangService {
-    private final KhachHangDAO dao;
+public interface KhachHangService {
+    /** Lấy toàn bộ danh sách khách hàng */
+    List<KhachHangDTO> getAllKhachHang();
 
-    public KhachHangService() {
-        this.dao = new KhachHangDAOImpl();
-    }
+    /** Thêm mới khách hàng */
+    boolean addKhachHang(KhachHangDTO dto);
 
-    private KhachHangDTO mapToDTO(KhachHang entity) {
-        return new KhachHangDTO(
-                entity.getMaKH(), entity.getTenKH(), entity.getGioiTinh(),
-                entity.getDiaChi(), entity.getSdt(), entity.getEmail()
-        );
-    }
+    /** Cập nhật thông tin khách hàng */
+    boolean updateKhachHang(KhachHangDTO dto);
 
-    public List<KhachHangDTO> getAllKhachHang() {
-        return dao.getAllKhachHang().stream().map(this::mapToDTO).collect(Collectors.toList());
-    }
+    /** Xóa khách hàng theo mã */
+    boolean deleteKhachHang(Integer maKH);
 
-    public boolean addKhachHang(KhachHangDTO dto) {
-        KhachHang entity = new KhachHang();
-        entity.setTenKH(dto.tenKH()); entity.setGioiTinh(dto.gioiTinh());
-        entity.setDiaChi(dto.diaChi()); entity.setSdt(dto.sdt()); entity.setEmail(dto.email());
-        return dao.insert(entity);
-    }
-
-    public boolean updateKhachHang(KhachHangDTO dto) {
-        KhachHang entity = dao.getById(dto.maKH());
-        if (entity == null) return false;
-        entity.setTenKH(dto.tenKH()); entity.setGioiTinh(dto.gioiTinh());
-        entity.setDiaChi(dto.diaChi()); entity.setSdt(dto.sdt()); entity.setEmail(dto.email());
-        return dao.update(entity);
-    }
-
-    public boolean deleteKhachHang(Integer maKH) {
-        if (dao.hasInvoices(maKH)) return false;
-        return dao.delete(maKH);
-    }
-
-    public List<KhachHangDTO> search(String keyword) {
-        return dao.timKiem(keyword).stream().map(this::mapToDTO).collect(Collectors.toList());
-    }
+    /** Tìm kiếm khách hàng theo tên hoặc SĐT */
+    List<KhachHangDTO> search(String keyword);
 }

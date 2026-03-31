@@ -1,11 +1,11 @@
 package com.example.controller;
 
-import com.example.entity.SanPham;
-import com.example.dao.SanPhamDAO;
+import com.example.dto.SanPhamDTO;
+import com.example.services.SanPhamService;
 import com.example.view.SanPhamView;
-import com.example.view.ThemSanPhamView;
 import com.example.util.InputValidator;
 import com.example.util.ValidationResult;
+import com.example.exception.ServiceException;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -15,15 +15,17 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 
 /**
- * Controller điều khiển các tương tác giữa giao diện Sản phẩm và Cơ sở dữ liệu
- * Author: Nông Hoàng Anh
+ * Controller điều khiển các tương tác giữa giao diện Sản phẩm và Cơ sở dữ liệu.
+ * Đã được refactor để tuân thủ kiến trúc Clean Architecture, chỉ gọi Service.
  */
 public class SanPhamController {
-    private final SanPhamDAO dao;
+    
+    // Giao tiếp độc quyền qua Service
+    private final SanPhamService service;
     private final SanPhamView view;
 
-    public SanPhamController(SanPhamDAO dao, SanPhamView view) {
-        this.dao = dao;
+    public SanPhamController(SanPhamService service, SanPhamView view) {
+        this.service = service;
         this.view = view;
         initController();
         loadData();
@@ -65,23 +67,50 @@ public class SanPhamController {
         // Nút Xóa sản phẩm
         view.btnDelete.addActionListener(e -> deleteSanPham());
 
-        // Nút Thêm: Mở cửa sổ thêm mới sản phẩm
+        // Nút Thêm: Xóa dữ liệu cũ và mở khóa form để nhập mới
         view.btnThem.addActionListener(e -> {
-            ThemSanPhamView themView = new ThemSanPhamView();
-            themView.setVisible(true);
-            // Sau khi đóng cửa sổ thêm, tải lại dữ liệu
-            themView.addWindowListener(new java.awt.event.WindowAdapter() {
-                @Override
-                public void windowClosed(java.awt.event.WindowEvent e) {
-                    loadData();
-                }
-            });
+            clearInput();
+            setInputEnabled(true);
         });
     }
 
+    private void clearInput() {
+        view.txtMaSP.setText("");
+        view.txtLoaiMay.setText("");
+        view.txtTenSP.setText("");
+        view.txtCPU.setText("");
+        view.txtGPU.setText("");
+        view.txtRAM.setText("");
+        view.txtOCung.setText("");
+        view.txtKTManHinh.setText("");
+        view.txtDPGManHinh.setText("");
+        view.txtCanNang.setText("");
+        view.txtSLTrongKho.setText("");
+        view.txtGiaBan.setText("");
+        view.txtGiaNhap.setText("");
+        view.txtThoiGianBaoHanh.setText("");
+    }
+
     private void loadData() {
-        List<SanPham> danhSach = dao.getAllSanPham();
-        view.hienThiSanPham(danhSach);
+        try {
+            List<SanPhamDTO> danhSach = service.getAllSanPham();
+            
+            // Xóa dữ liệu cũ trong bảng
+            var model = (javax.swing.table.DefaultTableModel) view.tableSanPham.getModel();
+            model.setRowCount(0);
+            
+            // Đổ dữ liệu DTO lên View
+            // (Thứ tự cột phải match với giao diện SanPhamView)
+            for (SanPhamDTO dto : danhSach) {
+                model.addRow(new Object[]{
+                        dto.maSP(), dto.loaiMay(), dto.tenSP(), dto.CPU(), dto.GPU(),
+                        dto.RAM(), dto.oCung(), dto.kichThuocMH(), dto.doPhanGiaiMH(),
+                        dto.canNang(), dto.soLuongTrongKho(), dto.giaBan(), dto.giaNhap(), dto.thoiGianBaoHanh()
+                });
+            }
+        } catch (ServiceException e) {
+            JOptionPane.showMessageDialog(view, "Lỗi tải dữ liệu: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void setInputEnabled(boolean enabled) {
@@ -103,8 +132,20 @@ public class SanPhamController {
 
     private void search() {
         String keyword = view.txtTimKiem.getText().trim();
-        List<SanPham> result = dao.timKiem(keyword);
-        view.hienThiSanPham(result);
+        try {
+            List<SanPhamDTO> result = service.search(keyword);
+            var model = (javax.swing.table.DefaultTableModel) view.tableSanPham.getModel();
+            model.setRowCount(0);
+            for (SanPhamDTO dto : result) {
+                model.addRow(new Object[]{
+                        dto.maSP(), dto.loaiMay(), dto.tenSP(), dto.CPU(), dto.GPU(),
+                        dto.RAM(), dto.oCung(), dto.kichThuocMH(), dto.doPhanGiaiMH(),
+                        dto.canNang(), dto.soLuongTrongKho(), dto.giaBan(), dto.giaNhap(), dto.thoiGianBaoHanh()
+                });
+            }
+        } catch (ServiceException e) {
+            JOptionPane.showMessageDialog(view, "Lỗi tìm kiếm: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void displaySelectedRow(int row) {
@@ -125,67 +166,39 @@ public class SanPhamController {
         view.txtThoiGianBaoHanh.setText(getValue(model, row, 13));
     }
 
-    // Hàm bổ trợ lấy giá trị từ bảng tránh lỗi null
     private String getValue(javax.swing.table.TableModel model, int row, int col) {
         Object val = model.getValueAt(row, col);
         return (val == null) ? "" : val.toString();
     }
 
     private void saveSanPham() {
-        if (view.txtMaSP.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(view, "Vui lòng chọn một sản phẩm để cập nhật!");
-            return;
-        }
+        Integer maSP = view.txtMaSP.getText().isEmpty() ? null : Integer.parseInt(view.txtMaSP.getText());
 
-        ValidationResult<String> rLoaiMay = InputValidator.validateRequiredString(view.txtLoaiMay.getText(), "Loại máy", 255);
-        if (!rLoaiMay.isValid()) { JOptionPane.showMessageDialog(view, rLoaiMay.getErrorMessage()); return; }
-        
-        ValidationResult<String> rTenSP = InputValidator.validateRequiredString(view.txtTenSP.getText(), "Tên sản phẩm", 255);
-        if (!rTenSP.isValid()) { JOptionPane.showMessageDialog(view, rTenSP.getErrorMessage()); return; }
-        
-        ValidationResult<Integer> rRAM = InputValidator.parseIntSafe(view.txtRAM.getText(), "RAM");
-        if (!rRAM.isValid()) { JOptionPane.showMessageDialog(view, rRAM.getErrorMessage()); return; }
-        
-        ValidationResult<Float> rKT = InputValidator.parseFloatSafe(view.txtKTManHinh.getText(), "Kích thước màn hình");
-        if (!rKT.isValid()) { JOptionPane.showMessageDialog(view, rKT.getErrorMessage()); return; }
-        
-        ValidationResult<Float> rCanNang = InputValidator.parseFloatSafe(view.txtCanNang.getText(), "Cân nặng");
-        if (!rCanNang.isValid()) { JOptionPane.showMessageDialog(view, rCanNang.getErrorMessage()); return; }
-        
-        ValidationResult<Integer> rSL = InputValidator.parseIntSafe(view.txtSLTrongKho.getText(), "Số lượng tồn kho");
-        if (!rSL.isValid()) { JOptionPane.showMessageDialog(view, rSL.getErrorMessage()); return; }
-        
-        ValidationResult<Double> rGiaBan = InputValidator.parseCurrency(view.txtGiaBan.getText(), "Giá bán");
-        if (!rGiaBan.isValid()) { JOptionPane.showMessageDialog(view, rGiaBan.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
-        
-        ValidationResult<Double> rGiaNhap = InputValidator.parseCurrency(view.txtGiaNhap.getText(), "Giá nhập");
-        if (!rGiaNhap.isValid()) { JOptionPane.showMessageDialog(view, rGiaNhap.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
-        
-        ValidationResult<Integer> rBH = InputValidator.parseIntSafe(view.txtThoiGianBaoHanh.getText(), "Thời gian bảo hành");
-        if (!rBH.isValid()) { JOptionPane.showMessageDialog(view, rBH.getErrorMessage()); return; }
+        try {
+            SanPhamDTO dto = validateAndCreateDTO(view.txtLoaiMay, view.txtTenSP, view.txtCPU, view.txtGPU,
+                    view.txtRAM, view.txtOCung, view.txtKTManHinh, view.txtDPGManHinh, view.txtCanNang,
+                    view.txtSLTrongKho, view.txtGiaBan, view.txtGiaNhap, view.txtThoiGianBaoHanh, maSP);
 
-        SanPham sp = new SanPham();
-        sp.setMaSP(Integer.parseInt(view.txtMaSP.getText()));
-        sp.setLoaiMay(rLoaiMay.getValue());
-        sp.setTenSP(rTenSP.getValue());
-        sp.setCPU(view.txtCPU.getText());
-        sp.setGPU(view.txtGPU.getText());
-        sp.setRAM(rRAM.getValue());
-        sp.setOCung(view.txtOCung.getText());
-        sp.setKichThuocMH(rKT.getValue());
-        sp.setDoPhanGiaiMH(view.txtDPGManHinh.getText());
-        sp.setCanNang(rCanNang.getValue());
-        sp.setSoLuongTrongKho(rSL.getValue());
-        sp.setGiaBan(rGiaBan.getValue());
-        sp.setGiaNhap(rGiaNhap.getValue());
-        sp.setThoiGianBaoHanh(rBH.getValue());
+            if (dto != null) {
+                boolean success = false;
+                if (maSP == null) {
+                    success = service.addSanPham(dto);
+                } else {
+                    success = service.updateSanPham(dto);
+                }
 
-        if (dao.insertOrUpdate(sp)) {
-            JOptionPane.showMessageDialog(view, "Cập nhật thành công!");
-            loadData();
-            setInputEnabled(false);
-        } else {
-            JOptionPane.showMessageDialog(view, "Cập nhật thất bại!");
+                if (success) {
+                    JOptionPane.showMessageDialog(view, "Lưu thông tin sản phẩm thành công!");
+                    loadData();
+                    setInputEnabled(false);
+                } else {
+                    JOptionPane.showMessageDialog(view, "Trọng tâm lưu dữ liệu thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } catch (ServiceException ex) {
+            JOptionPane.showMessageDialog(view, "Lỗi từ CSDL: " + ex.getMessage(), "Lỗi hệ thống", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view, "Dữ liệu không hợp lệ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -198,15 +211,75 @@ public class SanPhamController {
                     "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
 
             if (confirm == JOptionPane.YES_OPTION) {
-                if (dao.xoaSanPham(maSP)) {
-                    JOptionPane.showMessageDialog(view, "Xóa thành công!");
-                    loadData();
-                } else {
-                    JOptionPane.showMessageDialog(view, "Không thể xóa sản phẩm này (có thể đã có trong hóa đơn)!");
+                try {
+                    if (service.deleteSanPham(maSP)) {
+                        JOptionPane.showMessageDialog(view, "Xóa thành công!");
+                        loadData();
+                    } else {
+                        JOptionPane.showMessageDialog(view, "Không thể xóa sản phẩm này (có thể đã có trong hóa đơn)!");
+                    }
+                } catch (ServiceException ex) {
+                    JOptionPane.showMessageDialog(view, "Lỗi hệ thống khi xóa: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
             }
         } else {
             JOptionPane.showMessageDialog(view, "Vui lòng chọn một sản phẩm trong bảng để xóa!");
         }
+    }
+
+    /**
+     * Hàm dùng chung để validate input và đóng gói thành DTO.
+     */
+    private SanPhamDTO validateAndCreateDTO(
+            JTextField txtLoaiMay, JTextField txtTenSP, JTextField txtCPU, JTextField txtGPU,
+            JTextField txtRAM, JTextField txtOCung, JTextField txtKTManHinh, JTextField txtDPGManHinh,
+            JTextField txtCanNang, JTextField txtSLTrongKho, JTextField txtGiaBan, JTextField txtGiaNhap,
+            JTextField txtThoiGianBaoHanh, Integer maSP) {
+
+        ValidationResult<String> rLoaiMay = InputValidator.validateRequiredString(txtLoaiMay.getText(), "Loại máy", 255);
+        if (!rLoaiMay.isValid()) { JOptionPane.showMessageDialog(view, rLoaiMay.getErrorMessage(), "Thiếu dữ liệu", JOptionPane.WARNING_MESSAGE); txtLoaiMay.requestFocus(); return null; }
+        
+        ValidationResult<String> rTenSP = InputValidator.validateRequiredString(txtTenSP.getText(), "Tên sản phẩm", 255);
+        if (!rTenSP.isValid()) { JOptionPane.showMessageDialog(view, rTenSP.getErrorMessage(), "Thiếu dữ liệu", JOptionPane.WARNING_MESSAGE); txtTenSP.requestFocus(); return null; }
+        
+        ValidationResult<Integer> rRAM = InputValidator.parseIntSafe(txtRAM.getText(), "RAM");
+        if (!rRAM.isValid()) { JOptionPane.showMessageDialog(view, "RAM không hợp lệ! Ví dụ: 16 hoặc 32", "Lỗi", JOptionPane.ERROR_MESSAGE); txtRAM.requestFocus(); return null; }
+        
+        ValidationResult<Float> rKT = InputValidator.parseFloatSafe(txtKTManHinh.getText(), "Kích thước màn hình");
+        if (!rKT.isValid()) { JOptionPane.showMessageDialog(view, "Kích thước màn hình không hợp lệ!", "Lỗi", JOptionPane.ERROR_MESSAGE); txtKTManHinh.requestFocus(); return null; }
+        
+        ValidationResult<Float> rCanNang = InputValidator.parseFloatSafe(txtCanNang.getText(), "Cân nặng");
+        if (!rCanNang.isValid()) { JOptionPane.showMessageDialog(view, "Cân nặng không hợp lệ! Ví dụ: 1.5", "Lỗi", JOptionPane.ERROR_MESSAGE); txtCanNang.requestFocus(); return null; }
+        
+        ValidationResult<Integer> rSL = InputValidator.parseIntSafe(txtSLTrongKho.getText(), "Số lượng tồn kho");
+        if (!rSL.isValid()) { JOptionPane.showMessageDialog(view, rSL.getErrorMessage()); txtSLTrongKho.requestFocus(); return null; }
+        
+        ValidationResult<Double> rGiaBan = InputValidator.parseCurrency(txtGiaBan.getText(), "Giá bán");
+        if (!rGiaBan.isValid()) { JOptionPane.showMessageDialog(view, rGiaBan.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); txtGiaBan.requestFocus(); return null; }
+        
+        ValidationResult<Double> rGiaNhap = InputValidator.parseCurrency(txtGiaNhap.getText(), "Giá nhập");
+        if (!rGiaNhap.isValid()) { JOptionPane.showMessageDialog(view, rGiaNhap.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); txtGiaNhap.requestFocus(); return null; }
+        
+        ValidationResult<Integer> rBH = InputValidator.parseIntSafe(txtThoiGianBaoHanh.getText(), "Thời gian bảo hành");
+        if (!rBH.isValid()) { JOptionPane.showMessageDialog(view, "Thời gian bảo hành không hợp lệ!", "Lỗi", JOptionPane.ERROR_MESSAGE); txtThoiGianBaoHanh.requestFocus(); return null; }
+
+        return new SanPhamDTO(
+            maSP,
+            rLoaiMay.getValue(),
+            rTenSP.getValue(),
+            txtCPU.getText(),
+            txtGPU.getText(),
+            rRAM.getValue(),
+            txtOCung.getText(),
+            rKT.getValue(),
+            txtDPGManHinh.getText(),
+            rCanNang.getValue(),
+            rSL.getValue(),
+            rGiaBan.getValue(),
+            rGiaNhap.getValue(),
+            rBH.getValue(),
+            null, // maNCC (tạm chờ logic nếu bảng form có mục NCC)
+            ""
+        );
     }
 }

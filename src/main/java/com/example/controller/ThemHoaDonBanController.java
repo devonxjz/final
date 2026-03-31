@@ -1,8 +1,6 @@
 package com.example.controller;
 
 import com.example.dao.HoaDonBanHangDAO;
-import com.example.dao.HoaDonBanHangDAO;
-import com.example.dao.SanPhamDAO;
 import com.example.entity.KhachHang;
 import com.example.entity.SanPham;
 import com.example.view.ThemHoaDonBanView;
@@ -32,16 +30,20 @@ public class ThemHoaDonBanController {
     }
 
     private void setupTables() {
-        String[] headerSP = {"Mã SP", "Tên SP", "Giá bán", "Tồn kho"};
+        String[] headerSP = { "Mã SP", "Tên SP", "Giá bán", "Tồn kho" };
         view.tableSanPham.setModel(new DefaultTableModel(headerSP, 0) {
             @Override
-            public boolean isCellEditable(int row, int column) { return false; }
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
         });
 
-        String[] headerChon = {"Mã SP", "Tên SP", "Số lượng", "Giá bán", "Thành tiền"};
+        String[] headerChon = { "Mã SP", "Tên SP", "Số lượng", "Giá bán", "Thành tiền" };
         view.tableSanPhamChon.setModel(new DefaultTableModel(headerChon, 0) {
             @Override
-            public boolean isCellEditable(int row, int column) { return false; }
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
         });
     }
 
@@ -90,7 +92,7 @@ public class ThemHoaDonBanController {
         DefaultTableModel model = (DefaultTableModel) view.tableSanPham.getModel();
         model.setRowCount(0);
         for (SanPham sp : sanPhamList) {
-            model.addRow(new Object[]{sp.getMaSP(), sp.getTenSP(), sp.getGiaBan(), sp.getSoLuongTrongKho()});
+            model.addRow(new Object[] { sp.getMaSP(), sp.getTenSP(), sp.getGiaBan(), sp.getSoLuongTrongKho() });
         }
     }
 
@@ -102,7 +104,7 @@ public class ThemHoaDonBanController {
 
         try {
             int maSP = Integer.parseInt(view.txtMaSP.getText());
-            
+
             ValidationResult<Integer> rSL = InputValidator.parseIntSafe(view.txtSoLuong.getText(), "Số lượng");
             if (!rSL.isValid()) {
                 JOptionPane.showMessageDialog(view, rSL.getErrorMessage());
@@ -154,7 +156,7 @@ public class ThemHoaDonBanController {
             int qty = entry.getValue();
             SanPham sp = sanPhamList.stream().filter(s -> s.getMaSP() == maSP).findFirst().orElse(null);
             if (sp != null) {
-                model.addRow(new Object[]{maSP, sp.getTenSP(), qty, sp.getGiaBan(), sp.getGiaBan() * qty});
+                model.addRow(new Object[] { maSP, sp.getTenSP(), qty, sp.getGiaBan(), sp.getGiaBan() * qty });
             }
         }
     }
@@ -166,10 +168,16 @@ public class ThemHoaDonBanController {
         }
 
         ValidationResult<String> rSdt = InputValidator.validatePhone(view.txtSDT.getText(), true);
-        if (!rSdt.isValid()) { JOptionPane.showMessageDialog(view, rSdt.getErrorMessage()); return; }
+        if (!rSdt.isValid()) {
+            JOptionPane.showMessageDialog(view, rSdt.getErrorMessage());
+            return;
+        }
 
         ValidationResult<String> rTen = InputValidator.normalizeName(view.txtTenKH.getText(), "Tên khách hàng");
-        if (!rTen.isValid()) { JOptionPane.showMessageDialog(view, rTen.getErrorMessage()); return; }
+        if (!rTen.isValid()) {
+            JOptionPane.showMessageDialog(view, rTen.getErrorMessage());
+            return;
+        }
 
         String sdt = rSdt.getValue();
         String tenKH = rTen.getValue();
@@ -188,19 +196,23 @@ public class ThemHoaDonBanController {
         int thoiHanTG = 0;
 
         if ("Trả góp".equals(loaiHD)) {
-            ValidationResult<Double> rLaiSuat = InputValidator.parseFloatSafe(view.txtLaiSuat.getText(), "Lãi suất").isValid() ? 
-                ValidationResult.success((double) InputValidator.parseFloatSafe(view.txtLaiSuat.getText(), "Lãi suất").getValue()) : 
-                ValidationResult.fail("Lãi suất không hợp lệ");
-            if(!rLaiSuat.isValid()){ JOptionPane.showMessageDialog(view, rLaiSuat.getErrorMessage()); return; }
+            ValidationResult<Double> rLaiSuat = InputValidator.parseFloatSafe(view.txtLaiSuat.getText(),
+                    "Lãi suất").isValid() ? ValidationResult.success(
+                            (double) InputValidator.parseFloatSafe(view.txtLaiSuat.getText(), "Lãi suất").getValue())
+                            : ValidationResult.fail("Lãi suất không hợp lệ");
+            if (!rLaiSuat.isValid()) {
+                JOptionPane.showMessageDialog(view, rLaiSuat.getErrorMessage());
+                return;
+            }
             laiSuat = rLaiSuat.getValue();
-            
-            thoiHanTG = 6; 
+
+            thoiHanTG = 6;
             String inputThoiHan = JOptionPane.showInputDialog(view, "Nhập thời hạn trả góp (tháng):", "6");
             if (inputThoiHan != null && !inputThoiHan.isEmpty()) {
                 ValidationResult<Integer> resTH = InputValidator.parseIntSafe(inputThoiHan, "Thời hạn trả góp");
                 if (!resTH.isValid() || resTH.getValue() <= 0) {
-                     JOptionPane.showMessageDialog(view, "Thời hạn trả góp không hợp lệ!");
-                     return;
+                    JOptionPane.showMessageDialog(view, "Thời hạn trả góp không hợp lệ!");
+                    return;
                 }
                 thoiHanTG = resTH.getValue();
             }
@@ -224,12 +236,11 @@ public class ThemHoaDonBanController {
 
         boolean success = dao.themHoaDonVaChiTietVaThanhToan(
                 ngayTao, loaiHD, tongTien, 0, chiTietList,
-                tenKH, sdt, diaChi, gioiTinh, hinhThucTT, "Chua thanh toan"
-        );
+                tenKH, sdt, diaChi, gioiTinh, hinhThucTT, "Chua thanh toan");
 
         if (success) {
             JOptionPane.showMessageDialog(view, "Xuất hóa đơn thành công!");
-            view.dispose(); // Đóng form
+            view.setVisible(false); // Panel sẽ được swap bởi HomeView
         } else {
             JOptionPane.showMessageDialog(view, "Lỗi khi xuất hóa đơn!");
         }

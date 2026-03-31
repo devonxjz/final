@@ -3,58 +3,77 @@ package com.example.services.impl;
 import com.example.dao.NhaCungCapDAO;
 import com.example.dao.impl.NhaCungCapDAOImpl;
 import com.example.entity.NhaCungCap;
-import com.example.services.INhaCungCapService;
+import com.example.dto.NhaCungCapDTO;
+import com.example.services.NhaCungCapService;
+import com.example.exception.ServiceException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Triển khai INhaCungCapService — Xử lý nghiệp vụ Nhà Cung Cấp
  */
-public class NhaCungCapServiceImpl implements INhaCungCapService {
+public class NhaCungCapServiceImpl implements NhaCungCapService {
     private final NhaCungCapDAO dao;
 
     public NhaCungCapServiceImpl() {
         this.dao = new NhaCungCapDAOImpl();
     }
 
-    @Override
-    public List<NhaCungCap> getAllNhaCungCap() {
-        return dao.getAllNhaCungCap();
+    private NhaCungCapDTO mapToDTO(NhaCungCap e) {
+        return new NhaCungCapDTO(e.getMaNCC(), e.getTenNCC(), e.getDiaChi(), e.getSdt());
     }
 
     @Override
-    public NhaCungCap getById(int maNCC) {
-        // NhaCungCapDAO interface doesn't have getById, query manually
+    public List<NhaCungCapDTO> getAllNhaCungCap() {
+        return dao.getAllNhaCungCap().stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public NhaCungCapDTO getById(int maNCC) {
         List<NhaCungCap> all = dao.getAllNhaCungCap();
-        return all.stream().filter(n -> n.getMaNCC() == maNCC).findFirst().orElse(null);
+        NhaCungCap ncc = all.stream().filter(n -> n.getMaNCC() == maNCC).findFirst().orElse(null);
+        return ncc != null ? mapToDTO(ncc) : null;
     }
 
     @Override
-    public boolean addNhaCungCap(NhaCungCap ncc) {
-        return dao.themNhaCungCap(ncc.getTenNCC(), ncc.getDiaChi(), ncc.getSdt());
+    public boolean addNhaCungCap(NhaCungCapDTO ncc) {
+        boolean success = dao.themNhaCungCap(ncc.tenNCC(), ncc.diaChi(), ncc.sdt());
+        if (!success) {
+            throw new ServiceException("Thêm nhà cung cấp thất bại do lỗi CSDL");
+        }
+        return true;
     }
 
     @Override
-    public boolean updateNhaCungCap(NhaCungCap ncc) {
-        return dao.capNhatNhaCungCap(ncc.getMaNCC(), ncc.getTenNCC(), ncc.getDiaChi(), ncc.getSdt());
+    public boolean updateNhaCungCap(NhaCungCapDTO ncc) {
+        boolean success = dao.capNhatNhaCungCap(ncc.maNCC(), ncc.tenNCC(), ncc.diaChi(), ncc.sdt());
+        if (!success) {
+            throw new ServiceException("Cập nhật nhà cung cấp thất bại do lỗi CSDL");
+        }
+        return true;
     }
 
     @Override
     public boolean deleteNhaCungCap(int maNCC) {
         if (dao.kiemTraNhaCungCapDuocXoa(String.valueOf(maNCC))) {
-            return false; // Có sản phẩm liên kết, không xóa
+            throw new ServiceException("Có sản phẩm liên kết với nhà cung cấp này, không thể xóa!");
         }
-        return dao.xoaNhaCungCap(maNCC);
+        boolean success = dao.xoaNhaCungCap(maNCC);
+        if (!success) {
+            throw new ServiceException("Xóa nhà cung cấp thất bại do lỗi CSDL");
+        }
+        return true;
     }
 
     @Override
-    public List<NhaCungCap> search(String keyword) {
-        // NhaCungCapDAO interface doesn't have search, filter manually
+    public List<NhaCungCapDTO> search(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) return getAllNhaCungCap();
         String kw = keyword.toLowerCase();
         return dao.getAllNhaCungCap().stream()
                 .filter(n -> n.getTenNCC().toLowerCase().contains(kw) ||
                              (n.getSdt() != null && n.getSdt().contains(kw)))
-                .toList();
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 }

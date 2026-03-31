@@ -1,73 +1,35 @@
 package com.example.services;
 
-import com.example.dao.HoaDonBanHangDAO;
-import com.example.dao.impl.HoaDonBanHangDAOImpl;
-import com.example.dao.impl.KhachHangDAOImpl;
-import com.example.dao.impl.SanPhamDAOImpl;
-import com.example.dao.KhachHangDAO;
-import com.example.dao.SanPhamDAO;
 import com.example.dto.ChiTietHDBHDTO;
-import com.example.entity.*;
+import com.example.dto.HoaDonBanHangDTO;
+import com.example.dto.ThanhToanDTO;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-public class HoaDonBanHangService {
-    private final HoaDonBanHangDAO hoadoDao;
-    private final KhachHangDAO khachHangDAO;
-    private final SanPhamDAO sanPhamDAO;
+/**
+ * Interface Service cho Hóa Đơn Bán Hàng
+ * Trả về DTO thay vì Entity
+ */
+public interface HoaDonBanHangService {
+    /** Lấy toàn bộ hóa đơn */
+    List<HoaDonBanHangDTO> getAllHoaDon();
 
-    public HoaDonBanHangService() {
-        this.hoadoDao = new HoaDonBanHangDAOImpl();
-        this.khachHangDAO = new KhachHangDAOImpl();
-        this.sanPhamDAO = new SanPhamDAOImpl();
-    }
+    /** Lấy chi tiết hóa đơn theo mã hóa đơn */
+    List<ChiTietHDBHDTO> getAllChiTiet(int maHD);
 
-    public boolean thanhToanHoaDon(int maKH, String loaiHD, double tongTien, double laiSuat, int thoiHan, List<ChiTietHDBHDTO> gioHang) {
-        KhachHang kh = khachHangDAO.getById(maKH);
-        if (kh == null) return false;
+    /** Lấy toàn bộ thanh toán theo mã hóa đơn */
+    List<ThanhToanDTO> getAllThanhToan(int maHD);
 
-        HoaDonBanHang hd = new HoaDonBanHang();
-        hd.setNgayTao(new Date());
-        hd.setLoaiHD(loaiHD);
-        hd.setTongTien(tongTien);
-        hd.setTrangThai("Trả góp".equals(loaiHD) ? "Đang trả góp" : "Đã thanh toán");
+    /** Thanh toán trực tiếp */
+    boolean thanhToanHoaDon(int maHD, String loaiHD, double tongTien, double laiSuat, int thoiHan, List<ChiTietHDBHDTO> gioHang);
 
-        if ("Trả góp".equals(loaiHD)) {
-            hd.setLaiSuat(laiSuat);
-            hd.setThoiHanTG(thoiHan);
-            double tienCoc = tongTien * (laiSuat > 0 ? laiSuat / 100.0 : 0.3);
-            hd.setTienCoc(tienCoc);
-            double conLai = tongTien - tienCoc;
-            hd.setSoTienConLai(conLai);
-            hd.setTienGopHangThang(thoiHan > 0 ? conLai / thoiHan : 0);
-        } else {
-            hd.setTienCoc(tongTien); hd.setLaiSuat(0.0);
-            hd.setThoiHanTG(0); hd.setTienGopHangThang(0.0); hd.setSoTienConLai(0.0);
-        }
+    /** Lưu hóa đơn và chi tiết vào CSDL */
+    boolean themHoaDonVaChiTietVaThanhToan(Date ngayTao, String loaiHD, double tongTien, int maKH,
+            List<Map<Integer, Integer>> gioHang, String tenKH, String sdt, String diaChi,
+            String gioiTinh, String hinhThucTT, String trangThai);
 
-        List<ChiTietHDBH> dsCT = new ArrayList<>();
-        for (ChiTietHDBHDTO ctDTO : gioHang) {
-            SanPham sp = sanPhamDAO.getById(ctDTO.maSP());
-            if (sp == null || sp.getSoLuongTrongKho() < ctDTO.soLuong()) {
-                throw new IllegalArgumentException("Sản phẩm không đủ tồn kho: " + ctDTO.tenSP());
-            }
-            ChiTietHDBH ct = new ChiTietHDBH();
-            ct.setHoaDonBanHang(hd); ct.setSanPham(sp);
-            ct.setSoLuong(ctDTO.soLuong()); ct.setTongTien(ctDTO.tongTien());
-            dsCT.add(ct);
-        }
-        hd.setDanhSachChiTiet(dsCT);
-
-        ThanhToan tt = new ThanhToan();
-        tt.setHoaDonBanHang(hd); tt.setKhachHang(kh);
-        tt.setNgayTT(new Date()); tt.setTienThanhToan(hd.getTienCoc());
-        tt.setHinhThucTT("Tiền mặt");
-        List<ThanhToan> dsTT = new ArrayList<>();
-        dsTT.add(tt);
-        hd.setDanhSachThanhToan(dsTT);
-
-        return hoadoDao.saveHoaDonFull(hd);
-    }
+    /** Tìm hóa đơn theo ngày */
+    List<HoaDonBanHangDTO> searchByDate(Date date);
 }

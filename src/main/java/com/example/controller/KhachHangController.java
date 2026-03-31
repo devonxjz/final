@@ -1,6 +1,5 @@
 package com.example.controller;
 
-import com.example.dao.KhachHangDAO;
 import com.example.dto.KhachHangDTO;
 import com.example.services.KhachHangService;
 import com.example.view.KhachHangView;
@@ -49,11 +48,19 @@ public class KhachHangController {
         // Tìm kiếm khách hàng theo tên hoặc số điện thoại
         view.txtTimKiem.getDocument().addDocumentListener(new DocumentListener() {
             @Override
-            public void insertUpdate(DocumentEvent e) { search(); }
+            public void insertUpdate(DocumentEvent e) {
+                search();
+            }
+
             @Override
-            public void removeUpdate(DocumentEvent e) { search(); }
+            public void removeUpdate(DocumentEvent e) {
+                search();
+            }
+
             @Override
-            public void changedUpdate(DocumentEvent e) { search(); }
+            public void changedUpdate(DocumentEvent e) {
+                search();
+            }
         });
 
         // Nút Sửa
@@ -69,7 +76,7 @@ public class KhachHangController {
         view.btnAdd.addActionListener(e -> {
             clearInput();
             setInputEnabled(true);
-            view.txtMaKH.setText(""); 
+            view.txtMaKH.setText("");
         });
     }
 
@@ -122,16 +129,28 @@ public class KhachHangController {
 
     private void saveKhachHang() {
         ValidationResult<String> rTen = InputValidator.normalizeName(view.txtTenKH.getText(), "Tên khách hàng");
-        if (!rTen.isValid()) { JOptionPane.showMessageDialog(view, rTen.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
+        if (!rTen.isValid()) {
+            JOptionPane.showMessageDialog(view, rTen.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         ValidationResult<String> rSdt = InputValidator.validatePhone(view.txtSDT.getText(), true);
-        if (!rSdt.isValid()) { JOptionPane.showMessageDialog(view, rSdt.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
+        if (!rSdt.isValid()) {
+            JOptionPane.showMessageDialog(view, rSdt.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         ValidationResult<String> rDiaChi = InputValidator.normalizeAddress(view.txtDiaChi.getText(), "Địa chỉ");
-        if (!rDiaChi.isValid()) { JOptionPane.showMessageDialog(view, rDiaChi.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
+        if (!rDiaChi.isValid()) {
+            JOptionPane.showMessageDialog(view, rDiaChi.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         ValidationResult<String> rEmail = InputValidator.validateEmail(view.txtEmail.getText(), false);
-        if (!rEmail.isValid()) { JOptionPane.showMessageDialog(view, rEmail.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE); return; }
+        if (!rEmail.isValid()) {
+            JOptionPane.showMessageDialog(view, rEmail.getErrorMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         Integer maKH = view.txtMaKH.getText().isEmpty() ? null : Integer.parseInt(view.txtMaKH.getText());
         String gioiTinh = view.cbGioiTinh != null ? view.cbGioiTinh.getSelectedItem().toString() : "";
@@ -143,22 +162,27 @@ public class KhachHangController {
                 gioiTinh,
                 rDiaChi.getValue(),
                 rSdt.getValue(),
-                rEmail.getValue()
-        );
+                rEmail.getValue());
 
-        boolean success;
-        if (maKH == null) {
-            success = service.addKhachHang(dto);
-        } else {
-            success = service.updateKhachHang(dto);
-        }
+        try {
+            boolean success = false;
+            if (maKH == null) {
+                success = service.addKhachHang(dto);
+            } else {
+                success = service.updateKhachHang(dto);
+            }
 
-        if (success) {
-            JOptionPane.showMessageDialog(view, "Lưu thông tin khách hàng thành công!");
-            loadData();
-            setInputEnabled(false);
-        } else {
-            JOptionPane.showMessageDialog(view, "Thao tác thất bại!");
+            if (success) {
+                JOptionPane.showMessageDialog(view, "Lưu thông tin khách hàng thành công!");
+                loadData();
+                setInputEnabled(false);
+            } else {
+                JOptionPane.showMessageDialog(view, "Thao tác luồng thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (com.example.exception.ServiceException ex) {
+            JOptionPane.showMessageDialog(view, "Lỗi từ CSDL: " + ex.getMessage(), "Lỗi hệ thống", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view, "Lỗi không hợp lệ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -169,11 +193,13 @@ public class KhachHangController {
             int confirm = JOptionPane.showConfirmDialog(view,
                     "Xóa khách hàng này sẽ ảnh hưởng đến lịch sử hóa đơn. Bạn chắc chứ?");
             if (confirm == JOptionPane.YES_OPTION) {
-                if (service.deleteKhachHang(maKH)) {
-                    loadData();
-                    clearInput();
-                } else {
-                    JOptionPane.showMessageDialog(view, "Không thể xóa khách hàng đã có hóa đơn hoặc lỗi DB!");
+                try {
+                    if (service.deleteKhachHang(maKH)) {
+                        loadData();
+                        clearInput();
+                    }
+                } catch (com.example.exception.ServiceException ex) {
+                    JOptionPane.showMessageDialog(view, "Lỗi hệ thống khi xóa: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
             }
         }

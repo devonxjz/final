@@ -59,7 +59,7 @@
 
 | Thư viện | Phiên bản | Mục đích |
 |---|---|---|
-| Java JDK | 17 | Ngôn ngữ lập trình chính |
+| Java JDK | 21 | Ngôn ngữ lập trình chính |
 | Maven | 3.9+ | Quản lý dependency & build |
 
 ### Persistence & Database

@@ -4,7 +4,7 @@ import com.example.dao.SanPhamDAO;
 import com.example.dao.impl.SanPhamDAOImpl;
 import com.example.dto.SanPhamDTO;
 import com.example.entity.SanPham;
-import com.example.services.ISanPhamService;
+import com.example.services.SanPhamService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 /**
  * Triển khai ISanPhamService — Xử lý nghiệp vụ Sản Phẩm
  */
-public class SanPhamServiceImpl implements ISanPhamService {
+public class SanPhamServiceImpl implements SanPhamService {
     private final SanPhamDAO dao;
 
     public SanPhamServiceImpl() {
@@ -45,7 +45,11 @@ public class SanPhamServiceImpl implements ISanPhamService {
         sp.setCanNang(dto.canNang()); sp.setSoLuongTrongKho(dto.soLuongTrongKho());
         sp.setGiaBan(dto.giaBan()); sp.setGiaNhap(dto.giaNhap());
         sp.setThoiGianBaoHanh(dto.thoiGianBaoHanh());
-        return dao.insertOrUpdate(sp);
+        boolean success = dao.insertOrUpdate(sp);
+        if (!success) {
+            throw new com.example.exception.ServiceException("Thêm sản phẩm thất bại do lỗi CSDL");
+        }
+        return true;
     }
 
     @Override
@@ -59,12 +63,20 @@ public class SanPhamServiceImpl implements ISanPhamService {
         sp.setCanNang(dto.canNang()); sp.setSoLuongTrongKho(dto.soLuongTrongKho());
         sp.setGiaBan(dto.giaBan()); sp.setGiaNhap(dto.giaNhap());
         sp.setThoiGianBaoHanh(dto.thoiGianBaoHanh());
-        return dao.insertOrUpdate(sp);
+        boolean success = dao.insertOrUpdate(sp);
+        if (!success) {
+            throw new com.example.exception.ServiceException("Cập nhật sản phẩm thất bại do lỗi CSDL");
+        }
+        return true;
     }
 
     @Override
     public boolean deleteSanPham(Integer maSP) {
-        return dao.xoaSanPham(maSP);
+        boolean success = dao.xoaSanPham(maSP);
+        if (!success) {
+            throw new com.example.exception.ServiceException("Không thể xóa sản phẩm này (có thể đã có trong hóa đơn)");
+        }
+        return true;
     }
 
     @Override

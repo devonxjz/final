@@ -1,6 +1,6 @@
 package com.example.dao.impl;
 
-import com.example.config.HibernateUtil;
+import com.example.config.HibernateConfig;
 import com.example.dao.ThanhToanDAO;
 import com.example.entity.HoaDonBanHang;
 import com.example.entity.KhachHang;
@@ -8,7 +8,6 @@ import com.example.entity.ThanhToan;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +18,7 @@ public class ThanhToanDAOImpl implements ThanhToanDAO {
     @Override
     public List<Map<String, Object>> getAllThanhToanAsMap() {
         List<Map<String, Object>> list = new ArrayList<>();
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             String jpql = "SELECT t.maTT, h.maHDBH, k.maKH, t.ngayTT, t.tienThanhToan, t.hinhThucTT, k.tenKH " +
                           "FROM ThanhToan t JOIN t.khachHang k JOIN t.hoaDonBanHang h";
             List<Object[]> results = em.createQuery(jpql, Object[].class).getResultList();
@@ -42,7 +41,7 @@ public class ThanhToanDAOImpl implements ThanhToanDAO {
 
     @Override
     public boolean themThanhToan(int maHDBH, int maKH, java.util.Date ngayTT, double tienThanhToan, String hinhThucTT) {
-        EntityManager em = HibernateUtil.getEntityManager();
+        EntityManager em = HibernateConfig.getEntityManager();
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
@@ -58,7 +57,7 @@ public class ThanhToanDAOImpl implements ThanhToanDAO {
             tt.setTienThanhToan(tienThanhToan);
             tt.setHinhThucTT(hinhThucTT);
             em.persist(tt);
-            
+
             // Cập nhật lại số tiền nợ
             double nợCòn = hd.getSoTienConLai() - tienThanhToan;
             if (nợCòn <= 0) {
@@ -68,7 +67,7 @@ public class ThanhToanDAOImpl implements ThanhToanDAO {
                 hd.setSoTienConLai(nợCòn);
             }
             em.merge(hd);
-            
+
             tx.commit();
             return true;
         } catch (Exception e) {
@@ -83,7 +82,7 @@ public class ThanhToanDAOImpl implements ThanhToanDAO {
     @Override
     public List<Map<String, Object>> getAllHoaDonDangGopAsMap() {
         List<Map<String, Object>> list = new ArrayList<>();
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             String jpql = "SELECT h.maHDBH, MIN(k.maKH), MIN(k.tenKH), h.tongTien, h.tienCoc, h.tienGopHangThang, h.ngayTao " +
                           "FROM ThanhToan t JOIN t.hoaDonBanHang h JOIN t.khachHang k " +
                           "WHERE h.trangThai = 'Đang trả góp' " +
@@ -108,7 +107,7 @@ public class ThanhToanDAOImpl implements ThanhToanDAO {
 
     @Override
     public List<ThanhToan> layTatCaThanhToan() {
-        try (EntityManager em = HibernateUtil.getEntityManager()) {
+        try (EntityManager em = HibernateConfig.getEntityManager()) {
             return em.createQuery("SELECT t FROM ThanhToan t JOIN FETCH t.hoaDonBanHang h JOIN FETCH t.khachHang k", ThanhToan.class).getResultList();
         }
     }
