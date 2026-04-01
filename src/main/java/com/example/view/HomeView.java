@@ -257,14 +257,11 @@ public class HomeView extends JFrame {
         lblChart.setForeground(UIThemeConfig.TEXT_PRIMARY);
         chartPanel.add(lblChart, BorderLayout.NORTH);
 
+        // Dùng AtomicReference để chia sẻ dữ liệu giữa async callback và chartArea
+        final java.util.concurrent.atomic.AtomicReference<Map<String, Double>> chartDataRef =
+                new java.util.concurrent.atomic.AtomicReference<>(null);
+
         JPanel chartArea = new JPanel() {
-            private Map<String, Double> chartRevenueData = null;
-
-            public void setRevenueData(Map<String, Double> data) {
-                this.chartRevenueData = data;
-                repaint();
-            }
-
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -273,6 +270,8 @@ public class HomeView extends JFrame {
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     g2.setColor(UIThemeConfig.BG_CARD);
                     g2.fillRect(0, 0, getWidth(), getHeight());
+
+                    Map<String, Double> chartRevenueData = chartDataRef.get();
 
                     if (chartRevenueData == null || chartRevenueData.isEmpty()) {
                         g2.setColor(UIThemeConfig.TEXT_MUTED);
@@ -382,14 +381,10 @@ public class HomeView extends JFrame {
                         });
                     }
 
-                    // Revenue chart — use reflection-free approach: just set data and repaint
+                    // Revenue chart — set data vào AtomicReference rồi repaint
                     if (revenueData != null) {
-                        try {
-                            var setMethod = chartArea.getClass().getMethod("setRevenueData", Map.class);
-                            setMethod.invoke(chartArea, revenueData);
-                        } catch (Exception ignored) {
-                            chartArea.repaint();
-                        }
+                        chartDataRef.set(revenueData);
+                        chartArea.repaint();
                     }
                 },
                 ex -> {
