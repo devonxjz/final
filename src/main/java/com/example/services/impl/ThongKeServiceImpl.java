@@ -1,7 +1,6 @@
 package com.example.services.impl;
 
 import com.example.dao.ThongKeDAO;
-import com.example.dao.impl.ThongKeDAOImpl;
 import com.example.services.ThongKeService;
 
 import java.util.Map;
@@ -12,8 +11,8 @@ import java.util.Map;
 public class ThongKeServiceImpl implements ThongKeService {
     private final ThongKeDAO dao;
 
-    public ThongKeServiceImpl() {
-        this.dao = new ThongKeDAOImpl();
+    public ThongKeServiceImpl(ThongKeDAO dao) {
+        this.dao = dao;
     }
 
     @Override

@@ -41,7 +41,14 @@ public class Main {
                 com.example.config.AppConfig.initialize();
                 System.out.println("AppConfig initialized.");
 
-                // 6. Open main UI
+                // 6. Register Shutdown Hook for graceful cleanup (HikariCP pool)
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    System.out.println("Đang dọn dẹp kết nối Database...");
+                    HibernateConfig.shutdown();
+                    System.out.println("Đã đóng kết nối Database.");
+                }));
+
+                // 7. Open main UI
                 new HomeView();
 
             } catch (Exception ex) {

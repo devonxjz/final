@@ -41,13 +41,13 @@ public class AppConfig {
         hoadonDAO = new HoaDonBanHangDAOImpl();
         thongKeDAO = new ThongKeDAOImpl();
 
-        // Init Services
-        sanPhamService = new SanPhamServiceImpl();
-        khachHangService = new KhachHangServiceImpl();
-        nhaCungCapService = new NhaCungCapServiceImpl();
-        thanhToanService = new ThanhToanServiceImpl();
-        hoaDonBanHangService = new HoaDonBanHangServiceImpl();
-        thongKeService = new ThongKeServiceImpl();
+        // Init Services (inject DAOs via constructor — proper DI)
+        sanPhamService = new SanPhamServiceImpl(sanPhamDAO);
+        khachHangService = new KhachHangServiceImpl(khachHangDAO);
+        nhaCungCapService = new NhaCungCapServiceImpl(nhaCungCapDAO);
+        thanhToanService = new ThanhToanServiceImpl(thanhToanDAO);
+        hoaDonBanHangService = new HoaDonBanHangServiceImpl(hoadonDAO, khachHangDAO, sanPhamDAO);
+        thongKeService = new ThongKeServiceImpl(thongKeDAO);
         dashboardService = new DashboardServiceImpl(hoadonDAO, sanPhamDAO, khachHangDAO);
     }
 

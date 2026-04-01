@@ -2,9 +2,10 @@ package com.example.controller;
 
 import com.example.services.ThongKeService;
 import com.example.view.ThongKeView;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import com.example.util.SwingWorkerUtils;
+
 import java.util.Map;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -12,8 +13,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 /**
- * Controller xử lý báo cáo, biểu đồ doanh thu và sản phẩm bán chạy
- * Tương ứng với chương cuối của phần Controller trong tài liệu
+ * Controller báo cáo/thống kê — Async optimized.
  */
 public class ThongKeController {
     private final ThongKeService service;
@@ -27,77 +27,73 @@ public class ThongKeController {
     }
 
     private void initController() {
-        // Sự kiện khi nhấn nút "Thống kê" theo khoảng thời gian
-        view.btnSubmit.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateStatistics();
-            }
-        });
+        view.btnSubmit.addActionListener(e -> updateStatistics());
 
-        // Sự kiện xuất báo cáo ra file Excel (nếu có trong yêu cầu đồ án)
         if (view.btnExportExcel != null) {
             view.btnExportExcel.addActionListener(e -> exportToExcel());
         }
     }
 
     private void loadDefaultStatistics() {
-        // Mặc định thống kê doanh thu 7 ngày gần nhất hoặc tháng hiện tại
         updateStatistics();
     }
 
+    // ====== ASYNC: Load toàn bộ thống kê ======
     private void updateStatistics() {
-        String tuNgay = view.getTuNgay(); // Giả định View có hàm lấy ngày từ JDateChooser
+        String tuNgay = view.getTuNgay();
         String denNgay = view.getDenNgay();
 
-        // 1. Cập nhật các con số tổng quát (Cards)
-        double tongDoanhThu = service.getTongDoanhThu(tuNgay, denNgay);
-        int tongDonHang = service.getTongDonHang(tuNgay, denNgay);
-        double loiNhuan = service.getLoiNhuan(tuNgay, denNgay);
+        SwingWorkerUtils.runAsync(
+            view.btnSubmit,
+            () -> {
+                // Chạy tất cả DB calls trên background thread
+                double tongDoanhThu = service.getTongDoanhThu(tuNgay, denNgay);
+                int tongDonHang = service.getTongDonHang(tuNgay, denNgay);
+                double loiNhuan = service.getLoiNhuan(tuNgay, denNgay);
+                Map<String, Integer> topSelling = service.getTopSellingProducts(tuNgay, denNgay);
+                Map<String, Double> chartData = service.getRevenueByDay(tuNgay, denNgay);
 
-        view.lblTongDoanhThu.setText(String.format("%,.0f VNĐ", tongDoanhThu));
-        view.lblTongDonHang.setText(String.valueOf(tongDonHang));
-        view.lblLoiNhuan.setText(String.format("%,.0f VNĐ", loiNhuan));
+                // Đóng gói kết quả
+                return new Object[]{tongDoanhThu, tongDonHang, loiNhuan, topSelling, chartData};
+            },
+            result -> {
+                // Cập nhật UI trên EDT
+                double tongDoanhThu = (double) result[0];
+                int tongDonHang = (int) result[1];
+                double loiNhuan = (double) result[2];
+                @SuppressWarnings("unchecked")
+                Map<String, Integer> topSelling = (Map<String, Integer>) result[3];
+                @SuppressWarnings("unchecked")
+                Map<String, Double> chartData = (Map<String, Double>) result[4];
 
-        // 2. Cập nhật bảng Sản phẩm bán chạy nhất
-        updateBestSellerTable(tuNgay, denNgay);
+                view.lblTongDoanhThu.setText(String.format("%,.0f VNĐ", tongDoanhThu));
+                view.lblTongDonHang.setText(String.valueOf(tongDonHang));
+                view.lblLoiNhuan.setText(String.format("%,.0f VNĐ", loiNhuan));
 
-        // 3. Vẽ biểu đồ doanh thu (Sử dụng thư viện JFreeChart)
-        drawRevenueChart(tuNgay, denNgay);
-    }
+                // Bảng sản phẩm bán chạy
+                DefaultTableModel model = (DefaultTableModel) view.tableBestSeller.getModel();
+                model.setRowCount(0);
+                for (Map.Entry<String, Integer> entry : topSelling.entrySet()) {
+                    model.addRow(new Object[]{ entry.getKey(), entry.getValue() });
+                }
 
-    private void updateBestSellerTable(String tuNgay, String denNgay) {
-        DefaultTableModel model = (DefaultTableModel) view.tableBestSeller.getModel();
-        model.setRowCount(0);
-
-        Map<String, Integer> data = service.getTopSellingProducts(tuNgay, denNgay);
-        for (Map.Entry<String, Integer> entry : data.entrySet()) {
-            model.addRow(new Object[] { entry.getKey(), entry.getValue() });
-        }
-    }
-
-    private void drawRevenueChart(String tuNgay, String denNgay) {
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        Map<String, Double> chartData = service.getRevenueByDay(tuNgay, denNgay);
-
-        for (Map.Entry<String, Double> entry : chartData.entrySet()) {
-            dataset.addValue(entry.getValue(), "Doanh thu", entry.getKey());
-        }
-
-        JFreeChart lineChart = ChartFactory.createLineChart(
-                "BIỂU ĐỒ DOANH THU",
-                "Ngày", "Số tiền (VNĐ)",
-                dataset);
-
-        ChartPanel chartPanel = new ChartPanel(lineChart);
-        view.panelChart.removeAll();
-        view.panelChart.add(chartPanel);
-        view.panelChart.validate();
+                // Biểu đồ doanh thu
+                DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+                for (Map.Entry<String, Double> entry : chartData.entrySet()) {
+                    dataset.addValue(entry.getValue(), "Doanh thu", entry.getKey());
+                }
+                JFreeChart lineChart = ChartFactory.createLineChart(
+                        "BIỂU ĐỒ DOANH THU", "Ngày", "Số tiền (VNĐ)", dataset);
+                ChartPanel chartPanel = new ChartPanel(lineChart);
+                view.panelChart.removeAll();
+                view.panelChart.add(chartPanel);
+                view.panelChart.validate();
+            },
+            ex -> JOptionPane.showMessageDialog(view, "Lỗi tải thống kê: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE)
+        );
     }
 
     private void exportToExcel() {
-        // Logic gọi lớp helper để xuất file Excel
-        // Đây thường là phần mở rộng để đạt điểm 9-10
         System.out.println("Đang xuất báo cáo Excel...");
     }
 }

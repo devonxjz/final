@@ -97,7 +97,6 @@ public class HomeView extends JFrame {
         rightSection.add(avatar);
 
         header.add(logo, BorderLayout.WEST);
-        // header.add(searchWrap, BorderLayout.CENTER);
         header.add(rightSection, BorderLayout.EAST);
         return header;
     }
@@ -192,32 +191,19 @@ public class HomeView extends JFrame {
         JLabel lblWelcome = new JLabel("Bảng điều khiển");
         lblWelcome.setFont(UIThemeConfig.FONT_TITLE);
         lblWelcome.setForeground(UIThemeConfig.TEXT_PRIMARY);
-        JLabel lblSub = new JLabel("Chào mừng bạn trở lại! Đây là tình hình hôm nay.");
+        JLabel lblSub = new JLabel("Đang tải dữ liệu...");
         lblSub.setFont(UIThemeConfig.FONT_BODY);
         lblSub.setForeground(UIThemeConfig.TEXT_MUTED);
         welcomePanel.add(lblWelcome, BorderLayout.NORTH);
         welcomePanel.add(lblSub, BorderLayout.SOUTH);
 
-        // Stats cards — 4 in a row
+        // Stats cards — 4 in a row (placeholder)
         JPanel statsRow = new JPanel(new GridLayout(1, 4, 16, 0));
         statsRow.setOpaque(false);
-
-        // Load real data
-        DashboardStatusDTO status;
-        try {
-            status = AppConfig.getDashboardService().getDashboardStatus();
-        } catch (Exception e) {
-            status = new DashboardStatusDTO(0, 0, 0, 0);
-        }
-
-        statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY",
-                String.format("%,.0f VND", status.revenueToday()), "$", UIThemeConfig.ACCENT));
-        statsRow.add(UIThemeConfig.createStatCard("TỔNG ĐƠN HÀNG",
-                String.valueOf(status.totalOrders()), "#", UIThemeConfig.ACCENT_GREEN));
-        statsRow.add(UIThemeConfig.createStatCard("SẢN PHẨM TRONG KHO",
-                String.valueOf(status.productsInStock()), "📦", UIThemeConfig.ACCENT_YELLOW));
-        statsRow.add(UIThemeConfig.createStatCard("KHÁCH HÀNG",
-                String.valueOf(status.totalCustomers()), "👥", UIThemeConfig.ACCENT_PURPLE));
+        statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY", "...", "$", UIThemeConfig.ACCENT));
+        statsRow.add(UIThemeConfig.createStatCard("TỔNG ĐƠN HÀNG", "...", "#", UIThemeConfig.ACCENT_GREEN));
+        statsRow.add(UIThemeConfig.createStatCard("SẢN PHẨM TRONG KHO", "...", "📦", UIThemeConfig.ACCENT_YELLOW));
+        statsRow.add(UIThemeConfig.createStatCard("KHÁCH HÀNG", "...", "👥", UIThemeConfig.ACCENT_PURPLE));
 
         JPanel topSection = new JPanel(new BorderLayout(0, 16));
         topSection.setOpaque(false);
@@ -230,7 +216,7 @@ public class HomeView extends JFrame {
         JPanel bottomSection = new JPanel(new GridLayout(1, 2, 16, 0));
         bottomSection.setOpaque(false);
 
-        // Recent Orders
+        // Recent Orders table (empty initially)
         JPanel ordersPanel = UIThemeConfig.createGlassPanel(new BorderLayout(0, 10));
         ordersPanel.setBorder(new EmptyBorder(18, 18, 18, 18));
         JLabel lblOrders = new JLabel("Đơn hàng gần đây");
@@ -238,26 +224,10 @@ public class HomeView extends JFrame {
         lblOrders.setForeground(UIThemeConfig.TEXT_PRIMARY);
         ordersPanel.add(lblOrders, BorderLayout.NORTH);
 
-        // Recent orders table
         String[] orderCols = { "Mã đơn hàng", "Ngày", "Tổng tiền", "Trạng thái" };
         DefaultTableModel orderModel = new DefaultTableModel(orderCols, 0) {
-            @Override
-            public boolean isCellEditable(int r, int c) {
-                return false;
-            }
+            @Override public boolean isCellEditable(int r, int c) { return false; }
         };
-        try {
-            List<HoaDonBanHangDTO> recent = AppConfig.getHoaDonBanHangService().getAllHoaDon();
-            int limit = Math.min(recent.size(), 8);
-            for (int i = 0; i < limit; i++) {
-                HoaDonBanHangDTO hd = recent.get(i);
-                orderModel.addRow(new Object[] {
-                        hd.maHDBH(), hd.ngayTao(), String.format("%,.0f", hd.tongTien()), hd.trangThai()
-                });
-            }
-        } catch (Exception ignored) {
-        }
-
         JTable ordersTable = new JTable(orderModel);
         UIThemeConfig.styleTable(ordersTable);
         ordersPanel.add(UIThemeConfig.createScrollPane(ordersTable), BorderLayout.CENTER);
@@ -270,35 +240,27 @@ public class HomeView extends JFrame {
         lblChart.setForeground(UIThemeConfig.TEXT_PRIMARY);
         chartPanel.add(lblChart, BorderLayout.NORTH);
 
-        // Load revenue data once (not in paintComponent to avoid DB calls during paint)
-        Map<String, Double> revenueData;
-        try {
-            java.time.LocalDate now = java.time.LocalDate.now();
-            String to = now.toString();
-            String from = now.minusDays(6).toString();
-            revenueData = AppConfig.getThongKeService().getRevenueByDay(from, to);
-        } catch (Exception ignored) {
-            revenueData = null;
-        }
-        final Map<String, Double> chartRevenueData = revenueData;
-
-        // Simple bar chart
         JPanel chartArea = new JPanel() {
+            private Map<String, Double> chartRevenueData = null;
+
+            public void setRevenueData(Map<String, Double> data) {
+                this.chartRevenueData = data;
+                repaint();
+            }
+
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
                 try {
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                    // Paint dark background to prevent blue screen flash
                     g2.setColor(UIThemeConfig.BG_CARD);
                     g2.fillRect(0, 0, getWidth(), getHeight());
 
                     if (chartRevenueData == null || chartRevenueData.isEmpty()) {
                         g2.setColor(UIThemeConfig.TEXT_MUTED);
                         g2.setFont(UIThemeConfig.FONT_BODY);
-                        g2.drawString("Không có dữ liệu doanh thu", 20, getHeight() / 2);
+                        g2.drawString("Đang tải dữ liệu...", 20, getHeight() / 2);
                         return;
                     }
 
@@ -313,13 +275,11 @@ public class HomeView extends JFrame {
                         int barH = maxVal > 0 ? (int) (val / maxVal * h) : 0;
                         int y = getHeight() - 30 - barH;
 
-                        // Gradient bar
                         GradientPaint gp = new GradientPaint(x, y, UIThemeConfig.ACCENT,
                                 x, getHeight() - 30, new Color(63, 132, 229, 60));
                         g2.setPaint(gp);
                         g2.fillRoundRect(x, y, barWidth, barH, 6, 6);
 
-                        // Label
                         g2.setColor(UIThemeConfig.TEXT_MUTED);
                         g2.setFont(UIThemeConfig.FONT_SMALL);
                         String label = entry.getKey().length() > 5 ? entry.getKey().substring(5) : entry.getKey();
@@ -343,6 +303,73 @@ public class HomeView extends JFrame {
         contentPanel.add(dash, BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
+
+        // ====== ASYNC: Load tất cả dữ liệu Dashboard trên Background Thread ======
+        com.example.util.SwingWorkerUtils.runAsync(
+            null,
+            () -> {
+                DashboardStatusDTO status;
+                try { status = AppConfig.getDashboardService().getDashboardStatus(); }
+                catch (Exception e) { status = new DashboardStatusDTO(0, 0, 0, 0); }
+
+                List<HoaDonBanHangDTO> recent;
+                try { recent = AppConfig.getHoaDonBanHangService().getAllHoaDon(); }
+                catch (Exception e) { recent = new java.util.ArrayList<>(); }
+
+                Map<String, Double> revenueData;
+                try {
+                    java.time.LocalDate now = java.time.LocalDate.now();
+                    revenueData = AppConfig.getThongKeService().getRevenueByDay(now.minusDays(6).toString(), now.toString());
+                } catch (Exception e) { revenueData = null; }
+
+                return new Object[]{status, recent, revenueData};
+            },
+            result -> {
+                // Cập nhật UI trên EDT
+                DashboardStatusDTO status = (DashboardStatusDTO) result[0];
+                @SuppressWarnings("unchecked")
+                List<HoaDonBanHangDTO> recent = (List<HoaDonBanHangDTO>) result[1];
+                @SuppressWarnings("unchecked")
+                Map<String, Double> revenueData = (Map<String, Double>) result[2];
+
+                lblSub.setText("Chào mừng bạn trở lại! Đây là tình hình hôm nay.");
+
+                // Rebuild stats cards with real data
+                statsRow.removeAll();
+                statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY",
+                        String.format("%,.0f VND", status.revenueToday()), "$", UIThemeConfig.ACCENT));
+                statsRow.add(UIThemeConfig.createStatCard("TỔNG ĐƠN HÀNG",
+                        String.valueOf(status.totalOrders()), "#", UIThemeConfig.ACCENT_GREEN));
+                statsRow.add(UIThemeConfig.createStatCard("SẢN PHẨM TRONG KHO",
+                        String.valueOf(status.productsInStock()), "📦", UIThemeConfig.ACCENT_YELLOW));
+                statsRow.add(UIThemeConfig.createStatCard("KHÁCH HÀNG",
+                        String.valueOf(status.totalCustomers()), "👥", UIThemeConfig.ACCENT_PURPLE));
+                statsRow.revalidate();
+                statsRow.repaint();
+
+                // Recent orders
+                int limit = Math.min(recent.size(), 8);
+                for (int i = 0; i < limit; i++) {
+                    HoaDonBanHangDTO hd = recent.get(i);
+                    orderModel.addRow(new Object[] {
+                            hd.maHDBH(), hd.ngayTao(), String.format("%,.0f", hd.tongTien()), hd.trangThai()
+                    });
+                }
+
+                // Revenue chart — use reflection-free approach: just set data and repaint
+                if (revenueData != null) {
+                    try {
+                        var setMethod = chartArea.getClass().getMethod("setRevenueData", Map.class);
+                        setMethod.invoke(chartArea, revenueData);
+                    } catch (Exception ignored) {
+                        chartArea.repaint();
+                    }
+                }
+            },
+            ex -> {
+                lblSub.setText("Lỗi tải dữ liệu dashboard.");
+            }
+        );
     }
 
     // ═══════════════════════════════════════════════════════════════════

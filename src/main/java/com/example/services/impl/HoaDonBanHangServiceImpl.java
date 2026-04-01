@@ -1,11 +1,8 @@
 package com.example.services.impl;
 
 import com.example.dao.HoaDonBanHangDAO;
-import com.example.dao.impl.HoaDonBanHangDAOImpl;
 import com.example.dao.KhachHangDAO;
-import com.example.dao.impl.KhachHangDAOImpl;
 import com.example.dao.SanPhamDAO;
-import com.example.dao.impl.SanPhamDAOImpl;
 import com.example.dto.ChiTietHDBHDTO;
 import com.example.dto.HoaDonBanHangDTO;
 import com.example.dto.ThanhToanDTO;
@@ -31,10 +28,10 @@ public class HoaDonBanHangServiceImpl implements HoaDonBanHangService {
     private final KhachHangDAO khachHangDAO;
     private final SanPhamDAO sanPhamDAO;
 
-    public HoaDonBanHangServiceImpl() {
-        this.hoadonDAO = new HoaDonBanHangDAOImpl();
-        this.khachHangDAO = new KhachHangDAOImpl();
-        this.sanPhamDAO = new SanPhamDAOImpl();
+    public HoaDonBanHangServiceImpl(HoaDonBanHangDAO hoadonDAO, KhachHangDAO khachHangDAO, SanPhamDAO sanPhamDAO) {
+        this.hoadonDAO = hoadonDAO;
+        this.khachHangDAO = khachHangDAO;
+        this.sanPhamDAO = sanPhamDAO;
     }
 
     private HoaDonBanHangDTO mapToHoaDonDTO(HoaDonBanHang h) {

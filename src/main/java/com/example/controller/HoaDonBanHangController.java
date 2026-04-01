@@ -10,6 +10,7 @@ import com.example.services.KhachHangService;
 import com.example.services.SanPhamService;
 import com.example.util.InputValidator;
 import com.example.util.ValidationResult;
+import com.example.util.SwingWorkerUtils;
 import com.example.view.HoaDonBanHangView;
 import com.example.view.HoaDonView;
 import com.example.view.ThemHoaDonBanView;
@@ -28,21 +29,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Controller thống nhất xử lý nghiệp vụ Quản lý danh sách hóa đơn và Bán hàng/Trả góp.
- * Đã refactor theo Clean Architecture (không gọi DAO, giao tiếp qua DTO).
+ * Controller thống nhất xử lý Quản lý HĐ + Bán hàng/Trả góp.
+ * Đã tối ưu: Tất cả DB call chạy async qua SwingWorkerUtils.
  */
 public class HoaDonBanHangController {
 
-    // --- Services ---
     private final HoaDonBanHangService hdService;
     private final SanPhamService spService;
     private final KhachHangService khService;
 
-    // --- Views ---
-    private final HoaDonBanHangView dsHoaDonView; // View quản lý danh sách HĐ
-    private final HoaDonView banHangView;         // View POS / Bán hàng
+    private final HoaDonBanHangView dsHoaDonView;
+    private final HoaDonView banHangView;
 
-    // --- State ---
     private final List<ChiTietHDBHDTO> gioHang = new ArrayList<>();
 
     public HoaDonBanHangController(HoaDonBanHangService hdService,
@@ -81,16 +79,19 @@ public class HoaDonBanHangController {
         dsHoaDonView.btnTimKiem.addActionListener(e -> {
             Date selectedDate = dsHoaDonView.dateChooser.getDate();
             if (selectedDate != null) {
-                hienThiDsHDBH(hdService.searchByDate(selectedDate));
+                SwingWorkerUtils.runAsync(
+                    dsHoaDonView.btnTimKiem,
+                    () -> hdService.searchByDate(selectedDate),
+                    this::hienThiDsHDBH,
+                    ex -> JOptionPane.showMessageDialog(dsHoaDonView, "Lỗi tìm kiếm: " + ex.getMessage())
+                );
             } else {
                 loadDsHoaDon();
             }
         });
 
-        // Click "Add Order" -> hiển thị form tạo đơn tay (dành cho đơn nhập lại hoặc backoffice)
         dsHoaDonView.btnThem.addActionListener(e -> showThemHoaDonBanDialog());
 
-        // Xử lý click chọn hóa đơn để xem chi tiết
         dsHoaDonView.tableDsHDBH.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -104,16 +105,23 @@ public class HoaDonBanHangController {
         });
     }
 
+    // ====== ASYNC: Load danh sách hóa đơn ======
     private void loadDsHoaDon() {
-        hienThiDsHDBH(hdService.getAllHoaDon());
-        ((DefaultTableModel) dsHoaDonView.tableChiTietHD.getModel()).setRowCount(0);
-        ((DefaultTableModel) dsHoaDonView.tableThanhToan.getModel()).setRowCount(0);
+        SwingWorkerUtils.runAsync(
+            dsHoaDonView.btnReload,
+            () -> hdService.getAllHoaDon(),
+            danhSach -> {
+                hienThiDsHDBH(danhSach);
+                ((DefaultTableModel) dsHoaDonView.tableChiTietHD.getModel()).setRowCount(0);
+                ((DefaultTableModel) dsHoaDonView.tableThanhToan.getModel()).setRowCount(0);
+            },
+            ex -> JOptionPane.showMessageDialog(dsHoaDonView, "Lỗi tải hóa đơn: " + ex.getMessage())
+        );
     }
 
     private void hienThiDsHDBH(List<HoaDonBanHangDTO> danhSach) {
         DefaultTableModel model = new DefaultTableModel(
                 new String[]{"Mã HĐBH", "Ngày tạo", "Loại HĐ", "Tổng tiền", "Tiền cọc", "Trạng thái"}, 0);
-
         for (HoaDonBanHangDTO hd : danhSach) {
             model.addRow(new Object[]{
                     hd.maHDBH(), hd.ngayTao(), hd.loaiHD(),
@@ -123,26 +131,40 @@ public class HoaDonBanHangController {
         dsHoaDonView.tableDsHDBH.setModel(model);
     }
 
+    // ====== ASYNC: Load chi tiết hóa đơn ======
     private void loadChiTietHoaDon(int maHDBH) {
-        DefaultTableModel model = new DefaultTableModel(new String[]{"Mã SP", "Tên SP", "Số lượng", "Tổng tiền"}, 0);
-        List<ChiTietHDBHDTO> ds = hdService.getAllChiTiet(maHDBH);
-        for (ChiTietHDBHDTO ct : ds) {
-            model.addRow(new Object[]{ct.maSP(), ct.tenSP(), ct.soLuong(), ct.tongTien()});
-        }
-        dsHoaDonView.tableChiTietHD.setModel(model);
+        SwingWorkerUtils.runAsync(
+            null,
+            () -> hdService.getAllChiTiet(maHDBH),
+            ds -> {
+                DefaultTableModel model = new DefaultTableModel(new String[]{"Mã SP", "Tên SP", "Số lượng", "Tổng tiền"}, 0);
+                for (ChiTietHDBHDTO ct : ds) {
+                    model.addRow(new Object[]{ct.maSP(), ct.tenSP(), ct.soLuong(), ct.tongTien()});
+                }
+                dsHoaDonView.tableChiTietHD.setModel(model);
+            },
+            ex -> {}
+        );
     }
 
+    // ====== ASYNC: Load thanh toán của hóa đơn ======
     private void loadThanhToanHoaDon(int maHDBH) {
-        DefaultTableModel model = new DefaultTableModel(
-                new String[]{"Mã TT", "Mã KH", "Tên KH", "Ngày TT", "Tiền TT", "Hình thức TT"}, 0);
-        List<ThanhToanDTO> ds = hdService.getAllThanhToan(maHDBH);
-        for (ThanhToanDTO tt : ds) {
-            model.addRow(new Object[]{
-                    tt.maTT(), tt.maKH(), tt.tenKH(), tt.ngayTT(),
-                    tt.tienThanhToan(), tt.hinhThucTT()
-            });
-        }
-        dsHoaDonView.tableThanhToan.setModel(model);
+        SwingWorkerUtils.runAsync(
+            null,
+            () -> hdService.getAllThanhToan(maHDBH),
+            ds -> {
+                DefaultTableModel model = new DefaultTableModel(
+                        new String[]{"Mã TT", "Mã KH", "Tên KH", "Ngày TT", "Tiền TT", "Hình thức TT"}, 0);
+                for (ThanhToanDTO tt : ds) {
+                    model.addRow(new Object[]{
+                            tt.maTT(), tt.maKH(), tt.tenKH(), tt.ngayTT(),
+                            tt.tienThanhToan(), tt.hinhThucTT()
+                    });
+                }
+                dsHoaDonView.tableThanhToan.setModel(model);
+            },
+            ex -> {}
+        );
     }
 
     // =========================================================================
@@ -164,16 +186,20 @@ public class HoaDonBanHangController {
         banHangView.btnHuy.addActionListener(e -> resetFormBanHang());
     }
 
+    // ====== ASYNC: Load danh sách sản phẩm cho POS ======
     private void loadDsSanPham() {
-        DefaultTableModel tModel = (DefaultTableModel) banHangView.tableSanPham.getModel();
-        tModel.setRowCount(0);
-        try {
-            for (SanPhamDTO dto : spService.getAllSanPham()) {
-                tModel.addRow(new Object[]{dto.maSP(), dto.tenSP(), dto.giaBan(), dto.soLuongTrongKho()});
-            }
-        } catch (ServiceException ex) {
-            JOptionPane.showMessageDialog(banHangView, "Lỗi tải danh sách sản phẩm: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
-        }
+        SwingWorkerUtils.runAsync(
+            null,
+            () -> spService.getAllSanPham(),
+            danhSach -> {
+                DefaultTableModel tModel = (DefaultTableModel) banHangView.tableSanPham.getModel();
+                tModel.setRowCount(0);
+                for (SanPhamDTO dto : danhSach) {
+                    tModel.addRow(new Object[]{dto.maSP(), dto.tenSP(), dto.giaBan(), dto.soLuongTrongKho()});
+                }
+            },
+            ex -> JOptionPane.showMessageDialog(banHangView, "Lỗi tải danh sách sản phẩm: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE)
+        );
     }
 
     private void updateUIPayMode() {
@@ -194,10 +220,7 @@ public class HoaDonBanHangController {
         if (inputSL == null || inputSL.trim().isEmpty()) return;
 
         ValidationResult<Integer> rSL = InputValidator.parseIntSafe(inputSL, "Số lượng");
-        if (!rSL.isValid()) {
-            JOptionPane.showMessageDialog(banHangView, rSL.getErrorMessage());
-            return;
-        }
+        if (!rSL.isValid()) { JOptionPane.showMessageDialog(banHangView, rSL.getErrorMessage()); return; }
 
         int sl = rSL.getValue();
         if (sl <= 0 || sl > tonKho) {
@@ -245,6 +268,7 @@ public class HoaDonBanHangController {
         }
     }
 
+    // ====== ASYNC: Xử lý thanh toán ======
     private void xuLyThanhToan() {
         if (gioHang.isEmpty()) {
             JOptionPane.showMessageDialog(banHangView, "Giỏ hàng đang trống!");
@@ -254,14 +278,8 @@ public class HoaDonBanHangController {
         ValidationResult<Integer> rMaKH = InputValidator.parseIntSafe(banHangView.txtMaKH.getText(), "Mã khách hàng");
         ValidationResult<Double> rTongTien = InputValidator.parseCurrency(banHangView.txtTongTien.getText(), "Tổng tiền");
 
-        if (!rMaKH.isValid()) {
-            JOptionPane.showMessageDialog(banHangView, rMaKH.getErrorMessage());
-            return;
-        }
-        if (!rTongTien.isValid()) {
-            JOptionPane.showMessageDialog(banHangView, rTongTien.getErrorMessage());
-            return;
-        }
+        if (!rMaKH.isValid()) { JOptionPane.showMessageDialog(banHangView, rMaKH.getErrorMessage()); return; }
+        if (!rTongTien.isValid()) { JOptionPane.showMessageDialog(banHangView, rTongTien.getErrorMessage()); return; }
 
         String loaiHD = banHangView.cbLoaiHD.getSelectedItem().toString();
         double laiSuat = 0;
@@ -271,30 +289,29 @@ public class HoaDonBanHangController {
             ValidationResult<Float> rLaiSuat = InputValidator.parseFloatSafe(banHangView.txtLaiSuat.getText(), "Lãi suất");
             ValidationResult<Integer> rThoiHan = InputValidator.parseIntSafe(banHangView.txtThoiHan.getText(), "Thời hạn");
 
-            if (!rLaiSuat.isValid()) {
-                JOptionPane.showMessageDialog(banHangView, rLaiSuat.getErrorMessage());
-                return;
-            }
-            if (!rThoiHan.isValid()) {
-                JOptionPane.showMessageDialog(banHangView, rThoiHan.getErrorMessage());
-                return;
-            }
+            if (!rLaiSuat.isValid()) { JOptionPane.showMessageDialog(banHangView, rLaiSuat.getErrorMessage()); return; }
+            if (!rThoiHan.isValid()) { JOptionPane.showMessageDialog(banHangView, rThoiHan.getErrorMessage()); return; }
 
             laiSuat = rLaiSuat.getValue();
             thoiHan = rThoiHan.getValue();
         }
 
-        try {
-            boolean isSuccess = hdService.thanhToanHoaDon(rMaKH.getValue(), loaiHD, rTongTien.getValue(), laiSuat, thoiHan, gioHang);
-            if (isSuccess) {
+        // Capture for lambda
+        final double finalLaiSuat = laiSuat;
+        final int finalThoiHan = thoiHan;
+        final List<ChiTietHDBHDTO> snapshot = new ArrayList<>(gioHang);
+
+        SwingWorkerUtils.runAsyncVoid(
+            banHangView.btnThanhToan,
+            () -> hdService.thanhToanHoaDon(rMaKH.getValue(), loaiHD, rTongTien.getValue(), finalLaiSuat, finalThoiHan, snapshot),
+            () -> {
                 JOptionPane.showMessageDialog(banHangView, "Thanh toán thành công!");
                 resetFormBanHang();
-                loadDsSanPham(); 
-                loadDsHoaDon();  
-            }
-        } catch (ServiceException ex) {
-            JOptionPane.showMessageDialog(banHangView, "Lỗi khi lưu hóa đơn: " + ex.getMessage(), "Lỗi nghiệp vụ", JOptionPane.ERROR_MESSAGE);
-        }
+                loadDsSanPham();
+                loadDsHoaDon();
+            },
+            ex -> JOptionPane.showMessageDialog(banHangView, "Lỗi khi lưu hóa đơn: " + ex.getMessage(), "Lỗi nghiệp vụ", JOptionPane.ERROR_MESSAGE)
+        );
     }
 
     private void resetFormBanHang() {
@@ -308,37 +325,38 @@ public class HoaDonBanHangController {
     }
 
     // =========================================================================
-    // PHẦN 3: NGHIỆP VỤ TẠO ĐƠN HÀNG MỚI (POPUP) TỪ ThemHoaDonBanView
+    // PHẦN 3: NGHIỆP VỤ TẠO ĐƠN HÀNG MỚI (POPUP)
     // =========================================================================
 
     private void showThemHoaDonBanDialog() {
         ThemHoaDonBanView themView = new ThemHoaDonBanView();
-        Map<Integer, Integer> gioHangPopup = new HashMap<>(); // MaSP -> SoLuong
+        Map<Integer, Integer> gioHangPopup = new HashMap<>();
         
-        List<SanPhamDTO> sanPhamList = new ArrayList<>();
-        try {
-            sanPhamList = spService.getAllSanPham();
-        } catch (ServiceException e) {
-            JOptionPane.showMessageDialog(themView, "Lỗi khi lấy danh sách sản phẩm!");
-        }
+        final List<SanPhamDTO> sanPhamList = new ArrayList<>();
 
-        // Cập nhật model bảng
-        String[] headerSP = { "Mã SP", "Tên SP", "Giá bán", "Tồn kho" };
-        themView.tableSanPham.setModel(new DefaultTableModel(headerSP, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) { return false; }
-        });
-        String[] headerChon = { "Mã SP", "Tên SP", "Số lượng", "Giá bán", "Thành tiền" };
-        themView.tableSanPhamChon.setModel(new DefaultTableModel(headerChon, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) { return false; }
-        });
+        // ====== ASYNC: Load sản phẩm cho popup ======
+        SwingWorkerUtils.runAsync(
+            null,
+            () -> spService.getAllSanPham(),
+            list -> {
+                sanPhamList.addAll(list);
 
-        // Load sản phẩm ra bảng Popup
-        DefaultTableModel modelSP = (DefaultTableModel) themView.tableSanPham.getModel();
-        for (SanPhamDTO sp : sanPhamList) {
-            modelSP.addRow(new Object[] { sp.maSP(), sp.tenSP(), sp.giaBan(), sp.soLuongTrongKho() });
-        }
+                String[] headerSP = { "Mã SP", "Tên SP", "Giá bán", "Tồn kho" };
+                themView.tableSanPham.setModel(new DefaultTableModel(headerSP, 0) {
+                    @Override public boolean isCellEditable(int row, int column) { return false; }
+                });
+                String[] headerChon = { "Mã SP", "Tên SP", "Số lượng", "Giá bán", "Thành tiền" };
+                themView.tableSanPhamChon.setModel(new DefaultTableModel(headerChon, 0) {
+                    @Override public boolean isCellEditable(int row, int column) { return false; }
+                });
+
+                DefaultTableModel modelSP = (DefaultTableModel) themView.tableSanPham.getModel();
+                for (SanPhamDTO sp : list) {
+                    modelSP.addRow(new Object[] { sp.maSP(), sp.tenSP(), sp.giaBan(), sp.soLuongTrongKho() });
+                }
+            },
+            ex -> JOptionPane.showMessageDialog(themView, "Lỗi khi lấy danh sách sản phẩm!")
+        );
 
         // Tự động điền khách hàng khi nhập sđt
         themView.txtSDT.addFocusListener(new FocusAdapter() {
@@ -346,20 +364,19 @@ public class HoaDonBanHangController {
             public void focusLost(FocusEvent e) {
                 String sdt = themView.txtSDT.getText().trim();
                 if (!sdt.isEmpty()) {
-                    try {
-                        List<KhachHangDTO> listKH = khService.search(sdt);
-                        if (listKH != null && !listKH.isEmpty()) {
-                            KhachHangDTO kh = listKH.get(0);
-                            themView.txtTenKH.setText(kh.tenKH());
-                        }
-                    } catch (Exception ex) {
-                        // Ignore
-                    }
+                    SwingWorkerUtils.runAsync(null,
+                        () -> khService.search(sdt),
+                        listKH -> {
+                            if (listKH != null && !listKH.isEmpty()) {
+                                themView.txtTenKH.setText(listKH.get(0).tenKH());
+                            }
+                        },
+                        ex -> {}
+                    );
                 }
             }
         });
 
-        // Click sản phẩm
         themView.tableSanPham.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -373,8 +390,6 @@ public class HoaDonBanHangController {
             }
         });
 
-        // Thêm vào giỏ (Popup)
-        List<SanPhamDTO> finalSanPhamList = sanPhamList;
         themView.btnThem.addActionListener(e -> {
             if (themView.txtMaSP.getText().isEmpty() || themView.txtSoLuong.getText().isEmpty()) {
                 JOptionPane.showMessageDialog(themView, "Vui lòng chọn sản phẩm và nhập số lượng!");
@@ -383,35 +398,31 @@ public class HoaDonBanHangController {
             try {
                 int maSP = Integer.parseInt(themView.txtMaSP.getText());
                 int soLuong = Integer.parseInt(themView.txtSoLuong.getText());
-                if (soLuong <= 0) {
-                    JOptionPane.showMessageDialog(themView, "Số lượng phải lớn hơn 0!");
-                    return;
-                }
-                SanPhamDTO found = finalSanPhamList.stream().filter(sp -> sp.maSP() == maSP).findFirst().orElse(null);
+                if (soLuong <= 0) { JOptionPane.showMessageDialog(themView, "Số lượng phải lớn hơn 0!"); return; }
+                SanPhamDTO found = sanPhamList.stream().filter(sp -> sp.maSP() == maSP).findFirst().orElse(null);
                 if (found == null || found.soLuongTrongKho() < soLuong) {
                     JOptionPane.showMessageDialog(themView, "Không đủ hàng trong kho!");
                     return;
                 }
                 gioHangPopup.put(maSP, gioHangPopup.getOrDefault(maSP, 0) + soLuong);
-                updateGioHangPopupUI(themView, gioHangPopup, finalSanPhamList);
+                updateGioHangPopupUI(themView, gioHangPopup, sanPhamList);
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(themView, "Số lượng không hợp lệ!");
             }
         });
 
-        // Hủy chọn
         themView.btnHuyChon.addActionListener(e -> {
             int row = themView.tableSanPhamChon.getSelectedRow();
             if (row >= 0) {
                 int maSP = Integer.parseInt(themView.tableSanPhamChon.getValueAt(row, 0).toString());
                 gioHangPopup.remove(maSP);
-                updateGioHangPopupUI(themView, gioHangPopup, finalSanPhamList);
+                updateGioHangPopupUI(themView, gioHangPopup, sanPhamList);
             } else {
                 JOptionPane.showMessageDialog(themView, "Vui lòng chọn sản phẩm trong giỏ để hủy!");
             }
         });
 
-        // Xuất hóa đơn
+        // ====== ASYNC: Xuất hóa đơn ======
         themView.btnXuatHoaDon.addActionListener(e -> {
             if (gioHangPopup.isEmpty()) {
                 JOptionPane.showMessageDialog(themView, "Giỏ hàng trống!");
@@ -438,28 +449,29 @@ public class HoaDonBanHangController {
                 Map<Integer, Integer> map = new HashMap<>();
                 map.put(entry.getKey(), entry.getValue());
                 chiTietList.add(map);
-                SanPhamDTO found2 = finalSanPhamList.stream().filter(s -> s.maSP() == entry.getKey()).findFirst().orElse(null);
+                SanPhamDTO found2 = sanPhamList.stream().filter(s -> s.maSP() == entry.getKey()).findFirst().orElse(null);
                 if (found2 != null) tongTien += found2.giaBan() * entry.getValue();
             }
 
-            try {
-                boolean success = hdService.themHoaDonVaChiTietVaThanhToan(
-                        ngayTao, loaiHD, tongTien, 0, chiTietList,
-                        tenKH, sdt, diaChi, gioiTinh, hinhThucTT, "Đã thanh toán");
+            final double finalTongTien = tongTien;
+            final Date finalNgayTao = ngayTao;
 
-                if (success) {
+            SwingWorkerUtils.runAsyncVoid(
+                themView.btnXuatHoaDon,
+                () -> {
+                    boolean success = hdService.themHoaDonVaChiTietVaThanhToan(
+                            finalNgayTao, loaiHD, finalTongTien, 0, chiTietList,
+                            tenKH, sdt, diaChi, gioiTinh, hinhThucTT, "Đã thanh toán");
+                    if (!success) throw new ServiceException("Lỗi khi xuất hóa đơn!");
+                },
+                () -> {
                     JOptionPane.showMessageDialog(themView, "Xuất hóa đơn thành công!");
-                    loadDsHoaDon(); // Cập nhật lại view danh sách
-                    loadDsSanPham(); // Cập nhật kho POS
-                } else {
-                    JOptionPane.showMessageDialog(themView, "Lỗi khi xuất hóa đơn!");
-                }
-            } catch (ServiceException ex) {
-                JOptionPane.showMessageDialog(themView, "Lỗi nghiệp vụ: " + ex.getMessage());
-            }
+                    loadDsHoaDon();
+                    loadDsSanPham();
+                },
+                ex -> JOptionPane.showMessageDialog(themView, "Lỗi nghiệp vụ: " + ex.getMessage())
+            );
         });
-
-        // ThemHoaDonBanView is now a JPanel shown inline via HomeView.showSubView()
     }
 
     private void updateGioHangPopupUI(ThemHoaDonBanView themView, Map<Integer, Integer> gioHangPopup, List<SanPhamDTO> sanPhamList) {

@@ -1,7 +1,6 @@
 package com.example.services.impl;
 
 import com.example.dao.KhachHangDAO;
-import com.example.dao.impl.KhachHangDAOImpl;
 import com.example.dto.KhachHangDTO;
 import com.example.entity.KhachHang;
 import com.example.services.KhachHangService;
@@ -15,8 +14,8 @@ import java.util.stream.Collectors;
 public class KhachHangServiceImpl implements KhachHangService {
     private final KhachHangDAO dao;
 
-    public KhachHangServiceImpl() {
-        this.dao = new KhachHangDAOImpl();
+    public KhachHangServiceImpl(KhachHangDAO dao) {
+        this.dao = dao;
     }
 
     private KhachHangDTO mapToDTO(KhachHang entity) {

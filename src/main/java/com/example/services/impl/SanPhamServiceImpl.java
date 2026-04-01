@@ -1,7 +1,6 @@
 package com.example.services.impl;
 
 import com.example.dao.SanPhamDAO;
-import com.example.dao.impl.SanPhamDAOImpl;
 import com.example.dto.SanPhamDTO;
 import com.example.entity.SanPham;
 import com.example.services.SanPhamService;
@@ -15,8 +14,8 @@ import java.util.stream.Collectors;
 public class SanPhamServiceImpl implements SanPhamService {
     private final SanPhamDAO dao;
 
-    public SanPhamServiceImpl() {
-        this.dao = new SanPhamDAOImpl();
+    public SanPhamServiceImpl(SanPhamDAO dao) {
+        this.dao = dao;
     }
 
     private SanPhamDTO mapToDTO(SanPham e) {

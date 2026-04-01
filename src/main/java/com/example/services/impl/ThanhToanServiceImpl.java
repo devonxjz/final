@@ -1,7 +1,6 @@
 package com.example.services.impl;
 
 import com.example.dao.ThanhToanDAO;
-import com.example.dao.impl.ThanhToanDAOImpl;
 import com.example.services.ThanhToanService;
 
 import java.util.Date;
@@ -14,8 +13,8 @@ import java.util.Map;
 public class ThanhToanServiceImpl implements ThanhToanService {
     private final ThanhToanDAO dao;
 
-    public ThanhToanServiceImpl() {
-        this.dao = new ThanhToanDAOImpl();
+    public ThanhToanServiceImpl(ThanhToanDAO dao) {
+        this.dao = dao;
     }
 
     @Override

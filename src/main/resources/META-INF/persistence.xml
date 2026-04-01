@@ -25,12 +25,19 @@
             <property name="jakarta.persistence.jdbc.password" value="12345"/>
 
             <!-- Hibernate Properties -->
-            <!-- Use update to automatically create or update the schema -->
             <property name="hibernate.hbm2ddl.auto" value="update"/>
-            <!-- Show SQL in console for debugging -->
-            <property name="hibernate.show_sql" value="true"/>
-            <property name="hibernate.format_sql" value="true"/>
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
+
+            <!-- Tắt verbose SQL logging (dùng logback.xml để kiểm soát) -->
+            <property name="hibernate.show_sql" value="false"/>
+            <property name="hibernate.format_sql" value="false"/>
+
+            <!-- HikariCP Connection Pooling -->
+            <property name="hibernate.connection.provider_class" value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider"/>
+            <property name="hibernate.hikari.minimumIdle" value="2"/>
+            <property name="hibernate.hikari.maximumPoolSize" value="10"/>
+            <property name="hibernate.hikari.idleTimeout" value="30000"/>
+            <property name="hibernate.hikari.connectionTimeout" value="5000"/>
         </properties>
     </persistence-unit>
 </persistence>

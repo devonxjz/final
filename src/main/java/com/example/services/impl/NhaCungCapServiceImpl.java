@@ -1,7 +1,6 @@
 package com.example.services.impl;
 
 import com.example.dao.NhaCungCapDAO;
-import com.example.dao.impl.NhaCungCapDAOImpl;
 import com.example.entity.NhaCungCap;
 import com.example.dto.NhaCungCapDTO;
 import com.example.services.NhaCungCapService;
@@ -16,8 +15,8 @@ import java.util.stream.Collectors;
 public class NhaCungCapServiceImpl implements NhaCungCapService {
     private final NhaCungCapDAO dao;
 
-    public NhaCungCapServiceImpl() {
-        this.dao = new NhaCungCapDAOImpl();
+    public NhaCungCapServiceImpl(NhaCungCapDAO dao) {
+        this.dao = dao;
     }
 
     private NhaCungCapDTO mapToDTO(NhaCungCap e) {
