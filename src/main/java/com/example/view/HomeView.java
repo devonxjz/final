@@ -67,33 +67,6 @@ public class HomeView extends JFrame {
         logo.setFont(new Font("Segoe UI", Font.BOLD, 20));
         logo.setForeground(UIThemeConfig.ACCENT);
 
-        // Search bar
-        JPanel searchWrap = new JPanel(new BorderLayout());
-        searchWrap.setOpaque(false);
-        searchWrap.setPreferredSize(new Dimension(300, 34));
-        searchWrap.setBorder(new EmptyBorder(0, 40, 0, 0)); // Left margin to avoid logo overlap
-        JTextField searchField = UIThemeConfig.createTextField();
-        // Use the default border from createTextField() — don't override it
-        // Set placeholder text via focus listener
-        searchField.setForeground(UIThemeConfig.TEXT_MUTED);
-        searchField.setText("Tìm kiếm...");
-        searchField.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) {
-                if (searchField.getText().equals("Tìm kiếm...")) {
-                    searchField.setText("");
-                    searchField.setForeground(UIThemeConfig.TEXT_PRIMARY);
-                }
-            }
-
-            public void focusLost(FocusEvent e) {
-                if (searchField.getText().isEmpty()) {
-                    searchField.setText("Tìm kiếm...");
-                    searchField.setForeground(UIThemeConfig.TEXT_MUTED);
-                }
-            }
-        });
-        searchWrap.add(searchField, BorderLayout.CENTER);
-
         // Right section — notification + avatar
         JPanel rightSection = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         rightSection.setOpaque(false);
@@ -124,7 +97,7 @@ public class HomeView extends JFrame {
         rightSection.add(avatar);
 
         header.add(logo, BorderLayout.WEST);
-        header.add(searchWrap, BorderLayout.CENTER);
+        // header.add(searchWrap, BorderLayout.CENTER);
         header.add(rightSection, BorderLayout.EAST);
         return header;
     }
