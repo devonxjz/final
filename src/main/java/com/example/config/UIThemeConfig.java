@@ -224,8 +224,42 @@ public class UIThemeConfig {
 
     // ========== SIDEBAR ITEM ==========
 
-    /** Menu item cho sidebar — hover effect + active glow */
+    // ========== IMAGE ICON HELPER ==========
+
+    /** Load ảnh từ resources và scale lại kích thước */
+    public static ImageIcon loadScaledIcon(String path, int width, int height) {
+        try {
+            java.net.URL imgURL = UIThemeConfig.class.getResource(path);
+            if (imgURL != null) {
+                ImageIcon originalIcon = new ImageIcon(imgURL);
+                Image scaled = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+                return new ImageIcon(scaled);
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi load icon: " + path);
+        }
+        return null; // Trả về null để UI tự fallback nếu không có
+    }
+
+    // ========== SIDEBAR ITEM ==========
+
+    /** Menu item cho sidebar — hover effect + active glow (dùng Emoji String) */
     public static JPanel createSidebarItem(String icon, String text, boolean active, Runnable onClick) {
+        return createSidebarItemBase(new JLabel(icon), text, active, onClick, true);
+    }
+
+    /** Menu item cho sidebar — Hover effect + active glow (Dùng ImageIcon) */
+    public static JPanel createSidebarItem(Icon icon, String text, boolean active, Runnable onClick) {
+        JLabel lblIcon = new JLabel();
+        if (icon != null) {
+            lblIcon.setIcon(icon);
+        } else {
+            lblIcon.setText("🔹"); // Fallback nếu chết icon
+        }
+        return createSidebarItemBase(lblIcon, text, active, onClick, false);
+    }
+
+    private static JPanel createSidebarItemBase(JLabel lblIcon, String text, boolean active, Runnable onClick, boolean isTextIcon) {
         JPanel item = new JPanel(new BorderLayout(10, 0)) {
             private boolean hover = false;
             {
@@ -257,10 +291,12 @@ public class UIThemeConfig {
         item.setBorder(new EmptyBorder(10, 16, 10, 16));
         item.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
 
-        JLabel lblIcon = new JLabel(icon);
-        lblIcon.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        lblIcon.setForeground(active ? ACCENT : TEXT_MUTED);
+        if (isTextIcon) {
+            lblIcon.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+            lblIcon.setForeground(active ? ACCENT : TEXT_MUTED);
+        }
         lblIcon.setPreferredSize(new Dimension(24, 24));
+        lblIcon.setHorizontalAlignment(SwingConstants.CENTER);
 
         JLabel lblText = new JLabel(text);
         lblText.setFont(FONT_MENU);

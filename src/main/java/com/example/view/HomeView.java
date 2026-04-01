@@ -71,25 +71,25 @@ public class HomeView extends JFrame {
         JPanel rightSection = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         rightSection.setOpaque(false);
 
-        JLabel bellIcon = new JLabel("🔔");
-        bellIcon.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        ImageIcon bellImg = UIThemeConfig.loadScaledIcon("/icons/notification.png", 22, 22);
+        JLabel bellIcon = new JLabel();
+        if (bellImg != null) {
+            bellIcon.setIcon(bellImg);
+        } else {
+            bellIcon.setText("🔔");
+            bellIcon.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        }
         bellIcon.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        JPanel avatar = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(UIThemeConfig.ACCENT);
-                g2.fillOval(0, 0, 34, 34);
-                g2.setColor(Color.WHITE);
-                g2.setFont(new Font("Segoe UI", Font.BOLD, 14));
-                FontMetrics fm = g2.getFontMetrics();
-                g2.drawString("A", (34 - fm.stringWidth("A")) / 2, (34 + fm.getAscent() - fm.getDescent()) / 2);
-                g2.dispose();
-            }
-        };
-        avatar.setOpaque(false);
+        ImageIcon profileImg = UIThemeConfig.loadScaledIcon("/icons/profile.png", 34, 34);
+        JLabel avatar = new JLabel();
+        if (profileImg != null) {
+            avatar.setIcon(profileImg);
+        } else {
+            avatar.setText("A");
+            avatar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            avatar.setForeground(UIThemeConfig.ACCENT);
+        }
         avatar.setPreferredSize(new Dimension(34, 34));
         avatar.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
@@ -119,20 +119,34 @@ public class HomeView extends JFrame {
         sidebar.add(Box.createRigidArea(new Dimension(0, 12)));
 
         String[][] items = {
-                { "📊", "Bảng điều khiển" },
-                { "📦", "Sản phẩm" },
-                { "🏭", "Nhà cung cấp" },
-                { "👥", "Khách hàng" },
-                { "📋", "Đơn hàng" },
-                { "💳", "Thanh toán" },
-                { "📈", "Báo cáo" },
+                { "/icons/dashboard.png", "Bảng điều khiển", "📊" },
+                { "/icons/box.png", "Sản phẩm", "📦" },
+                { "/icons/factory.png", "Nhà cung cấp", "🏭" },
+                { "/icons/team.png", "Khách hàng", "👥" },
+                { "/icons/checklist.png", "Đơn hàng", "📋" },
+                { "/icons/atm-card.png", "Thanh toán", "💳" },
+                { "/icons/bar-chart.png", "Báo cáo", "📈" },
         };
 
         for (String[] item : items) {
             boolean isActive = item[1].equals(activeMenu);
-            JPanel menuItem = UIThemeConfig.createSidebarItem(item[0], item[1], isActive, () -> {
-                onSidebarClick(item[1]);
-            });
+
+            // 1. Thử load ảnh với đường dẫn classpath (VD: /icons/box.png)
+            ImageIcon icon = UIThemeConfig.loadScaledIcon(item[0], 24, 24);
+            JPanel menuItem;
+
+            if (icon != null) {
+                // 2a. Load ảnh thành công -> Dùng hàm tạo ImageIcon
+                menuItem = UIThemeConfig.createSidebarItem(icon, item[1], isActive, () -> {
+                    onSidebarClick(item[1]);
+                });
+            } else {
+                // 2b. Không tìm thấy ảnh -> Fallback về Emoji truyền thống
+                menuItem = UIThemeConfig.createSidebarItem(item[2], item[1], isActive, () -> {
+                    onSidebarClick(item[1]);
+                });
+            }
+
             sidebar.add(menuItem);
             sidebar.add(Box.createRigidArea(new Dimension(0, 2)));
         }
@@ -226,7 +240,10 @@ public class HomeView extends JFrame {
 
         String[] orderCols = { "Mã đơn hàng", "Ngày", "Tổng tiền", "Trạng thái" };
         DefaultTableModel orderModel = new DefaultTableModel(orderCols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
         };
         JTable ordersTable = new JTable(orderModel);
         UIThemeConfig.styleTable(ordersTable);
@@ -306,70 +323,78 @@ public class HomeView extends JFrame {
 
         // ====== ASYNC: Load tất cả dữ liệu Dashboard trên Background Thread ======
         com.example.util.SwingWorkerUtils.runAsync(
-            null,
-            () -> {
-                DashboardStatusDTO status;
-                try { status = AppConfig.getDashboardService().getDashboardStatus(); }
-                catch (Exception e) { status = new DashboardStatusDTO(0, 0, 0, 0); }
-
-                List<HoaDonBanHangDTO> recent;
-                try { recent = AppConfig.getHoaDonBanHangService().getAllHoaDon(); }
-                catch (Exception e) { recent = new java.util.ArrayList<>(); }
-
-                Map<String, Double> revenueData;
-                try {
-                    java.time.LocalDate now = java.time.LocalDate.now();
-                    revenueData = AppConfig.getThongKeService().getRevenueByDay(now.minusDays(6).toString(), now.toString());
-                } catch (Exception e) { revenueData = null; }
-
-                return new Object[]{status, recent, revenueData};
-            },
-            result -> {
-                // Cập nhật UI trên EDT
-                DashboardStatusDTO status = (DashboardStatusDTO) result[0];
-                @SuppressWarnings("unchecked")
-                List<HoaDonBanHangDTO> recent = (List<HoaDonBanHangDTO>) result[1];
-                @SuppressWarnings("unchecked")
-                Map<String, Double> revenueData = (Map<String, Double>) result[2];
-
-                lblSub.setText("Chào mừng bạn trở lại! Đây là tình hình hôm nay.");
-
-                // Rebuild stats cards with real data
-                statsRow.removeAll();
-                statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY",
-                        String.format("%,.0f VND", status.revenueToday()), "$", UIThemeConfig.ACCENT));
-                statsRow.add(UIThemeConfig.createStatCard("TỔNG ĐƠN HÀNG",
-                        String.valueOf(status.totalOrders()), "#", UIThemeConfig.ACCENT_GREEN));
-                statsRow.add(UIThemeConfig.createStatCard("SẢN PHẨM TRONG KHO",
-                        String.valueOf(status.productsInStock()), "📦", UIThemeConfig.ACCENT_YELLOW));
-                statsRow.add(UIThemeConfig.createStatCard("KHÁCH HÀNG",
-                        String.valueOf(status.totalCustomers()), "👥", UIThemeConfig.ACCENT_PURPLE));
-                statsRow.revalidate();
-                statsRow.repaint();
-
-                // Recent orders
-                int limit = Math.min(recent.size(), 8);
-                for (int i = 0; i < limit; i++) {
-                    HoaDonBanHangDTO hd = recent.get(i);
-                    orderModel.addRow(new Object[] {
-                            hd.maHDBH(), hd.ngayTao(), String.format("%,.0f", hd.tongTien()), hd.trangThai()
-                    });
-                }
-
-                // Revenue chart — use reflection-free approach: just set data and repaint
-                if (revenueData != null) {
+                null,
+                () -> {
+                    DashboardStatusDTO status;
                     try {
-                        var setMethod = chartArea.getClass().getMethod("setRevenueData", Map.class);
-                        setMethod.invoke(chartArea, revenueData);
-                    } catch (Exception ignored) {
-                        chartArea.repaint();
+                        status = AppConfig.getDashboardService().getDashboardStatus();
+                    } catch (Exception e) {
+                        status = new DashboardStatusDTO(0, 0, 0, 0);
                     }
-                }
-            },
-            ex -> {
-                lblSub.setText("Lỗi tải dữ liệu dashboard.");
-            }
-        );
+
+                    List<HoaDonBanHangDTO> recent;
+                    try {
+                        recent = AppConfig.getHoaDonBanHangService().getAllHoaDon();
+                    } catch (Exception e) {
+                        recent = new java.util.ArrayList<>();
+                    }
+
+                    Map<String, Double> revenueData;
+                    try {
+                        java.time.LocalDate now = java.time.LocalDate.now();
+                        revenueData = AppConfig.getThongKeService().getRevenueByDay(now.minusDays(6).toString(),
+                                now.toString());
+                    } catch (Exception e) {
+                        revenueData = null;
+                    }
+
+                    return new Object[] { status, recent, revenueData };
+                },
+                result -> {
+                    // Cập nhật UI trên EDT
+                    DashboardStatusDTO status = (DashboardStatusDTO) result[0];
+                    @SuppressWarnings("unchecked")
+                    List<HoaDonBanHangDTO> recent = (List<HoaDonBanHangDTO>) result[1];
+                    @SuppressWarnings("unchecked")
+                    Map<String, Double> revenueData = (Map<String, Double>) result[2];
+
+                    lblSub.setText("Chào mừng bạn trở lại! Đây là tình hình hôm nay.");
+
+                    // Rebuild stats cards with real data
+                    statsRow.removeAll();
+                    statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY",
+                            String.format("%,.0f VND", status.revenueToday()), "$", UIThemeConfig.ACCENT));
+                    statsRow.add(UIThemeConfig.createStatCard("TỔNG ĐƠN HÀNG",
+                            String.valueOf(status.totalOrders()), "#", UIThemeConfig.ACCENT_GREEN));
+                    statsRow.add(UIThemeConfig.createStatCard("SẢN PHẨM TRONG KHO",
+                            String.valueOf(status.productsInStock()), "📦", UIThemeConfig.ACCENT_YELLOW));
+                    statsRow.add(UIThemeConfig.createStatCard("KHÁCH HÀNG",
+                            String.valueOf(status.totalCustomers()), "👥", UIThemeConfig.ACCENT_PURPLE));
+                    statsRow.revalidate();
+                    statsRow.repaint();
+
+                    // Recent orders
+                    int limit = Math.min(recent.size(), 8);
+                    for (int i = 0; i < limit; i++) {
+                        HoaDonBanHangDTO hd = recent.get(i);
+                        orderModel.addRow(new Object[] {
+                                hd.maHDBH(), hd.ngayTao(), String.format("%,.0f", hd.tongTien()), hd.trangThai()
+                        });
+                    }
+
+                    // Revenue chart — use reflection-free approach: just set data and repaint
+                    if (revenueData != null) {
+                        try {
+                            var setMethod = chartArea.getClass().getMethod("setRevenueData", Map.class);
+                            setMethod.invoke(chartArea, revenueData);
+                        } catch (Exception ignored) {
+                            chartArea.repaint();
+                        }
+                    }
+                },
+                ex -> {
+                    lblSub.setText("Lỗi tải dữ liệu dashboard.");
+                });
     }
 
     // ═══════════════════════════════════════════════════════════════════
