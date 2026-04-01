@@ -120,7 +120,28 @@ public class UIThemeConfig {
     // ========== STAT CARD ==========
 
     /** Card thống kê trên dashboard — glassmorphism với accent glow */
+    /** Card thống kê trên dashboard — dùng Icon (Hình ảnh) */
+    public static JPanel createStatCard(String title, String value, Icon icon, Color accent) {
+        JLabel lblIcon = new JLabel();
+        if (icon != null) {
+            lblIcon.setIcon(icon);
+        } else {
+            lblIcon.setText("🔹"); // Fallback
+            lblIcon.setFont(new Font("Segoe UI", Font.BOLD, 16));
+            lblIcon.setForeground(accent);
+        }
+        return createStatCardBase(title, value, lblIcon, accent);
+    }
+
+    /** Card thống kê trên dashboard — dùng String (Emoji) */
     public static JPanel createStatCard(String title, String value, String icon, Color accent) {
+        JLabel lblIcon = new JLabel(icon);
+        lblIcon.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblIcon.setForeground(accent);
+        return createStatCardBase(title, value, lblIcon, accent);
+    }
+
+    private static JPanel createStatCardBase(String title, String value, JLabel lblIcon, Color accent) {
         JPanel card = new JPanel() {
             private boolean hover = false;
             {
@@ -163,15 +184,17 @@ public class UIThemeConfig {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 40));
                 g2.fillOval(0, 0, 44, 44);
-                g2.setColor(accent);
-                g2.setFont(new Font("Segoe UI", Font.BOLD, 16));
-                FontMetrics fm = g2.getFontMetrics();
-                g2.drawString(icon, (44 - fm.stringWidth(icon)) / 2, (44 + fm.getAscent() - fm.getDescent()) / 2);
                 g2.dispose();
             }
         };
         iconPanel.setOpaque(false);
+        iconPanel.setLayout(new GridBagLayout());
         iconPanel.setPreferredSize(new Dimension(44, 44));
+        
+        lblIcon.setHorizontalAlignment(SwingConstants.CENTER);
+        lblIcon.setVerticalAlignment(SwingConstants.CENTER);
+        
+        iconPanel.add(lblIcon, new GridBagConstraints()); // GridBagConstraints mặc định là căn giữa
 
         JPanel textPanel = new JPanel();
         textPanel.setOpaque(false);
@@ -232,13 +255,18 @@ public class UIThemeConfig {
             java.net.URL imgURL = UIThemeConfig.class.getResource(path);
             if (imgURL != null) {
                 ImageIcon originalIcon = new ImageIcon(imgURL);
+                // Kiểm tra xem ảnh có được decode thành công không
+                if (originalIcon.getImageLoadStatus() == java.awt.MediaTracker.ERRORED || 
+                    originalIcon.getIconWidth() <= 0) {
+                    return null;
+                }
                 Image scaled = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
                 return new ImageIcon(scaled);
             }
         } catch (Exception e) {
             System.err.println("Lỗi load icon: " + path);
         }
-        return null; // Trả về null để UI tự fallback nếu không có
+        return null; 
     }
 
     // ========== SIDEBAR ITEM ==========

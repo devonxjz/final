@@ -361,14 +361,49 @@ public class HomeView extends JFrame {
 
                     // Rebuild stats cards with real data
                     statsRow.removeAll();
-                    statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY",
-                            String.format("%,.0f VND", status.revenueToday()), "$", UIThemeConfig.ACCENT));
-                    statsRow.add(UIThemeConfig.createStatCard("TỔNG ĐƠN HÀNG",
-                            String.valueOf(status.totalOrders()), "#", UIThemeConfig.ACCENT_GREEN));
-                    statsRow.add(UIThemeConfig.createStatCard("SẢN PHẨM TRONG KHO",
-                            String.valueOf(status.productsInStock()), "📦", UIThemeConfig.ACCENT_YELLOW));
-                    statsRow.add(UIThemeConfig.createStatCard("KHÁCH HÀNG",
-                            String.valueOf(status.totalCustomers()), "👥", UIThemeConfig.ACCENT_PURPLE));
+
+                    // Load Icons (Chuẩn 24x24 cho stat cards)
+                    ImageIcon iconSalary = UIThemeConfig.loadScaledIcon("/icons/salary.png", 24, 24);
+                    ImageIcon iconOrders = UIThemeConfig.loadScaledIcon("/icons/total-orders.webp", 24, 24);
+                    ImageIcon iconBox    = UIThemeConfig.loadScaledIcon("/icons/box.png", 24, 24);
+                    ImageIcon iconTeam   = UIThemeConfig.loadScaledIcon("/icons/team.png", 24, 24);
+
+                    // Doanh thu
+                    if (iconSalary != null) {
+                        statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY", 
+                                String.format("%,.0f VND", status.revenueToday()), iconSalary, UIThemeConfig.ACCENT));
+                    } else {
+                        statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY", 
+                                String.format("%,.0f VND", status.revenueToday()), "$", UIThemeConfig.ACCENT));
+                    }
+
+                    // Đơn hàng
+                    if (iconOrders != null) {
+                        statsRow.add(UIThemeConfig.createStatCard("TỔNG ĐƠN HÀNG", 
+                                String.valueOf(status.totalOrders()), iconOrders, UIThemeConfig.ACCENT_GREEN));
+                    } else {
+                        statsRow.add(UIThemeConfig.createStatCard("TỔNG ĐƠN HÀNG", 
+                                String.valueOf(status.totalOrders()), "#", UIThemeConfig.ACCENT_GREEN));
+                    }
+
+                    // Kho hàng
+                    if (iconBox != null) {
+                        statsRow.add(UIThemeConfig.createStatCard("SẢN PHẨM TRONG KHO", 
+                                String.valueOf(status.productsInStock()), iconBox, UIThemeConfig.ACCENT_YELLOW));
+                    } else {
+                        statsRow.add(UIThemeConfig.createStatCard("SẢN PHẨM TRONG KHO", 
+                                String.valueOf(status.productsInStock()), "📦", UIThemeConfig.ACCENT_YELLOW));
+                    }
+
+                    // Khách hàng
+                    if (iconTeam != null) {
+                        statsRow.add(UIThemeConfig.createStatCard("KHÁCH HÀNG", 
+                                String.valueOf(status.totalCustomers()), iconTeam, UIThemeConfig.ACCENT_PURPLE));
+                    } else {
+                        statsRow.add(UIThemeConfig.createStatCard("KHÁCH HÀNG", 
+                                String.valueOf(status.totalCustomers()), "👥", UIThemeConfig.ACCENT_PURPLE));
+                    }
+
                     statsRow.revalidate();
                     statsRow.repaint();
 
