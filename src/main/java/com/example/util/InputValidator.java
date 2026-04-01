@@ -25,6 +25,10 @@ public final class InputValidator {
         if (input == null || input.trim().isEmpty()) return "0";
         String cleaned = input.trim().toLowerCase();
         
+        // Ghi nhận dấu âm
+        boolean negative = cleaned.startsWith("-");
+        if (negative) cleaned = cleaned.substring(1).trim();
+        
         // Loại bỏ các đơn vị phổ biến
         cleaned = cleaned.replaceAll("(gb|tb|kg|inch|ghz|mhz|mm|cm|g)$", "").trim();
         
@@ -63,7 +67,8 @@ public final class InputValidator {
         }
         
         cleaned = cleaned.replaceAll("[^0-9.]", "");
-        return cleaned.isEmpty() ? "0" : cleaned;
+        if (cleaned.isEmpty()) return "0";
+        return negative ? "-" + cleaned : cleaned;
     }
 
     public static ValidationResult<Integer> parseIntSafe(String input, String fieldName) {
@@ -73,6 +78,7 @@ public final class InputValidator {
             }
             String cleaned = cleanNumeric(input);
             double val = Double.parseDouble(cleaned);
+            if (val < 0) return ValidationResult.fail(fieldName + " không được là số âm!");
             return ValidationResult.success((int) val);
         } catch (NumberFormatException e) {
             return ValidationResult.fail(fieldName + " không hợp lệ! Vui lòng chỉ nhập số.");
@@ -97,7 +103,9 @@ public final class InputValidator {
                 return ValidationResult.fail("Vui lòng nhập " + fieldName + "!");
             }
             String cleaned = cleanNumeric(input);
-            return ValidationResult.success(Float.parseFloat(cleaned));
+            float val = Float.parseFloat(cleaned);
+            if (val < 0) return ValidationResult.fail(fieldName + " không được là số âm!");
+            return ValidationResult.success(val);
         } catch (NumberFormatException e) {
             return ValidationResult.fail(fieldName + " không hợp lệ! Vui lòng chỉ nhập số thực (ví dụ 1.5).");
         }

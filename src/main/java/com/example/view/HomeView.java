@@ -273,10 +273,16 @@ public class HomeView extends JFrame {
 
                     Map<String, Double> chartRevenueData = chartDataRef.get();
 
-                    if (chartRevenueData == null || chartRevenueData.isEmpty()) {
+                    if (chartRevenueData == null) {
                         g2.setColor(UIThemeConfig.TEXT_MUTED);
                         g2.setFont(UIThemeConfig.FONT_BODY);
                         g2.drawString("Đang tải dữ liệu...", 20, getHeight() / 2);
+                        return;
+                    }
+                    if (chartRevenueData.isEmpty()) {
+                        g2.setColor(UIThemeConfig.TEXT_MUTED);
+                        g2.setFont(UIThemeConfig.FONT_BODY);
+                        g2.drawString("Không có dữ liệu doanh thu.", 20, getHeight() / 2);
                         return;
                     }
 
@@ -340,11 +346,21 @@ public class HomeView extends JFrame {
 
                     Map<String, Double> revenueData;
                     try {
-                        java.time.LocalDate now = java.time.LocalDate.now();
-                        revenueData = AppConfig.getThongKeService().getRevenueByDay(now.minusDays(6).toString(),
-                                now.toString());
+                        // Lấy TẤT CẢ dữ liệu doanh thu, rồi lọc 7 ngày gần nhất có dữ liệu
+                        Map<String, Double> allRevenue = AppConfig.getThongKeService().getRevenueByDay(null, null);
+                        if (allRevenue != null && !allRevenue.isEmpty()) {
+                            // Lấy 7 bản ghi cuối cùng (gần nhất)
+                            java.util.List<Map.Entry<String, Double>> entries = new java.util.ArrayList<>(allRevenue.entrySet());
+                            int fromIndex = Math.max(0, entries.size() - 7);
+                            revenueData = new java.util.LinkedHashMap<>();
+                            for (int i = fromIndex; i < entries.size(); i++) {
+                                revenueData.put(entries.get(i).getKey(), entries.get(i).getValue());
+                            }
+                        } else {
+                            revenueData = new java.util.LinkedHashMap<>();
+                        }
                     } catch (Exception e) {
-                        revenueData = null;
+                        revenueData = new java.util.LinkedHashMap<>();
                     }
 
                     return new Object[] { status, recent, revenueData };
@@ -364,7 +380,7 @@ public class HomeView extends JFrame {
 
                     // Load Icons (Chuẩn 24x24 cho stat cards)
                     ImageIcon iconSalary = UIThemeConfig.loadScaledIcon("/icons/salary.png", 24, 24);
-                    ImageIcon iconOrders = UIThemeConfig.loadScaledIcon("/icons/total-orders.webp", 24, 24);
+                    ImageIcon iconOrders = UIThemeConfig.loadScaledIcon("/icons/total-orders.png", 24, 24);
                     ImageIcon iconBox    = UIThemeConfig.loadScaledIcon("/icons/box.png", 24, 24);
                     ImageIcon iconTeam   = UIThemeConfig.loadScaledIcon("/icons/team.png", 24, 24);
 
