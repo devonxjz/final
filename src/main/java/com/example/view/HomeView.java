@@ -384,19 +384,19 @@ public class HomeView extends JFrame {
             case "Sản phẩm" -> {
                 SanPhamView view = new SanPhamView();
                 new SanPhamController(AppConfig.getSanPhamService(), view);
-                showSubView("Products", view);
+                showSubView("Sản phẩm", view);
             }
-            case "Suppliers" -> {
+            case "Nhà cung cấp" -> {
                 NhaCungCapView view = new NhaCungCapView();
                 new NhaCungCapController(AppConfig.getNhaCungCapService(), view);
-                showSubView("Suppliers", view);
+                showSubView("Nhà cung cấp", view);
             }
-            case "Customers" -> {
+            case "Khách hàng" -> {
                 KhachHangView view = new KhachHangView();
                 new KhachHangController(AppConfig.getKhachHangService(), view);
-                showSubView("Customers", view);
+                showSubView("Khách hàng", view);
             }
-            case "Orders" -> {
+            case "Đơn hàng" -> {
                 HoaDonBanHangView listView = new HoaDonBanHangView();
                 HoaDonView banHangView = new HoaDonView();
                 new HoaDonBanHangController(
@@ -404,17 +404,17 @@ public class HomeView extends JFrame {
                         AppConfig.getSanPhamService(),
                         AppConfig.getKhachHangService(),
                         listView, banHangView);
-                showSubView("Sales Orders", listView);
+                showSubView("Đơn hàng", listView);
             }
-            case "Payments" -> {
+            case "Thanh toán" -> {
                 ThanhToanView view = new ThanhToanView();
                 new ThanhToanController(AppConfig.getThanhToanService(), view);
-                showSubView("Payments", view);
+                showSubView("Thanh toán", view);
             }
-            case "Reports" -> {
+            case "Báo cáo" -> {
                 ThongKeView view = new ThongKeView();
                 new ThongKeController(AppConfig.getThongKeService(), view);
-                showSubView("Reports", view);
+                showSubView("Báo cáo", view);
             }
         }
     }
