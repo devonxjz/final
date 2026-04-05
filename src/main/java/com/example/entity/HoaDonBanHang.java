@@ -61,8 +61,18 @@ public class HoaDonBanHang {
     private List<ChiTietHDBH> danhSachChiTiet = new ArrayList<>();
 
     /** Danh sách thanh toán */
-    @OneToMany(mappedBy = "hoaDonBanHang", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "hoaDon", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ThanhToan> danhSachThanhToan = new ArrayList<>();
+
+    /** Khách hàng mua đơn hàng này */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaKH", nullable = false)
+    private KhachHang khachHang;
+
+    /** Nhân viên lập hóa đơn */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaNV", nullable = false)
+    private NhanVien nhanVien;
 
     // ===== Constructors =====
     public HoaDonBanHang() {}
@@ -108,4 +118,10 @@ public class HoaDonBanHang {
     public String toString() {
         return "HoaDonBanHang{maHDBH=" + maHDBH + ", tongTien=" + tongTien + "}";
     }
+
+    public KhachHang getKhachHang() { return khachHang; }
+    public void setKhachHang(KhachHang khachHang) { this.khachHang = khachHang; }
+
+    public NhanVien getNhanVien() { return nhanVien; }
+    public void setNhanVien(NhanVien nhanVien) { this.nhanVien = nhanVien; }
 }

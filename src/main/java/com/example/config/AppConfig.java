@@ -4,14 +4,18 @@ import com.example.dao.*;
 import com.example.dao.impl.*;
 import com.example.services.*;
 import com.example.services.impl.*;
+import com.example.entity.TaiKhoan;
 
 /**
- * Dependency Injection Container.
+ * Dependency Injection Container cập nhật.
  * Cung cấp các instance Singleton của DAOs và Services.
- * Giải phóng Controller và View khỏi việc tự tạo instance (new DAOImpl()).
+ * Bổ sung quản lý TaiKhoan và phiên đăng nhập (Session).
  */
 public class AppConfig {
-    
+
+    // --- Session Management (Quản lý phiên đăng nhập) ---
+    private static TaiKhoan currentUser;
+
     // --- DAOs ---
     private static SanPhamDAO sanPhamDAO;
     private static KhachHangDAO khachHangDAO;
@@ -19,6 +23,8 @@ public class AppConfig {
     private static ThanhToanDAO thanhToanDAO;
     private static HoaDonBanHangDAO hoadonDAO;
     private static ThongKeDAO thongKeDAO;
+    private static TaiKhoanDAO taiKhoanDAO; // Bổ sung mới
+    private static NhanVienDAO nhanVienDAO; // Bổ sung mới
 
     // --- Services ---
     private static SanPhamService sanPhamService;
@@ -28,6 +34,8 @@ public class AppConfig {
     private static HoaDonBanHangService hoaDonBanHangService;
     private static ThongKeService thongKeService;
     private static DashboardService dashboardService;
+    private static TaiKhoanService taiKhoanService; // Bổ sung mới
+    private static NhanVienService nhanVienService; // Bổ sung mới
 
     /**
      * Khởi tạo toàn bộ dependency tĩnh một lần.
@@ -40,19 +48,45 @@ public class AppConfig {
         thanhToanDAO = new ThanhToanDAOImpl();
         hoadonDAO = new HoaDonBanHangDAOImpl();
         thongKeDAO = new ThongKeDAOImpl();
+        taiKhoanDAO = new TaiKhoanDAOImpl(); // Khởi tạo DAO Tài khoản
+        nhanVienDAO = new NhanVienDAOImpl(); // Khởi tạo DAO Nhân viên
 
         // Init Services (inject DAOs via constructor — proper DI)
         sanPhamService = new SanPhamServiceImpl(sanPhamDAO);
         khachHangService = new KhachHangServiceImpl(khachHangDAO);
         nhaCungCapService = new NhaCungCapServiceImpl(nhaCungCapDAO);
         thanhToanService = new ThanhToanServiceImpl(thanhToanDAO);
-        hoaDonBanHangService = new HoaDonBanHangServiceImpl(hoadonDAO, khachHangDAO, sanPhamDAO);
+        hoaDonBanHangService = new HoaDonBanHangServiceImpl(hoadonDAO, khachHangDAO, sanPhamDAO, nhanVienDAO);
         thongKeService = new ThongKeServiceImpl(thongKeDAO);
         dashboardService = new DashboardServiceImpl(hoadonDAO, sanPhamDAO, khachHangDAO);
+
+        // Khởi tạo Service Tài khoản và Nhân viên
+        taiKhoanService = new TaiKhoanServiceImpl(taiKhoanDAO);
+        nhanVienService = new NhanVienServiceImpl(nhanVienDAO);
+    }
+
+    // --- Session Getters & Setters ---
+
+    public static void setCurrentUser(TaiKhoan user) {
+        currentUser = user;
+    }
+
+    public static TaiKhoan getCurrentUser() {
+        return currentUser;
     }
 
     // --- Getters for Services ---
-    
+
+    public static TaiKhoanService getTaiKhoanService() {
+        if (taiKhoanService == null) initialize();
+        return taiKhoanService;
+    }
+
+    public static NhanVienService getNhanVienService() {
+        if (nhanVienService == null) initialize();
+        return nhanVienService;
+    }
+
     public static SanPhamService getSanPhamService() {
         if (sanPhamService == null) initialize();
         return sanPhamService;

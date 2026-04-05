@@ -23,10 +23,10 @@ public interface HoaDonBanHangService {
     List<ThanhToanDTO> getAllThanhToan(int maHD);
 
     /** Thanh toán trực tiếp */
-    boolean thanhToanHoaDon(int maHD, String loaiHD, double tongTien, double laiSuat, int thoiHan, List<ChiTietHDBHDTO> gioHang);
+    boolean thanhToanHoaDon(int maHD, int maNV, String loaiHD, double tongTien, double laiSuat, int thoiHan, List<ChiTietHDBHDTO> gioHang);
 
     /** Lưu hóa đơn và chi tiết vào CSDL */
-    boolean themHoaDonVaChiTietVaThanhToan(Date ngayTao, String loaiHD, double tongTien, int maKH,
+    boolean themHoaDonVaChiTietVaThanhToan(Date ngayTao, String loaiHD, double tongTien, int maNV, int maKH,
             List<Map<Integer, Integer>> gioHang, String tenKH, String sdt, String diaChi,
             String gioiTinh, String hinhThucTT, String trangThai);
 

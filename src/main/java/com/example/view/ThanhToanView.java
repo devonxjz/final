@@ -15,6 +15,7 @@ public class ThanhToanView extends JPanel {
     private DefaultTableModel tableModel;
     private JTextField txtTimKiem;
     private JButton btnThem, btnReload, btnXoa;
+    private JButton btnSua;
 
     public ThanhToanView() {
         setLayout(new BorderLayout(10, 10));
@@ -35,10 +36,14 @@ public class ThanhToanView extends JPanel {
         txtTimKiem.setPreferredSize(new Dimension(200, 30));
         btnThem = UIThemeConfig.createSuccessButton("+ Thêm thanh toán");
         btnReload = UIThemeConfig.createPrimaryButton("Làm mới");
+
+        btnSua = UIThemeConfig.createButton("Sửa", Color.pink);
         btnXoa = UIThemeConfig.createDangerButton("Xóa");
+
         pnlTools.add(UIThemeConfig.createLabel("Tìm kiếm:"));
         pnlTools.add(txtTimKiem);
         pnlTools.add(btnThem);
+        pnlTools.add(btnSua); // Thêm vào panel
         pnlTools.add(btnXoa);
         pnlTools.add(btnReload);
 
@@ -47,7 +52,7 @@ public class ThanhToanView extends JPanel {
         add(pnlHeader, BorderLayout.NORTH);
 
         // ── Table ──
-        String[] cols = {"Mã thanh toán", "Mã hóa đơn", "Khách hàng", "Số tiền", "Ngày", "Phương thức", "Trạng thái"};
+        String[] cols = {"Mã TT", "Mã HD", "Khách hàng", "Nhân viên", "Số tiền", "Ngày", "Phương thức", "Trạng thái HĐ"};
         tableModel = new DefaultTableModel(cols, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
@@ -63,4 +68,6 @@ public class ThanhToanView extends JPanel {
     public JButton getBtnThem() { return btnThem; }
     public JButton getBtnReload() { return btnReload; }
     public JButton getBtnXoa() { return btnXoa; }
+
+    public JButton getBtnSua() { return btnSua;}
 }

@@ -7,7 +7,7 @@
     <persistence-unit name="LaptopPU" transaction-type="RESOURCE_LOCAL">
         <!-- Configure the Hibernate Provider -->
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        
+
         <!-- List out all the Entities -->
         <class>com.example.entity.ChiTietHDBH</class>
         <class>com.example.entity.HoaDonBanHang</class>
@@ -16,13 +16,15 @@
         <class>com.example.entity.SanPham</class>
         <class>com.example.entity.ThanhToan</class>
         <class>com.example.entity.ChiTietHDBHId</class>
+        <class>com.example.entity.NhanVien</class>
+        <class>com.example.entity.TaiKhoan</class>
 
         <properties>
             <!-- Database Connection Properties -->
             <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/QLNVBCHLapTop"/>
             <property name="jakarta.persistence.jdbc.user" value="root"/>
-            <property name="jakarta.persistence.jdbc.password" value="12345"/>
+            <property name="jakarta.persistence.jdbc.password" value=""/>
 
             <!-- Hibernate Properties -->
             <property name="hibernate.hbm2ddl.auto" value="update"/>

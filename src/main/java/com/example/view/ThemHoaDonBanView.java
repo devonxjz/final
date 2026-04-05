@@ -2,214 +2,159 @@ package com.example.view;
 
 import com.example.config.UIThemeConfig;
 import com.toedter.calendar.JDateChooser;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.Date;
 
 /**
- * Form thêm hóa đơn bán hàng — nhúng vào ContentPanel, không mở cửa sổ mới.
+ * Giao diện Tạo Hóa Đơn Bán Hàng Mới (Popup)
+ * Đầy đủ thông tin Khách hàng, Giỏ hàng và Thanh toán
  */
 public class ThemHoaDonBanView extends JPanel {
 
-    public JTextField txtTimKiem, txtSDT, txtTenKH, txtDiaChi, txtMaSP, txtTenSP, txtSoLuong, txtLaiSuat;
+    // 1. Thông tin khách hàng & Hóa đơn
+    public JTextField txtSDT, txtTenKH, txtDiaChi;
     public JComboBox<String> cbGioiTinh, cbLoaiHD, cbHinhThucTT;
     public JDateChooser dateChooser;
+
+    // 2. Thông tin chọn sản phẩm
+    public JTextField txtMaSP, txtTenSP, txtSoLuong;
+    public JButton btnThem, btnHuyChon, btnXuatHoaDon;
     public JTable tableSanPham, tableSanPhamChon;
-    public JButton btnHuyChon, btnThem, btnXuatHoaDon;
 
     public ThemHoaDonBanView() {
-        setLayout(new BorderLayout(0, 8));
+        setLayout(new BorderLayout(10, 10));
         setBackground(UIThemeConfig.BG_DARK);
+        setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        // ── HEADER ──
-        JPanel pnlHeader = UIThemeConfig.createGlassPanel(new BorderLayout(12, 0));
-        pnlHeader.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 2, 0, UIThemeConfig.ACCENT),
-                new EmptyBorder(12, 20, 12, 20)));
+        // =========================================================
+        // PHẦN BẮC (NORTH): THÔNG TIN KHÁCH HÀNG & HÓA ĐƠN
+        // =========================================================
+        JPanel pnlTop = UIThemeConfig.createGlassPanel(new BorderLayout(10, 10));
+        pnlTop.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 3, 0, 0, UIThemeConfig.ACCENT),
+            new EmptyBorder(10, 15, 10, 15)));
 
-        JLabel lblSearch = UIThemeConfig.createLabel("Tìm sản phẩm:");
-        lblSearch.setFont(UIThemeConfig.FONT_SUBTITLE);
-        lblSearch.setForeground(UIThemeConfig.TEXT_PRIMARY);
-        txtTimKiem = UIThemeConfig.createTextField();
+        JLabel lblTitle = UIThemeConfig.createTitleLabel("THÔNG TIN KHÁCH HÀNG & ĐƠN HÀNG");
+        lblTitle.setForeground(UIThemeConfig.ACCENT);
+        pnlTop.add(lblTitle, BorderLayout.NORTH);
 
-        btnXuatHoaDon = UIThemeConfig.createSuccessButton("Xuất hóa đơn");
-        btnXuatHoaDon.setPreferredSize(new Dimension(150, 34));
+        JPanel pnlInfo = new JPanel(new GridLayout(3, 4, 15, 10));
+        pnlInfo.setOpaque(false);
 
-        pnlHeader.add(lblSearch, BorderLayout.WEST);
-        pnlHeader.add(txtTimKiem, BorderLayout.CENTER);
-        pnlHeader.add(btnXuatHoaDon, BorderLayout.EAST);
-        add(pnlHeader, BorderLayout.NORTH);
-
-        // ── BODY: LEFT (tables) + RIGHT (form) ──
-        JPanel pnlBody = new JPanel(new BorderLayout(10, 0));
-        pnlBody.setBackground(UIThemeConfig.BG_DARK);
-        pnlBody.setBorder(new EmptyBorder(8, 16, 8, 16));
-
-        // LEFT — Product list + selected
-        JPanel pnlLeft = new JPanel(new BorderLayout(0, 8));
-        pnlLeft.setBackground(UIThemeConfig.BG_DARK);
-        pnlLeft.setPreferredSize(new Dimension(530, 0));
-
-        JLabel lblCatalog = UIThemeConfig.createLabel("Danh mục sản phẩm");
-        lblCatalog.setFont(UIThemeConfig.FONT_SUBTITLE);
-        lblCatalog.setForeground(UIThemeConfig.ACCENT);
-        lblCatalog.setBorder(new EmptyBorder(0, 2, 6, 0));
-
-        tableSanPham = new JTable();
-        UIThemeConfig.styleTable(tableSanPham);
-
-        JPanel pnlCatalog = new JPanel(new BorderLayout());
-        pnlCatalog.setBackground(UIThemeConfig.BG_DARK);
-        pnlCatalog.add(lblCatalog, BorderLayout.NORTH);
-        pnlCatalog.add(UIThemeConfig.createScrollPane(tableSanPham), BorderLayout.CENTER);
-        pnlLeft.add(pnlCatalog, BorderLayout.CENTER);
-
-        // Selected products panel
-        JPanel pnlChonHeader = new JPanel(new BorderLayout(8, 0));
-        pnlChonHeader.setBackground(UIThemeConfig.BG_DARK);
-        pnlChonHeader.setBorder(new EmptyBorder(4, 0, 6, 0));
-        JLabel lblChon = UIThemeConfig.createLabel("Sản phẩm đã chọn");
-        lblChon.setFont(UIThemeConfig.FONT_SUBTITLE);
-        lblChon.setForeground(UIThemeConfig.ACCENT_YELLOW);
-        btnHuyChon = UIThemeConfig.createDangerButton("Xóa");
-        btnHuyChon.setPreferredSize(new Dimension(100, 30));
-        pnlChonHeader.add(lblChon, BorderLayout.WEST);
-        pnlChonHeader.add(btnHuyChon, BorderLayout.EAST);
-
-        tableSanPhamChon = new JTable();
-        UIThemeConfig.styleTable(tableSanPhamChon);
-
-        JPanel pnlSelected = new JPanel(new BorderLayout());
-        pnlSelected.setBackground(UIThemeConfig.BG_DARK);
-        pnlSelected.setPreferredSize(new Dimension(0, 180));
-        pnlSelected.add(pnlChonHeader, BorderLayout.NORTH);
-        pnlSelected.add(UIThemeConfig.createScrollPane(tableSanPhamChon), BorderLayout.CENTER);
-        pnlLeft.add(pnlSelected, BorderLayout.SOUTH);
-
-        pnlBody.add(pnlLeft, BorderLayout.WEST);
-
-        // RIGHT — Customer info + Product entry
-        JPanel pnlRight = new JPanel(new BorderLayout(0, 8));
-        pnlRight.setBackground(UIThemeConfig.BG_DARK);
-
-        // Customer card
-        JPanel pnlKH = UIThemeConfig.createGlassPanel(new GridBagLayout());
-        pnlKH.setBorder(new EmptyBorder(14, 16, 14, 16));
-
-        GridBagConstraints g = new GridBagConstraints();
-        g.insets = new Insets(5, 6, 5, 6);
-        g.fill = GridBagConstraints.HORIZONTAL;
-
-        JLabel lblKHTitle = UIThemeConfig.createLabel("Thông tin khách hàng & Đơn hàng");
-        lblKHTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
-        lblKHTitle.setForeground(UIThemeConfig.ACCENT);
-        g.gridx = 0;
-        g.gridy = 0;
-        g.gridwidth = 4;
-        g.weightx = 1;
-        pnlKH.add(lblKHTitle, g);
-        g.gridwidth = 1;
-
+        // Khởi tạo components
         txtSDT = UIThemeConfig.createTextField();
         txtTenKH = UIThemeConfig.createTextField();
         txtDiaChi = UIThemeConfig.createTextField();
-        txtLaiSuat = UIThemeConfig.createTextField();
-        cbGioiTinh = UIThemeConfig.createComboBox(new String[] { "Nam", "Nữ", "Khác" });
-        dateChooser = new JDateChooser();
+        cbGioiTinh = UIThemeConfig.createComboBox(new String[]{"Nam", "Nữ", "Khác"});
+        cbLoaiHD = UIThemeConfig.createComboBox(new String[]{"Trả thẳng", "Trả góp"});
+        cbHinhThucTT = UIThemeConfig.createComboBox(new String[]{"Tiền mặt", "Chuyển khoản", "Quẹt thẻ"});
+
+        cbLoaiHD.addActionListener(e -> {
+            boolean isTraGop = "Trả góp".equals(cbLoaiHD.getSelectedItem());
+            cbHinhThucTT.setEnabled(!isTraGop); // Vô hiệu hóa (làm mờ) nếu là Trả góp
+        });
+
+        dateChooser = new JDateChooser(new Date());
         dateChooser.setDateFormatString("dd/MM/yyyy");
         dateChooser.setBackground(UIThemeConfig.BG_INPUT);
-        cbLoaiHD = UIThemeConfig.createComboBox(new String[] { "Trả trực tiếp", "Trả góp" });
-        cbHinhThucTT = UIThemeConfig.createComboBox(new String[] { "Tiền mặt", "Chuyển khoản", "Thẻ tín dụng" });
 
-        Object[][] formRows = {
-                { "SĐT:", txtSDT, "Giới tính:", cbGioiTinh },
-                { "Tên khách hàng:", txtTenKH, "Địa chỉ:", txtDiaChi },
-                { "Ngày lập:", dateChooser, "Loại đơn:", cbLoaiHD },
-                { "Lãi suất:", txtLaiSuat, "Thanh toán:", cbHinhThucTT },
-        };
+        // Hàng 1
+        pnlInfo.add(UIThemeConfig.createLabel("Số điện thoại:"));
+        pnlInfo.add(txtSDT);
+        pnlInfo.add(UIThemeConfig.createLabel("Loại hóa đơn:"));
+        pnlInfo.add(cbLoaiHD);
 
-        for (int i = 0; i < formRows.length; i++) {
-            g.gridy = i + 1;
-            g.gridx = 0;
-            g.weightx = 0;
-            JLabel lA = UIThemeConfig.createLabel((String) formRows[i][0]);
-            lA.setPreferredSize(new Dimension(110, 24));
-            pnlKH.add(lA, g);
-            g.gridx = 1;
-            g.weightx = 1;
-            pnlKH.add((Component) formRows[i][1], g);
-            g.gridx = 2;
-            g.weightx = 0;
-            JLabel lB = UIThemeConfig.createLabel((String) formRows[i][2]);
-            lB.setPreferredSize(new Dimension(100, 24));
-            pnlKH.add(lB, g);
-            g.gridx = 3;
-            g.weightx = 1;
-            pnlKH.add((Component) formRows[i][3], g);
-        }
+        // Hàng 2
+        pnlInfo.add(UIThemeConfig.createLabel("Tên KH:"));
+        pnlInfo.add(txtTenKH);
+        pnlInfo.add(UIThemeConfig.createLabel("Hình thức TT:"));
+        pnlInfo.add(cbHinhThucTT);
 
-        pnlRight.add(pnlKH, BorderLayout.CENTER);
+        // Hàng 3
+        pnlInfo.add(UIThemeConfig.createLabel("Giới tính:"));
+        pnlInfo.add(cbGioiTinh);
+        pnlInfo.add(UIThemeConfig.createLabel("Ngày tạo:"));
+        pnlInfo.add(dateChooser);
 
-        // Product entry card
-        JPanel pnlSP = UIThemeConfig.createGlassPanel(new GridBagLayout());
-        pnlSP.setBorder(new EmptyBorder(12, 16, 12, 16));
+        pnlTop.add(pnlInfo, BorderLayout.CENTER);
 
-        GridBagConstraints gs = new GridBagConstraints();
-        gs.insets = new Insets(5, 6, 5, 6);
-        gs.fill = GridBagConstraints.HORIZONTAL;
+        // Thêm địa chỉ (Nằm riêng cho dài)
+        JPanel pnlDiaChi = new JPanel(new BorderLayout(10, 0));
+        pnlDiaChi.setOpaque(false);
+        JLabel lblDiaChi = UIThemeConfig.createLabel("Địa chỉ:");
+        lblDiaChi.setPreferredSize(new Dimension(85, 30));
+        pnlDiaChi.add(lblDiaChi, BorderLayout.WEST);
+        pnlDiaChi.add(txtDiaChi, BorderLayout.CENTER);
+        pnlTop.add(pnlDiaChi, BorderLayout.SOUTH);
 
-        JLabel lblSPTitle = UIThemeConfig.createLabel("Thêm sản phẩm vào đơn");
-        lblSPTitle.setFont(UIThemeConfig.FONT_SUBTITLE);
-        lblSPTitle.setForeground(UIThemeConfig.ACCENT_YELLOW);
-        gs.gridx = 0;
-        gs.gridy = 0;
-        gs.gridwidth = 4;
-        gs.weightx = 1;
-        pnlSP.add(lblSPTitle, gs);
-        gs.gridwidth = 1;
+        add(pnlTop, BorderLayout.NORTH);
 
-        txtMaSP = UIThemeConfig.createTextField();
-        txtTenSP = UIThemeConfig.createTextField();
-        txtSoLuong = UIThemeConfig.createTextField();
+        // =========================================================
+        // PHẦN GIỮA (CENTER): CHỌN SẢN PHẨM & GIỎ HÀNG
+        // =========================================================
+        JPanel pnlCenter = new JPanel(new GridLayout(2, 1, 0, 15));
+        pnlCenter.setBackground(UIThemeConfig.BG_DARK);
 
-        Object[][] spRows = {
-                { "Mã sản phẩm:", txtMaSP, "Tên SP:", txtTenSP },
-                { "Số lượng:", txtSoLuong, null, null },
-        };
+        // ---- 1. BẢNG DANH SÁCH SẢN PHẨM (KHO) ----
+        JPanel pnlKho = UIThemeConfig.createGlassPanel(new BorderLayout(5, 5));
+        pnlKho.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(UIThemeConfig.BORDER),
+            "Danh sách sản phẩm", 0, 0, UIThemeConfig.FONT_BODY, UIThemeConfig.TEXT_PRIMARY));
 
-        for (int i = 0; i < spRows.length; i++) {
-            gs.gridy = i + 1;
-            gs.gridx = 0;
-            gs.weightx = 0;
-            pnlSP.add(UIThemeConfig.createLabel((String) spRows[i][0]), gs);
-            gs.gridx = 1;
-            gs.weightx = 1;
-            pnlSP.add((Component) spRows[i][1], gs);
-            if (spRows[i][2] != null) {
-                gs.gridx = 2;
-                gs.weightx = 0;
-                pnlSP.add(UIThemeConfig.createLabel((String) spRows[i][2]), gs);
-                gs.gridx = 3;
-                gs.weightx = 1;
-                pnlSP.add((Component) spRows[i][3], gs);
-            }
-        }
+        tableSanPham = new JTable();
+        UIThemeConfig.styleTable(tableSanPham);
+        pnlKho.add(UIThemeConfig.createScrollPane(tableSanPham), BorderLayout.CENTER);
 
-        btnThem = UIThemeConfig.createPrimaryButton("Thêm vào đơn");
-        btnThem.setPreferredSize(new Dimension(140, 34));
-        gs.gridy = 3;
-        gs.gridx = 3;
-        gs.gridwidth = 1;
-        gs.anchor = GridBagConstraints.EAST;
-        pnlSP.add(btnThem, gs);
+        // Thanh công cụ thêm vào giỏ
+        JPanel pnlAddCart = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        pnlAddCart.setOpaque(false);
+        txtMaSP = UIThemeConfig.createTextField(); txtMaSP.setPreferredSize(new Dimension(50, 30)); txtMaSP.setEditable(false);
+        txtTenSP = UIThemeConfig.createTextField(); txtTenSP.setPreferredSize(new Dimension(200, 30)); txtTenSP.setEditable(false);
+        txtSoLuong = UIThemeConfig.createTextField(); txtSoLuong.setPreferredSize(new Dimension(60, 30));
+        btnThem = UIThemeConfig.createPrimaryButton("Thêm vào giỏ");
 
-        JPanel pnlSPWrap = new JPanel(new BorderLayout());
-        pnlSPWrap.setBackground(UIThemeConfig.BG_DARK);
-        pnlSPWrap.setPreferredSize(new Dimension(0, 160));
-        pnlSPWrap.add(pnlSP, BorderLayout.CENTER);
-        pnlRight.add(pnlSPWrap, BorderLayout.SOUTH);
+        pnlAddCart.add(UIThemeConfig.createLabel("Mã SP:")); pnlAddCart.add(txtMaSP);
+        pnlAddCart.add(UIThemeConfig.createLabel("Tên SP:")); pnlAddCart.add(txtTenSP);
+        pnlAddCart.add(UIThemeConfig.createLabel("SL:")); pnlAddCart.add(txtSoLuong);
+        pnlAddCart.add(btnThem);
+        pnlKho.add(pnlAddCart, BorderLayout.SOUTH);
 
-        pnlBody.add(pnlRight, BorderLayout.CENTER);
-        add(pnlBody, BorderLayout.CENTER);
+        pnlCenter.add(pnlKho);
+
+        // ---- 2. BẢNG GIỎ HÀNG ----
+        JPanel pnlGio = UIThemeConfig.createGlassPanel(new BorderLayout(5, 5));
+        pnlGio.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(UIThemeConfig.BORDER),
+            "Giỏ hàng của khách", 0, 0, UIThemeConfig.FONT_BODY, UIThemeConfig.ACCENT));
+
+        tableSanPhamChon = new JTable();
+        UIThemeConfig.styleTable(tableSanPhamChon);
+        pnlGio.add(UIThemeConfig.createScrollPane(tableSanPhamChon), BorderLayout.CENTER);
+
+        JPanel pnlRemoveCart = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+        pnlRemoveCart.setOpaque(false);
+        btnHuyChon = UIThemeConfig.createDangerButton("Bỏ sản phẩm");
+        pnlRemoveCart.add(btnHuyChon);
+        pnlGio.add(pnlRemoveCart, BorderLayout.SOUTH);
+
+        pnlCenter.add(pnlGio);
+
+        add(pnlCenter, BorderLayout.CENTER);
+
+        // =========================================================
+        // PHẦN NAM (SOUTH): NÚT XUẤT HÓA ĐƠN
+        // =========================================================
+        JPanel pnlBottom = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        pnlBottom.setOpaque(false);
+        btnXuatHoaDon = UIThemeConfig.createSuccessButton("✔ XUẤT HÓA ĐƠN");
+        btnXuatHoaDon.setPreferredSize(new Dimension(200, 40));
+        btnXuatHoaDon.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        pnlBottom.add(btnXuatHoaDon);
+
+        add(pnlBottom, BorderLayout.SOUTH);
     }
 }
