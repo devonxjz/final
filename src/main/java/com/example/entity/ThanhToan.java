@@ -17,15 +17,24 @@ public class ThanhToan {
     @Column(name = "MaTT")
     private Integer maTT;
 
-    /** Hóa đơn liên quan */
+    /** * Hóa đơn liên quan
+     * (Đã đổi tên thành hoaDon để khớp với DAO/Service)
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaHDBH", nullable = false)
-    private HoaDonBanHang hoaDonBanHang;
+    private HoaDonBanHang hoaDon;
 
     /** Khách hàng thực hiện thanh toán */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaKH", nullable = false)
     private KhachHang khachHang;
+
+    /** * Nhân viên thực hiện giao dịch (BỔ SUNG)
+     * Giúp hệ thống ghi nhận ai là người thu tiền
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaNV", nullable = false)
+    private NhanVien nhanVien;
 
     /** Ngày thanh toán */
     @Temporal(TemporalType.DATE)
@@ -47,11 +56,14 @@ public class ThanhToan {
     public Integer getMaTT() { return maTT; }
     public void setMaTT(Integer maTT) { this.maTT = maTT; }
 
-    public HoaDonBanHang getHoaDonBanHang() { return hoaDonBanHang; }
-    public void setHoaDonBanHang(HoaDonBanHang hoaDonBanHang) { this.hoaDonBanHang = hoaDonBanHang; }
+    public HoaDonBanHang getHoaDon() { return hoaDon; }
+    public void setHoaDon(HoaDonBanHang hoaDon) { this.hoaDon = hoaDon; }
 
     public KhachHang getKhachHang() { return khachHang; }
     public void setKhachHang(KhachHang khachHang) { this.khachHang = khachHang; }
+
+    public NhanVien getNhanVien() { return nhanVien; }
+    public void setNhanVien(NhanVien nhanVien) { this.nhanVien = nhanVien; }
 
     public Date getNgayTT() { return ngayTT; }
     public void setNgayTT(Date ngayTT) { this.ngayTT = ngayTT; }

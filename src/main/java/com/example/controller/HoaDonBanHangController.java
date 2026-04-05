@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.config.AppConfig; // BỔ SUNG: Import AppConfig để lấy Session người dùng
 import com.example.dto.KhachHangDTO;
 import com.example.dto.ChiTietHDBHDTO;
 import com.example.dto.HoaDonBanHangDTO;
@@ -30,7 +31,7 @@ import java.util.Map;
 
 /**
  * Controller thống nhất xử lý Quản lý HĐ + Bán hàng/Trả góp.
- * Đã tối ưu: Tất cả DB call chạy async qua SwingWorkerUtils.
+ * Đã tối ưu: Truyền mã nhân viên lập đơn từ phiên đăng nhập hiện tại.
  */
 public class HoaDonBanHangController {
 
@@ -120,12 +121,18 @@ public class HoaDonBanHangController {
     }
 
     private void hienThiDsHDBH(List<HoaDonBanHangDTO> danhSach) {
+        // SỬA LỖI: Bổ sung cột Khách Hàng và Nhân Viên để hiển thị dữ liệu mới từ DTO
         DefaultTableModel model = new DefaultTableModel(
-                new String[]{"Mã HĐBH", "Ngày tạo", "Loại HĐ", "Tổng tiền", "Tiền cọc", "Trạng thái"}, 0);
+            new String[]{"Mã HĐ", "Khách hàng", "Nhân viên lập", "Ngày tạo", "Loại HĐ", "Tổng tiền", "Trạng thái"}, 0);
         for (HoaDonBanHangDTO hd : danhSach) {
             model.addRow(new Object[]{
-                    hd.maHDBH(), hd.ngayTao(), hd.loaiHD(),
-                    hd.tongTien(), hd.tienCoc(), hd.trangThai()
+                hd.maHDBH(),
+                hd.tenKH(),
+                hd.tenNV(),
+                hd.ngayTao(),
+                hd.loaiHD(),
+                String.format("%,.0f VNĐ", hd.tongTien()), // Format tiền tệ chuẩn VN
+                hd.trangThai()
             });
         }
         dsHoaDonView.tableDsHDBH.setModel(model);
@@ -137,9 +144,9 @@ public class HoaDonBanHangController {
             null,
             () -> hdService.getAllChiTiet(maHDBH),
             ds -> {
-                DefaultTableModel model = new DefaultTableModel(new String[]{"Mã SP", "Tên SP", "Số lượng", "Tổng tiền"}, 0);
+                DefaultTableModel model = new DefaultTableModel(new String[]{"Mã SP", "Tên SP", "Số lượng", "Thành tiền"}, 0);
                 for (ChiTietHDBHDTO ct : ds) {
-                    model.addRow(new Object[]{ct.maSP(), ct.tenSP(), ct.soLuong(), ct.tongTien()});
+                    model.addRow(new Object[]{ct.maSP(), ct.tenSP(), ct.soLuong(), String.format("%,.0f VNĐ", ct.tongTien())});
                 }
                 dsHoaDonView.tableChiTietHD.setModel(model);
             },
@@ -154,11 +161,11 @@ public class HoaDonBanHangController {
             () -> hdService.getAllThanhToan(maHDBH),
             ds -> {
                 DefaultTableModel model = new DefaultTableModel(
-                        new String[]{"Mã TT", "Mã KH", "Tên KH", "Ngày TT", "Tiền TT", "Hình thức TT"}, 0);
+                    new String[]{"Mã TT", "Khách hàng", "Ngày TT", "Số tiền", "Hình thức TT"}, 0);
                 for (ThanhToanDTO tt : ds) {
                     model.addRow(new Object[]{
-                            tt.maTT(), tt.maKH(), tt.tenKH(), tt.ngayTT(),
-                            tt.tienThanhToan(), tt.hinhThucTT()
+                        tt.maTT(), tt.tenKH(), tt.ngayTT(),
+                        String.format("%,.0f VNĐ", tt.tienThanhToan()), tt.hinhThucTT()
                     });
                 }
                 dsHoaDonView.tableThanhToan.setModel(model);
@@ -186,7 +193,6 @@ public class HoaDonBanHangController {
         banHangView.btnHuy.addActionListener(e -> resetFormBanHang());
     }
 
-    // ====== ASYNC: Load danh sách sản phẩm cho POS ======
     private void loadDsSanPham() {
         SwingWorkerUtils.runAsync(
             null,
@@ -195,7 +201,7 @@ public class HoaDonBanHangController {
                 DefaultTableModel tModel = (DefaultTableModel) banHangView.tableSanPham.getModel();
                 tModel.setRowCount(0);
                 for (SanPhamDTO dto : danhSach) {
-                    tModel.addRow(new Object[]{dto.maSP(), dto.tenSP(), dto.giaBan(), dto.soLuongTrongKho()});
+                    tModel.addRow(new Object[]{dto.maSP(), dto.tenSP(), String.format("%,.0f", dto.giaBan()), dto.soLuongTrongKho()});
                 }
             },
             ex -> JOptionPane.showMessageDialog(banHangView, "Lỗi tải danh sách sản phẩm: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE)
@@ -213,7 +219,8 @@ public class HoaDonBanHangController {
 
         int maSP = Integer.parseInt(banHangView.tableSanPham.getValueAt(row, 0).toString());
         String tenSP = banHangView.tableSanPham.getValueAt(row, 1).toString();
-        double giaBan = Double.parseDouble(banHangView.tableSanPham.getValueAt(row, 2).toString());
+        // Lọc bỏ dấu phẩy do format tiền tệ trước khi parse
+        double giaBan = Double.parseDouble(banHangView.tableSanPham.getValueAt(row, 2).toString().replace(",", ""));
         int tonKho = Integer.parseInt(banHangView.tableSanPham.getValueAt(row, 3).toString());
 
         String inputSL = JOptionPane.showInputDialog(banHangView, "Nhập số lượng cho " + tenSP + ":", "1");
@@ -255,7 +262,7 @@ public class HoaDonBanHangController {
 
         for (ChiTietHDBHDTO ct : gioHang) {
             tongTien += ct.tongTien();
-            model.addRow(new Object[]{ct.maSP(), ct.tenSP(), ct.soLuong(), ct.giaBan(), ct.tongTien()});
+            model.addRow(new Object[]{ct.maSP(), ct.tenSP(), ct.soLuong(), String.format("%,.0f", ct.giaBan()), String.format("%,.0f", ct.tongTien())});
         }
         banHangView.txtTongTien.setText(String.format("%.0f", tongTien));
     }
@@ -296,16 +303,19 @@ public class HoaDonBanHangController {
             thoiHan = rThoiHan.getValue();
         }
 
-        // Capture for lambda
         final double finalLaiSuat = laiSuat;
         final int finalThoiHan = thoiHan;
         final List<ChiTietHDBHDTO> snapshot = new ArrayList<>(gioHang);
 
+        // BỔ SUNG: Lấy mã nhân viên đang thao tác
+        int maNV = AppConfig.getCurrentUser().getNhanVien().getMaNV();
+
         SwingWorkerUtils.runAsyncVoid(
             banHangView.btnThanhToan,
-            () -> hdService.thanhToanHoaDon(rMaKH.getValue(), loaiHD, rTongTien.getValue(), finalLaiSuat, finalThoiHan, snapshot),
+            // SỬA LỖI: Truyền maNV vào Service
+            () -> hdService.thanhToanHoaDon(rMaKH.getValue(), maNV, loaiHD, rTongTien.getValue(), finalLaiSuat, finalThoiHan, snapshot),
             () -> {
-                JOptionPane.showMessageDialog(banHangView, "Thanh toán thành công!");
+                JOptionPane.showMessageDialog(banHangView, "Thanh toán thành công! Người thu tiền: " + AppConfig.getCurrentUser().getNhanVien().getTenNV());
                 resetFormBanHang();
                 loadDsSanPham();
                 loadDsHoaDon();
@@ -321,7 +331,7 @@ public class HoaDonBanHangController {
         banHangView.txtTenKH.setText("");
         banHangView.txtLaiSuat.setText("");
         banHangView.txtThoiHan.setText("");
-        banHangView.cbLoaiHD.setSelectedIndex(0); 
+        banHangView.cbLoaiHD.setSelectedIndex(0);
     }
 
     // =========================================================================
@@ -330,11 +340,17 @@ public class HoaDonBanHangController {
 
     private void showThemHoaDonBanDialog() {
         ThemHoaDonBanView themView = new ThemHoaDonBanView();
+
+        JDialog dialog = new JDialog();
+        dialog.setTitle("Lập Hóa Đơn Mới");
+        dialog.setModal(true);
+        dialog.setContentPane(themView);
+        dialog.setSize(950, 800);
+        dialog.setLocationRelativeTo(dsHoaDonView);
+
         Map<Integer, Integer> gioHangPopup = new HashMap<>();
-        
         final List<SanPhamDTO> sanPhamList = new ArrayList<>();
 
-        // ====== ASYNC: Load sản phẩm cho popup ======
         SwingWorkerUtils.runAsync(
             null,
             () -> spService.getAllSanPham(),
@@ -352,13 +368,12 @@ public class HoaDonBanHangController {
 
                 DefaultTableModel modelSP = (DefaultTableModel) themView.tableSanPham.getModel();
                 for (SanPhamDTO sp : list) {
-                    modelSP.addRow(new Object[] { sp.maSP(), sp.tenSP(), sp.giaBan(), sp.soLuongTrongKho() });
+                    modelSP.addRow(new Object[] { sp.maSP(), sp.tenSP(), String.format("%,.0f", sp.giaBan()), sp.soLuongTrongKho() });
                 }
             },
             ex -> JOptionPane.showMessageDialog(themView, "Lỗi khi lấy danh sách sản phẩm!")
         );
 
-        // Tự động điền khách hàng khi nhập sđt
         themView.txtSDT.addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
@@ -422,7 +437,6 @@ public class HoaDonBanHangController {
             }
         });
 
-        // ====== ASYNC: Xuất hóa đơn ======
         themView.btnXuatHoaDon.addActionListener(e -> {
             if (gioHangPopup.isEmpty()) {
                 JOptionPane.showMessageDialog(themView, "Giỏ hàng trống!");
@@ -456,22 +470,29 @@ public class HoaDonBanHangController {
             final double finalTongTien = tongTien;
             final Date finalNgayTao = ngayTao;
 
+            // BỔ SUNG: Lấy mã nhân viên
+            int maNV = AppConfig.getCurrentUser().getNhanVien().getMaNV();
+
             SwingWorkerUtils.runAsyncVoid(
                 themView.btnXuatHoaDon,
                 () -> {
+                    // SỬA LỖI: Truyền maNV (thay cho số 0 lúc trước)
                     boolean success = hdService.themHoaDonVaChiTietVaThanhToan(
-                            finalNgayTao, loaiHD, finalTongTien, 0, chiTietList,
-                            tenKH, sdt, diaChi, gioiTinh, hinhThucTT, "Đã thanh toán");
+                        finalNgayTao, loaiHD, finalTongTien, 0, maNV, chiTietList,
+                        tenKH, sdt, diaChi, gioiTinh, hinhThucTT, "Đã thanh toán");
                     if (!success) throw new ServiceException("Lỗi khi xuất hóa đơn!");
                 },
                 () -> {
-                    JOptionPane.showMessageDialog(themView, "Xuất hóa đơn thành công!");
+                    JOptionPane.showMessageDialog(themView, "Xuất hóa đơn thành công! Người lập: " + AppConfig.getCurrentUser().getNhanVien().getTenNV());
+                    dialog.dispose(); // Đóng popup sau khi xuất hóa đơn thành công
                     loadDsHoaDon();
                     loadDsSanPham();
                 },
                 ex -> JOptionPane.showMessageDialog(themView, "Lỗi nghiệp vụ: " + ex.getMessage())
             );
         });
+
+        dialog.setVisible(true);
     }
 
     private void updateGioHangPopupUI(ThemHoaDonBanView themView, Map<Integer, Integer> gioHangPopup, List<SanPhamDTO> sanPhamList) {
@@ -482,7 +503,7 @@ public class HoaDonBanHangController {
             int qty = entry.getValue();
             SanPhamDTO sp = sanPhamList.stream().filter(s -> s.maSP() == maSP).findFirst().orElse(null);
             if (sp != null) {
-                model.addRow(new Object[] { maSP, sp.tenSP(), qty, sp.giaBan(), sp.giaBan() * qty });
+                model.addRow(new Object[] { maSP, sp.tenSP(), qty, String.format("%,.0f", sp.giaBan()), String.format("%,.0f", sp.giaBan() * qty) });
             }
         }
     }

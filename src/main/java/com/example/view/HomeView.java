@@ -11,7 +11,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
 import java.util.List;
 import java.util.Map;
 
@@ -59,8 +58,8 @@ public class HomeView extends JFrame {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(UIThemeConfig.BG_SIDEBAR);
         header.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, UIThemeConfig.BORDER),
-                new EmptyBorder(10, 20, 10, 20)));
+            BorderFactory.createMatteBorder(0, 0, 1, 0, UIThemeConfig.BORDER),
+            new EmptyBorder(10, 20, 10, 20)));
 
         // Logo
         JLabel logo = new JLabel("LaptopPU");
@@ -82,20 +81,82 @@ public class HomeView extends JFrame {
         bellIcon.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         ImageIcon profileImg = UIThemeConfig.loadScaledIcon("/icons/profile.png", 34, 34);
-        JLabel avatar = new JLabel();
+        JPopupMenu userMenu = new JPopupMenu();
+        JMenuItem itemThongTin = new JMenuItem("Xem/Sửa thông tin");
+        JMenuItem itemTheme = new JMenuItem("Cài đặt Theme");
+        JMenuItem itemDangXuat = new JMenuItem("Đăng xuất");
+
+        userMenu.add(itemThongTin);
+        userMenu.add(itemTheme);
+        userMenu.addSeparator(); // Thêm một đường kẻ ngang cho đẹp
+        userMenu.add(itemDangXuat);
+
+        // 1. Chỉ dùng DUY NHẤT một biến lblAvatar
+        JLabel lblAvatar = new JLabel();
         if (profileImg != null) {
-            avatar.setIcon(profileImg);
+            lblAvatar.setIcon(profileImg);
         } else {
-            avatar.setText("A");
-            avatar.setFont(new Font("Segoe UI", Font.BOLD, 14));
-            avatar.setForeground(UIThemeConfig.ACCENT);
+            lblAvatar.setText("A");
+            lblAvatar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            lblAvatar.setForeground(UIThemeConfig.ACCENT);
         }
-        avatar.setPreferredSize(new Dimension(34, 34));
-        avatar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        lblAvatar.setPreferredSize(new Dimension(34, 34));
+        lblAvatar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // 2. Gắn sự kiện click
+        lblAvatar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                userMenu.show(lblAvatar, 0, lblAvatar.getHeight());
+            }
+        });
+
+        // =======================================================
+        // XỬ LÝ SỰ KIỆN MENU AVATAR
+        // =======================================================
+        itemThongTin.addActionListener(e -> hienThiFormThongTinCaNhan());
+
+        itemTheme.addActionListener(e -> {
+            String[] options = {"Dark Mode (Hiện tại)", "Light Mode (Sắp ra mắt)", "Hủy"};
+            int choice = JOptionPane.showOptionDialog(this,
+                "Chọn chế độ hiển thị cho hệ thống:",
+                "Cài đặt Giao Diện",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.PLAIN_MESSAGE,
+                null,
+                options,
+                options[0]);
+
+            if (choice == 1) {
+                JOptionPane.showMessageDialog(this,
+                    "Tính năng Light Mode đang được phát triển để tối ưu bảng màu. Vui lòng quay lại sau!",
+                    "Thông báo",
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        itemDangXuat.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this,
+                "Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?",
+                "Xác nhận đăng xuất",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                // 1. (Tùy chọn) Xóa thông tin user đang đăng nhập trong bộ nhớ
+                com.example.config.AppConfig.setCurrentUser(null);
+
+                // 2. Đóng màn hình HomeView hiện tại
+                this.dispose();
+
+                // 3. Mở lại màn hình đăng nhập
+                new LoginView().setVisible(true);
+            }
+        });
 
         rightSection.add(bellIcon);
-        rightSection.add(avatar);
-
+        // 3. Thêm đúng cái lblAvatar vào màn hình
+        rightSection.add(lblAvatar);
         header.add(logo, BorderLayout.WEST);
         header.add(rightSection, BorderLayout.EAST);
         return header;
@@ -119,46 +180,37 @@ public class HomeView extends JFrame {
         sidebar.add(Box.createRigidArea(new Dimension(0, 12)));
 
         String[][] items = {
-                { "/icons/dashboard.png", "Bảng điều khiển", "📊" },
-                { "/icons/box.png", "Sản phẩm", "📦" },
-                { "/icons/factory.png", "Nhà cung cấp", "🏭" },
-                { "/icons/team.png", "Khách hàng", "👥" },
-                { "/icons/checklist.png", "Đơn hàng", "📋" },
-                { "/icons/atm-card.png", "Thanh toán", "💳" },
-                { "/icons/bar-chart.png", "Báo cáo", "📈" },
+            { "/icons/dashboard.png", "Bảng điều khiển", "📊" },
+            { "/icons/box.png", "Sản phẩm", "📦" },
+            { "/icons/factory.png", "Nhà cung cấp", "🏭" },
+            { "/icons/team.png", "Khách hàng", "👥" },
+            { "/icons/checklist.png", "Đơn hàng", "📋" },
+            { "/icons/atm-card.png", "Thanh toán", "💳" },
+            { "/icons/bar-chart.png", "Báo cáo", "📈" },
         };
 
         for (String[] item : items) {
             boolean isActive = item[1].equals(activeMenu);
-
-            // 1. Thử load ảnh với đường dẫn classpath (VD: /icons/box.png)
             ImageIcon icon = UIThemeConfig.loadScaledIcon(item[0], 24, 24);
             JPanel menuItem;
 
             if (icon != null) {
-                // 2a. Load ảnh thành công -> Dùng hàm tạo ImageIcon
-                menuItem = UIThemeConfig.createSidebarItem(icon, item[1], isActive, () -> {
-                    onSidebarClick(item[1]);
-                });
+                menuItem = UIThemeConfig.createSidebarItem(icon, item[1], isActive, () -> onSidebarClick(item[1]));
             } else {
-                // 2b. Không tìm thấy ảnh -> Fallback về Emoji truyền thống
-                menuItem = UIThemeConfig.createSidebarItem(item[2], item[1], isActive, () -> {
-                    onSidebarClick(item[1]);
-                });
+                menuItem = UIThemeConfig.createSidebarItem(item[2], item[1], isActive, () -> onSidebarClick(item[1]));
             }
 
             sidebar.add(menuItem);
             sidebar.add(Box.createRigidArea(new Dimension(0, 2)));
         }
 
-        // Spacer + Exit
         sidebar.add(Box.createVerticalGlue());
         sidebar.add(UIThemeConfig.createDivider());
         sidebar.add(Box.createRigidArea(new Dimension(0, 8)));
 
         JPanel exitItem = UIThemeConfig.createSidebarItem("🚪", "Thoát", false, () -> {
             int c = JOptionPane.showConfirmDialog(this,
-                    "Bạn có chắc chắn muốn thoát không?", "Xác nhận thoát", JOptionPane.YES_NO_OPTION);
+                "Bạn có chắc chắn muốn thoát không?", "Xác nhận thoát", JOptionPane.YES_NO_OPTION);
             if (c == JOptionPane.YES_OPTION) {
                 HibernateConfig.shutdown();
                 System.exit(0);
@@ -178,8 +230,8 @@ public class HomeView extends JFrame {
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER));
         footer.setBackground(UIThemeConfig.BG_SIDEBAR);
         footer.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(1, 0, 0, 0, UIThemeConfig.BORDER),
-                new EmptyBorder(6, 0, 6, 0)));
+            BorderFactory.createMatteBorder(1, 0, 0, 0, UIThemeConfig.BORDER),
+            new EmptyBorder(6, 0, 6, 0)));
         JLabel lbl = new JLabel("© 2026 LaptopPU — Bảo lưu mọi quyền.");
         lbl.setFont(UIThemeConfig.FONT_SMALL);
         lbl.setForeground(UIThemeConfig.TEXT_MUTED);
@@ -199,7 +251,6 @@ public class HomeView extends JFrame {
         dash.setBackground(UIThemeConfig.BG_DARK);
         dash.setBorder(new EmptyBorder(24, 28, 16, 28));
 
-        // Welcome header
         JPanel welcomePanel = new JPanel(new BorderLayout());
         welcomePanel.setOpaque(false);
         JLabel lblWelcome = new JLabel("Bảng điều khiển");
@@ -211,7 +262,6 @@ public class HomeView extends JFrame {
         welcomePanel.add(lblWelcome, BorderLayout.NORTH);
         welcomePanel.add(lblSub, BorderLayout.SOUTH);
 
-        // Stats cards — 4 in a row (placeholder)
         JPanel statsRow = new JPanel(new GridLayout(1, 4, 16, 0));
         statsRow.setOpaque(false);
         statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY", "...", "$", UIThemeConfig.ACCENT));
@@ -226,11 +276,9 @@ public class HomeView extends JFrame {
 
         dash.add(topSection, BorderLayout.NORTH);
 
-        // Bottom: Recent Orders + Revenue Chart
         JPanel bottomSection = new JPanel(new GridLayout(1, 2, 16, 0));
         bottomSection.setOpaque(false);
 
-        // Recent Orders table (empty initially)
         JPanel ordersPanel = UIThemeConfig.createGlassPanel(new BorderLayout(0, 10));
         ordersPanel.setBorder(new EmptyBorder(18, 18, 18, 18));
         JLabel lblOrders = new JLabel("Đơn hàng gần đây");
@@ -241,15 +289,12 @@ public class HomeView extends JFrame {
         String[] orderCols = { "Mã đơn hàng", "Ngày", "Tổng tiền", "Trạng thái" };
         DefaultTableModel orderModel = new DefaultTableModel(orderCols, 0) {
             @Override
-            public boolean isCellEditable(int r, int c) {
-                return false;
-            }
+            public boolean isCellEditable(int r, int c) { return false; }
         };
         JTable ordersTable = new JTable(orderModel);
         UIThemeConfig.styleTable(ordersTable);
         ordersPanel.add(UIThemeConfig.createScrollPane(ordersTable), BorderLayout.CENTER);
 
-        // Revenue Chart placeholder
         JPanel chartPanel = UIThemeConfig.createGlassPanel(new BorderLayout(0, 10));
         chartPanel.setBorder(new EmptyBorder(18, 18, 18, 18));
         JLabel lblChart = new JLabel("Xu hướng doanh thu (7 ngày)");
@@ -257,9 +302,8 @@ public class HomeView extends JFrame {
         lblChart.setForeground(UIThemeConfig.TEXT_PRIMARY);
         chartPanel.add(lblChart, BorderLayout.NORTH);
 
-        // Dùng AtomicReference để chia sẻ dữ liệu giữa async callback và chartArea
         final java.util.concurrent.atomic.AtomicReference<Map<String, Double>> chartDataRef =
-                new java.util.concurrent.atomic.AtomicReference<>(null);
+            new java.util.concurrent.atomic.AtomicReference<>(null);
 
         JPanel chartArea = new JPanel() {
             @Override
@@ -298,7 +342,7 @@ public class HomeView extends JFrame {
                         int y = getHeight() - 30 - barH;
 
                         GradientPaint gp = new GradientPaint(x, y, UIThemeConfig.ACCENT,
-                                x, getHeight() - 30, new Color(63, 132, 229, 60));
+                            x, getHeight() - 30, new Color(63, 132, 229, 60));
                         g2.setPaint(gp);
                         g2.fillRoundRect(x, y, barWidth, barH, 6, 6);
 
@@ -326,121 +370,109 @@ public class HomeView extends JFrame {
         contentPanel.revalidate();
         contentPanel.repaint();
 
-        // ====== ASYNC: Load tất cả dữ liệu Dashboard trên Background Thread ======
         com.example.util.SwingWorkerUtils.runAsync(
-                null,
-                () -> {
-                    DashboardStatusDTO status;
-                    try {
-                        status = AppConfig.getDashboardService().getDashboardStatus();
-                    } catch (Exception e) {
-                        status = new DashboardStatusDTO(0, 0, 0, 0);
-                    }
+            null,
+            () -> {
+                DashboardStatusDTO status;
+                try {
+                    status = AppConfig.getDashboardService().getDashboardStatus();
+                } catch (Exception e) {
+                    status = new DashboardStatusDTO(0, 0, 0, 0);
+                }
 
-                    List<HoaDonBanHangDTO> recent;
-                    try {
-                        recent = AppConfig.getHoaDonBanHangService().getAllHoaDon();
-                    } catch (Exception e) {
-                        recent = new java.util.ArrayList<>();
-                    }
+                List<HoaDonBanHangDTO> recent;
+                try {
+                    recent = AppConfig.getHoaDonBanHangService().getAllHoaDon();
+                } catch (Exception e) {
+                    recent = new java.util.ArrayList<>();
+                }
 
-                    Map<String, Double> revenueData;
-                    try {
-                        // Lấy TẤT CẢ dữ liệu doanh thu, rồi lọc 7 ngày gần nhất có dữ liệu
-                        Map<String, Double> allRevenue = AppConfig.getThongKeService().getRevenueByDay(null, null);
-                        if (allRevenue != null && !allRevenue.isEmpty()) {
-                            // Lấy 7 bản ghi cuối cùng (gần nhất)
-                            java.util.List<Map.Entry<String, Double>> entries = new java.util.ArrayList<>(allRevenue.entrySet());
-                            int fromIndex = Math.max(0, entries.size() - 7);
-                            revenueData = new java.util.LinkedHashMap<>();
-                            for (int i = fromIndex; i < entries.size(); i++) {
-                                revenueData.put(entries.get(i).getKey(), entries.get(i).getValue());
-                            }
-                        } else {
-                            revenueData = new java.util.LinkedHashMap<>();
+                Map<String, Double> revenueData;
+                try {
+                    Map<String, Double> allRevenue = AppConfig.getThongKeService().getRevenueByDay(null, null);
+                    if (allRevenue != null && !allRevenue.isEmpty()) {
+                        java.util.List<Map.Entry<String, Double>> entries = new java.util.ArrayList<>(allRevenue.entrySet());
+                        int fromIndex = Math.max(0, entries.size() - 7);
+                        revenueData = new java.util.LinkedHashMap<>();
+                        for (int i = fromIndex; i < entries.size(); i++) {
+                            revenueData.put(entries.get(i).getKey(), entries.get(i).getValue());
                         }
-                    } catch (Exception e) {
+                    } else {
                         revenueData = new java.util.LinkedHashMap<>();
                     }
+                } catch (Exception e) {
+                    revenueData = new java.util.LinkedHashMap<>();
+                }
 
-                    return new Object[] { status, recent, revenueData };
-                },
-                result -> {
-                    // Cập nhật UI trên EDT
-                    DashboardStatusDTO status = (DashboardStatusDTO) result[0];
-                    @SuppressWarnings("unchecked")
-                    List<HoaDonBanHangDTO> recent = (List<HoaDonBanHangDTO>) result[1];
-                    @SuppressWarnings("unchecked")
-                    Map<String, Double> revenueData = (Map<String, Double>) result[2];
+                return new Object[] { status, recent, revenueData };
+            },
+            result -> {
+                DashboardStatusDTO status = (DashboardStatusDTO) result[0];
+                @SuppressWarnings("unchecked")
+                List<HoaDonBanHangDTO> recent = (List<HoaDonBanHangDTO>) result[1];
+                @SuppressWarnings("unchecked")
+                Map<String, Double> revenueData = (Map<String, Double>) result[2];
 
-                    lblSub.setText("Chào mừng bạn trở lại! Đây là tình hình hôm nay.");
+                lblSub.setText("Chào mừng bạn trở lại! Đây là tình hình hôm nay.");
 
-                    // Rebuild stats cards with real data
-                    statsRow.removeAll();
+                statsRow.removeAll();
 
-                    // Load Icons (Chuẩn 24x24 cho stat cards)
-                    ImageIcon iconSalary = UIThemeConfig.loadScaledIcon("/icons/salary.png", 24, 24);
-                    ImageIcon iconOrders = UIThemeConfig.loadScaledIcon("/icons/total-orders.png", 24, 24);
-                    ImageIcon iconBox    = UIThemeConfig.loadScaledIcon("/icons/box.png", 24, 24);
-                    ImageIcon iconTeam   = UIThemeConfig.loadScaledIcon("/icons/team.png", 24, 24);
+                ImageIcon iconSalary = UIThemeConfig.loadScaledIcon("/icons/salary.png", 24, 24);
+                ImageIcon iconOrders = UIThemeConfig.loadScaledIcon("/icons/total-orders.png", 24, 24);
+                ImageIcon iconBox    = UIThemeConfig.loadScaledIcon("/icons/box.png", 24, 24);
+                ImageIcon iconTeam   = UIThemeConfig.loadScaledIcon("/icons/team.png", 24, 24);
 
-                    // Doanh thu
-                    if (iconSalary != null) {
-                        statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY", 
-                                String.format("%,.0f VND", status.revenueToday()), iconSalary, UIThemeConfig.ACCENT));
-                    } else {
-                        statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY", 
-                                String.format("%,.0f VND", status.revenueToday()), "$", UIThemeConfig.ACCENT));
-                    }
+                if (iconSalary != null) {
+                    statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY",
+                        String.format("%,.0f VND", status.revenueToday()), iconSalary, UIThemeConfig.ACCENT));
+                } else {
+                    statsRow.add(UIThemeConfig.createStatCard("DOANH THU HÔM NAY",
+                        String.format("%,.0f VND", status.revenueToday()), "$", UIThemeConfig.ACCENT));
+                }
 
-                    // Đơn hàng
-                    if (iconOrders != null) {
-                        statsRow.add(UIThemeConfig.createStatCard("TỔNG ĐƠN HÀNG", 
-                                String.valueOf(status.totalOrders()), iconOrders, UIThemeConfig.ACCENT_GREEN));
-                    } else {
-                        statsRow.add(UIThemeConfig.createStatCard("TỔNG ĐƠN HÀNG", 
-                                String.valueOf(status.totalOrders()), "#", UIThemeConfig.ACCENT_GREEN));
-                    }
+                if (iconOrders != null) {
+                    statsRow.add(UIThemeConfig.createStatCard("TỔNG ĐƠN HÀNG",
+                        String.valueOf(status.totalOrders()), iconOrders, UIThemeConfig.ACCENT_GREEN));
+                } else {
+                    statsRow.add(UIThemeConfig.createStatCard("TỔNG ĐƠN HÀNG",
+                        String.valueOf(status.totalOrders()), "#", UIThemeConfig.ACCENT_GREEN));
+                }
 
-                    // Kho hàng
-                    if (iconBox != null) {
-                        statsRow.add(UIThemeConfig.createStatCard("SẢN PHẨM TRONG KHO", 
-                                String.valueOf(status.productsInStock()), iconBox, UIThemeConfig.ACCENT_YELLOW));
-                    } else {
-                        statsRow.add(UIThemeConfig.createStatCard("SẢN PHẨM TRONG KHO", 
-                                String.valueOf(status.productsInStock()), "📦", UIThemeConfig.ACCENT_YELLOW));
-                    }
+                if (iconBox != null) {
+                    statsRow.add(UIThemeConfig.createStatCard("SẢN PHẨM TRONG KHO",
+                        String.valueOf(status.productsInStock()), iconBox, UIThemeConfig.ACCENT_YELLOW));
+                } else {
+                    statsRow.add(UIThemeConfig.createStatCard("SẢN PHẨM TRONG KHO",
+                        String.valueOf(status.productsInStock()), "📦", UIThemeConfig.ACCENT_YELLOW));
+                }
 
-                    // Khách hàng
-                    if (iconTeam != null) {
-                        statsRow.add(UIThemeConfig.createStatCard("KHÁCH HÀNG", 
-                                String.valueOf(status.totalCustomers()), iconTeam, UIThemeConfig.ACCENT_PURPLE));
-                    } else {
-                        statsRow.add(UIThemeConfig.createStatCard("KHÁCH HÀNG", 
-                                String.valueOf(status.totalCustomers()), "👥", UIThemeConfig.ACCENT_PURPLE));
-                    }
+                if (iconTeam != null) {
+                    statsRow.add(UIThemeConfig.createStatCard("KHÁCH HÀNG",
+                        String.valueOf(status.totalCustomers()), iconTeam, UIThemeConfig.ACCENT_PURPLE));
+                } else {
+                    statsRow.add(UIThemeConfig.createStatCard("KHÁCH HÀNG",
+                        String.valueOf(status.totalCustomers()), "👥", UIThemeConfig.ACCENT_PURPLE));
+                }
 
-                    statsRow.revalidate();
-                    statsRow.repaint();
+                statsRow.revalidate();
+                statsRow.repaint();
 
-                    // Recent orders
-                    int limit = Math.min(recent.size(), 8);
-                    for (int i = 0; i < limit; i++) {
-                        HoaDonBanHangDTO hd = recent.get(i);
-                        orderModel.addRow(new Object[] {
-                                hd.maHDBH(), hd.ngayTao(), String.format("%,.0f", hd.tongTien()), hd.trangThai()
-                        });
-                    }
+                int limit = Math.min(recent.size(), 8);
+                for (int i = 0; i < limit; i++) {
+                    HoaDonBanHangDTO hd = recent.get(i);
+                    orderModel.addRow(new Object[] {
+                        hd.maHDBH(), hd.ngayTao(), String.format("%,.0f", hd.tongTien()), hd.trangThai()
+                    });
+                }
 
-                    // Revenue chart — set data vào AtomicReference rồi repaint
-                    if (revenueData != null) {
-                        chartDataRef.set(revenueData);
-                        chartArea.repaint();
-                    }
-                },
-                ex -> {
-                    lblSub.setText("Lỗi tải dữ liệu dashboard.");
-                });
+                if (revenueData != null) {
+                    chartDataRef.set(revenueData);
+                    chartArea.repaint();
+                }
+            },
+            ex -> {
+                lblSub.setText("Lỗi tải dữ liệu dashboard.");
+            });
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -471,10 +503,10 @@ public class HomeView extends JFrame {
                 HoaDonBanHangView listView = new HoaDonBanHangView();
                 HoaDonView banHangView = new HoaDonView();
                 new HoaDonBanHangController(
-                        AppConfig.getHoaDonBanHangService(),
-                        AppConfig.getSanPhamService(),
-                        AppConfig.getKhachHangService(),
-                        listView, banHangView);
+                    AppConfig.getHoaDonBanHangService(),
+                    AppConfig.getSanPhamService(),
+                    AppConfig.getKhachHangService(),
+                    listView, banHangView);
                 showSubView("Đơn hàng", listView);
             }
             case "Thanh toán" -> {
@@ -500,21 +532,17 @@ public class HomeView extends JFrame {
         contentPanel.repaint();
     }
 
-    /**
-     * For sub-forms (ThemSanPham, ThemNCC etc.) — adds a "← Back" bar
-     */
     public void showSubViewWithBack(String title, JPanel panelView, Runnable onBack) {
         contentPanel.removeAll();
 
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBackground(UIThemeConfig.BG_DARK);
 
-        // Top bar with back button
         JPanel topBar = new JPanel(new BorderLayout());
         topBar.setBackground(UIThemeConfig.BG_CARD);
         topBar.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, UIThemeConfig.BORDER),
-                new EmptyBorder(9, 18, 9, 18)));
+            BorderFactory.createMatteBorder(0, 0, 1, 0, UIThemeConfig.BORDER),
+            new EmptyBorder(9, 18, 9, 18)));
 
         JButton btnBack = UIThemeConfig.createButton("← Quay lại", UIThemeConfig.BG_INPUT);
         btnBack.setPreferredSize(new Dimension(120, 33));
@@ -539,5 +567,125 @@ public class HomeView extends JFrame {
         contentPanel.add(wrapper, BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // POPUP XEM VÀ SỬA THÔNG TIN CÁ NHÂN
+    // ═══════════════════════════════════════════════════════════════════
+    private void hienThiFormThongTinCaNhan() {
+        var currentUser = AppConfig.getCurrentUser();
+        if (currentUser == null || currentUser.getNhanVien() == null) {
+            JOptionPane.showMessageDialog(this, "Không tìm thấy thông tin phiên đăng nhập!");
+            return;
+        }
+
+        var nv = currentUser.getNhanVien();
+
+        JDialog profileDialog = new JDialog(this, "Hồ Sơ Cá Nhân", true);
+        profileDialog.setSize(400, 300);
+        profileDialog.setLocationRelativeTo(this);
+        profileDialog.getContentPane().setBackground(UIThemeConfig.BG_DARK);
+        profileDialog.setLayout(new BorderLayout(10, 10));
+
+        JPanel pnlInfo = UIThemeConfig.createGlassPanel(new GridLayout(5, 1, 5, 5));
+        pnlInfo.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+
+        JLabel lblTen = UIThemeConfig.createLabel("👤 Họ và tên:  " + nv.getTenNV());
+        lblTen.setFont(UIThemeConfig.FONT_SUBTITLE);
+
+        pnlInfo.add(lblTen);
+        pnlInfo.add(UIThemeConfig.createLabel("💼 Chức vụ:  " + nv.getChucVu()));
+        // Lưu ý: Đảm bảo class NhanVien của bạn có hàm getSdt() hoặc getSDT()
+        pnlInfo.add(UIThemeConfig.createLabel("📞 Điện thoại:  " + nv.getSDT()));
+        pnlInfo.add(UIThemeConfig.createLabel("⚧ Giới tính:  " + (nv.getGioiTinh() != null ? nv.getGioiTinh() : "Chưa cập nhật")));
+        pnlInfo.add(UIThemeConfig.createLabel("🏠 Địa chỉ:  " + (nv.getDiaChi() != null ? nv.getDiaChi() : "Chưa cập nhật")));
+
+        JButton btnSua = UIThemeConfig.createButton("Sửa thông tin", Color.lightGray);
+        JButton btnClose = UIThemeConfig.createPrimaryButton("Đóng");
+
+        btnSua.addActionListener(ev -> {
+            profileDialog.dispose(); // Đóng form xem
+            hienThiFormSuaThongTin(nv); // Mở form sửa
+        });
+        btnClose.addActionListener(ev -> profileDialog.dispose());
+
+        JPanel pnlBtn = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        pnlBtn.setOpaque(false);
+        pnlBtn.add(btnSua);
+        pnlBtn.add(btnClose);
+
+        profileDialog.add(UIThemeConfig.createTitleLabel("THÔNG TIN NHÂN VIÊN"), BorderLayout.NORTH);
+        profileDialog.add(pnlInfo, BorderLayout.CENTER);
+        profileDialog.add(pnlBtn, BorderLayout.SOUTH);
+
+        profileDialog.setVisible(true);
+    }
+
+    private void hienThiFormSuaThongTin(com.example.entity.NhanVien nv) {
+        JDialog editDialog = new JDialog(this, "Sửa Thông Tin Cá Nhân", true);
+        editDialog.setSize(450, 350);
+        editDialog.setLocationRelativeTo(this);
+        editDialog.getContentPane().setBackground(UIThemeConfig.BG_DARK);
+
+        JPanel pnlForm = new JPanel(new GridLayout(4, 2, 10, 15));
+        pnlForm.setBackground(UIThemeConfig.BG_DARK);
+        pnlForm.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JTextField txtTen = UIThemeConfig.createTextField(); txtTen.setText(nv.getTenNV());
+        JTextField txtSdt = UIThemeConfig.createTextField(); txtSdt.setText(nv.getSDT());
+        JTextField txtDiaChi = UIThemeConfig.createTextField(); txtDiaChi.setText(nv.getDiaChi());
+        JComboBox<String> cmbGioiTinh = UIThemeConfig.createComboBox(new String[]{"Nam", "Nữ", "Khác"});
+        if (nv.getGioiTinh() != null) cmbGioiTinh.setSelectedItem(nv.getGioiTinh());
+
+        pnlForm.add(UIThemeConfig.createLabel("Họ và tên:")); pnlForm.add(txtTen);
+        pnlForm.add(UIThemeConfig.createLabel("Số điện thoại:")); pnlForm.add(txtSdt);
+        pnlForm.add(UIThemeConfig.createLabel("Địa chỉ:")); pnlForm.add(txtDiaChi);
+        pnlForm.add(UIThemeConfig.createLabel("Giới tính:")); pnlForm.add(cmbGioiTinh);
+
+        JButton btnLuu = UIThemeConfig.createSuccessButton("Lưu thay đổi");
+        JButton btnHuy = UIThemeConfig.createDangerButton("Hủy");
+
+        btnHuy.addActionListener(e -> editDialog.dispose());
+        btnLuu.addActionListener(e -> {
+            if (txtTen.getText().trim().isEmpty() || txtSdt.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(editDialog, "Họ tên và Số điện thoại không được để trống!");
+                return;
+            }
+
+            // Cập nhật dữ liệu vào Entity
+            nv.setTenNV(txtTen.getText().trim());
+            nv.setSDT(txtSdt.getText().trim());
+            nv.setDiaChi(txtDiaChi.getText().trim());
+            nv.setGioiTinh(cmbGioiTinh.getSelectedItem().toString());
+
+            // Lưu trực tiếp vào Database bằng Hibernate
+            jakarta.persistence.EntityManager em = HibernateConfig.getEntityManager();
+            jakarta.persistence.EntityTransaction tx = em.getTransaction();
+            try {
+                tx.begin();
+                em.merge(nv); // Update Database
+                tx.commit();
+
+                JOptionPane.showMessageDialog(editDialog, "Cập nhật thông tin thành công!");
+                editDialog.dispose();
+                hienThiFormThongTinCaNhan(); // Mở lại form xem để thấy data mới
+
+            } catch (Exception ex) {
+                if (tx.isActive()) tx.rollback();
+                JOptionPane.showMessageDialog(editDialog, "Lỗi khi lưu dữ liệu: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+            } finally {
+                em.close();
+            }
+        });
+
+        JPanel pnlBtn = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        pnlBtn.setOpaque(false);
+        pnlBtn.add(btnHuy);
+        pnlBtn.add(btnLuu);
+
+        editDialog.add(pnlForm, BorderLayout.CENTER);
+        editDialog.add(pnlBtn, BorderLayout.SOUTH);
+        editDialog.setVisible(true);
     }
 }
